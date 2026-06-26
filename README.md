@@ -21,3 +21,8 @@ You can also use your own video, but you need to extract the original & predicti
 ## How to run
 
 Simply execute `cargo run --release --example=<example>`.
+
+## Spartan2 / NeutronNova comparison
+
+A structured benchmark comparing Eva's Nova prover against Spartan2 NeutronNova is on branch
+`spartan2-comparison`. See [`docs/spartan2-comparison/README.md`](docs/spartan2-comparison/README.md).
