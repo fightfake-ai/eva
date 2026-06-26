@@ -4,10 +4,43 @@ use ark_poly::{
 };
 pub use ark_relations::r1cs::Matrix as R1CSMatrix;
 use ark_std::cfg_iter;
+#[cfg(feature = "cuda")]
 use icicle_core::vec_ops::HybridMatrix;
 use rayon::prelude::*;
+#[cfg(feature = "cuda")]
+use std::marker::PhantomData;
 
 use crate::{Error, MVM};
+
+#[cfg(feature = "cuda")]
+#[derive(Clone)]
+pub struct PreparedMatrix<F> {
+    pub inner: HybridMatrix,
+    _field: PhantomData<F>,
+}
+
+#[cfg(feature = "cuda")]
+impl<F> PreparedMatrix<F> {
+    pub fn new(inner: HybridMatrix) -> Self {
+        Self {
+            inner,
+            _field: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "cpu")]
+#[derive(Clone)]
+pub struct PreparedMatrix<F: PrimeField> {
+    pub csr: CSRSparseMatrix<F>,
+}
+
+#[cfg(feature = "cpu")]
+impl<F: PrimeField> PreparedMatrix<F> {
+    pub fn new(csr: CSRSparseMatrix<F>) -> Self {
+        Self { csr }
+    }
+}
 
 #[derive(Clone)]
 pub struct SparseMatrix<F: PrimeField> {
@@ -16,7 +49,7 @@ pub struct SparseMatrix<F: PrimeField> {
     /// coeffs = R1CSMatrix = Vec<Vec<(F, usize)>>, which contains each row and the F is the value
     /// of the coefficient and the usize indicates the column position
     pub coeffs: R1CSMatrix<F>,
-    pub cuda: HybridMatrix,
+    pub cuda: PreparedMatrix<F>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

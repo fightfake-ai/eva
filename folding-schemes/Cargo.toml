@@ -26,16 +26,23 @@ ark-pallas = { version = "^0.5.0", features = ["r1cs"] }
 ark-vesta = { version = "^0.5.0", features = ["r1cs"] }
 ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
 ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }
-icicle-cuda-runtime = { git = "https://github.com/winderica/icicle" }
-icicle-core = { git = "https://github.com/winderica/icicle", features = ["arkworks"] }
-icicle-bn254 = { git = "https://github.com/winderica/icicle", features = ["arkworks"] }
-icicle-grumpkin = { git = "https://github.com/winderica/icicle", features = ["arkworks"] }
+icicle-cuda-runtime = { git = "https://github.com/winderica/icicle", optional = true }
+icicle-core = { git = "https://github.com/winderica/icicle", features = ["arkworks"], optional = true }
+icicle-bn254 = { git = "https://github.com/winderica/icicle", features = ["arkworks"], optional = true }
+icicle-grumpkin = { git = "https://github.com/winderica/icicle", features = ["arkworks"], optional = true }
 
 [dev-dependencies]
 rand = "0.8.5"
 
 [features]
-default = ["parallel"]
+default = ["parallel", "cpu"]
+cuda = [
+    "dep:icicle-cuda-runtime",
+    "dep:icicle-core",
+    "dep:icicle-bn254",
+    "dep:icicle-grumpkin",
+]
+cpu = ["parallel"]
 
 parallel = [
     "ark-std/parallel",

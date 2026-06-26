@@ -2000,6 +2000,7 @@ pub mod benches {
         Ok(())
     }
 
+    #[cfg(feature = "cuda")]
     #[bench]
     fn bench_gpu_compute_t(b: &mut test::Bencher) -> Result<(), Box<dyn Error>> {
         let rng = &mut thread_rng();

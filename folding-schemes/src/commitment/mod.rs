@@ -1,11 +1,9 @@
 use ark_ec::CurveGroup;
 use ark_std::fmt::Debug;
 use ark_std::rand::RngCore;
-use icicle_cuda_runtime::memory::DeviceVec;
-use icicle_cuda_runtime::stream::CudaStream;
 
 use crate::transcript::Transcript;
-use crate::{Error, MSM};
+use crate::{CudaStream, DeviceVec, Error, MSM};
 
 pub mod pedersen;
 

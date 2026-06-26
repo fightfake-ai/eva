@@ -8,10 +8,11 @@ The implementation is based on [Sonobe](https://github.com/privacy-scaling-explo
 
 Hardware requirements:
 - 64 GB of RAM.
-- An Nvidia GPU. We used an RTX 3080 with 12 GB of VRAM, but 8 GB or even 6 GB should also work.
 - 50 GB of free disk space.
 
-You need to have packages for C/C++ development (`build-essential` for `apt`, `development-tools` for `dnf`, `base-devel` for `pacman`), [Rust](https://www.rust-lang.org/tools/install), and [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/) installed on our machine.
+You need to have packages for C/C++ development (`build-essential` for `apt`, `development-tools` for `dnf`, `base-devel` for `pacman`) and [Rust](https://www.rust-lang.org/tools/install) installed on your machine.
+
+The default build uses a CPU backend. For faster MSM and matrix-vector operations on Nvidia GPUs, build with `--features cuda` (requires [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/); we used an RTX 3080 with 12 GB of VRAM).
 
 Before running the examples, download the `data_parsed` folder from Hugging Face and set the environment variable `DATA_PATH=/<path>/<to>/data_parsed`.
 

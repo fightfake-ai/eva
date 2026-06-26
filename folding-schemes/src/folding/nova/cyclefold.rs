@@ -24,15 +24,13 @@ use ark_relations::r1cs::{ConstraintSynthesizer, ConstraintSystemRef, Namespace,
 use ark_std::fmt::Debug;
 use ark_std::{One, Zero};
 use core::{borrow::Borrow, marker::PhantomData};
-use icicle_cuda_runtime::memory::DeviceVec;
-use icicle_cuda_runtime::stream::CudaStream;
 
 use super::circuits::CF2;
 use super::CycleFoldCommittedInstance;
 use crate::constants::N_BITS_RO;
 use crate::folding::circuits::nonnative::uint::NonNativeUintVar;
 use crate::Error;
-use crate::MSM;
+use crate::{CudaStream, DeviceVec, MSM};
 
 // public inputs length for the CycleFoldCircuit: |[r, p1.x,y, p2.x,y, p3.x,y]|
 pub const CF_IO_LEN: usize = 7;

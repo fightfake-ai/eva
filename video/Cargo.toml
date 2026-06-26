@@ -16,7 +16,7 @@ ark-serialize = "^0.5.0"
 rayon = "1.7.0"
 num-bigint = "^0.4.6"
 ndarray = "0.15.6"
-folding-schemes = { path = "../folding-schemes/" }
+folding-schemes = { path = "../folding-schemes/", default-features = false }
 ark-pallas = {version="^0.5.0", features=["r1cs"]}
 ark-vesta = {version="^0.5.0", features=["r1cs"]}
 ark-bn254 = {version="^0.5.0", features=["r1cs"]}
@@ -32,8 +32,10 @@ tracing-subscriber = { version = "0.2" }
 rand = "0.8.5"
 
 [features]
-default = ["parallel"]
+default = ["parallel", "cpu"]
 constraints = []
+cuda = ["folding-schemes/cuda"]
+cpu = ["parallel", "folding-schemes/cpu"]
 
 parallel = [ 
     "ark-std/parallel", 
@@ -45,4 +47,3 @@ parallel = [
     "folding-schemes/parallel",
     # "ark-relations/parallel",
 ]
-

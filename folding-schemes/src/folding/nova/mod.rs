@@ -12,8 +12,6 @@ use ark_std::{add_to_trace, rand::Rng};
 use ark_std::{end_timer, fmt::Debug, start_timer};
 use ark_std::{One, Zero};
 use core::marker::PhantomData;
-use icicle_cuda_runtime::memory::DeviceVec;
-use icicle_cuda_runtime::stream::CudaStream;
 use num_bigint::BigUint;
 use num_traits::cast::ToPrimitive;
 use std::cmp::max;
@@ -29,11 +27,11 @@ use crate::frontend::FCircuit;
 use crate::frontend::LookupArgument;
 use crate::Error;
 use crate::FoldingScheme;
-use crate::MSM;
 use crate::{
     ccs::r1cs::{extract_r1cs, extract_w_x, R1CS},
     MVM,
 };
+use crate::{CudaStream, DeviceVec, MSM};
 
 pub mod circuits;
 pub mod cyclefold;
