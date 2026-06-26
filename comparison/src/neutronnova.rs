@@ -75,6 +75,7 @@ pub struct NeutronNovaTimings {
     pub verify_ms: f64,
     pub num_steps: usize,
     pub circuit_degree: usize,
+    pub num_constraints: usize,
     pub is_small: bool,
 }
 
@@ -82,9 +83,10 @@ impl std::fmt::Display for NeutronNovaTimings {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "NeutronNova(BN254): steps={} degree={} is_small={} setup={:.1}ms prep={:.1}ms prove={:.1}ms verify={:.1}ms",
+            "NeutronNova(BN254): steps={} degree={} constraints={} is_small={} setup={:.1}ms prep={:.1}ms prove={:.1}ms verify={:.1}ms",
             self.num_steps,
             self.circuit_degree,
+            self.num_constraints,
             self.is_small,
             self.setup_ms,
             self.prep_prove_ms,
@@ -96,7 +98,8 @@ impl std::fmt::Display for NeutronNovaTimings {
 
 /// Placeholder step/core circuit: chain of squaring constraints `x_{i+1} = x_i * x_i`.
 ///
-/// Phase 1 will replace this with a size-matched circuit based on [`super::r1cs_stats::R1csStats`].
+/// Each squaring adds exactly one R1CS constraint (+ small overhead for public IO).
+/// Use [`count_placeholder_constraints`] to measure the actual count for a given degree.
 #[derive(Clone, Debug)]
 pub struct PlaceholderStepCircuit {
     pub degree: usize,
@@ -171,6 +174,37 @@ impl SpartanCircuit<E> for PlaceholderStepCircuit {
     }
 }
 
+/// Synthesize a placeholder circuit and return its R1CS constraint count (no prove).
+pub fn count_placeholder_constraints(degree: usize) -> Result<usize, String> {
+    use spartan2::bellpepper::shape_cs::ShapeCS;
+
+    let circuit = PlaceholderStepCircuit::new(degree, 2);
+    let mut cs = ShapeCS::<E>::new();
+    let shared = circuit
+        .shared(&mut cs)
+        .map_err(|e| format!("shared: {e}"))?;
+    let precommitted = circuit
+        .precommitted(&mut cs, &shared)
+        .map_err(|e| format!("precommitted: {e}"))?;
+    circuit
+        .synthesize(&mut cs, &shared, &precommitted, None)
+        .map_err(|e| format!("synthesize: {e}"))?;
+    Ok(cs.num_constraints())
+}
+
+/// Pick placeholder degree to approximate `target_constraints` (each degree ≈ 1 constraint).
+pub fn degree_for_target_constraints(target: usize) -> usize {
+    target.saturating_sub(1).max(1)
+}
+
+/// Run full NeutronNova pipeline: setup → prep_prove → prove → verify.
+pub fn run_neutronnova_benchmark(config: &PlaceholderConfig) -> Result<NeutronNovaTimings, String> {
+    let num_constraints = count_placeholder_constraints(config.circuit_degree)?;
+    let mut timings = run_neutronnova_smoke(config)?;
+    timings.num_constraints = num_constraints;
+    Ok(timings)
+}
+
 /// Run full NeutronNova pipeline: setup → prep_prove → prove → verify.
 pub fn run_neutronnova_smoke(config: &PlaceholderConfig) -> Result<NeutronNovaTimings, String> {
     let proto = PlaceholderStepCircuit::new(config.circuit_degree, 2);
@@ -220,6 +254,7 @@ pub fn run_neutronnova_smoke(config: &PlaceholderConfig) -> Result<NeutronNovaTi
         verify_ms,
         num_steps: config.num_steps,
         circuit_degree: config.circuit_degree,
+        num_constraints: 0,
         is_small: config.is_small,
     })
 }

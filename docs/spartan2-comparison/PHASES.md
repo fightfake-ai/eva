@@ -40,10 +40,11 @@ NUM_STEPS=4 cargo run --release -p comparison --example phase0_baseline
 
 **Tasks:**
 
-- [ ] Implement bellpepper `PlaceholderStepCircuit` sized to match Eva step R1CS constraint count
-- [ ] Nova baseline: time one `AugmentedFCircuit` synthesis + `compute_t` + one MSM commit
-- [ ] NeutronNova baseline: time `prep_prove + prove` for `NUM_STEPS` matching one Eva "batch"
-- [ ] Document methodology in `METRICS.md` results table
+- [x] Implement bellpepper `PlaceholderStepCircuit` sized to match Eva step R1CS constraint count
+- [x] Nova baseline: time `AugmentedFCircuit` synthesis + `compute_cmT` + `prove_step`
+- [x] NeutronNova baseline: time `prep_prove + prove` with `MATCH_EVA=1` constraint matching
+- [x] `phase1_benchmark` example + initial results in `results/phase1.md`
+- [ ] Full-scale run at BLOCKS_PER_STEP=256 (~1.43M constraints)
 
 **Exit criteria:**
 

@@ -36,3 +36,7 @@ path = "examples/r1cs_stats.rs"
 [[example]]
 name = "phase0_baseline"
 path = "examples/phase0_baseline.rs"
+
+[[example]]
+name = "phase1_benchmark"
+path = "examples/phase1_benchmark.rs"

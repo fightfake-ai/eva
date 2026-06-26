@@ -43,6 +43,7 @@ cpu-backend          ← CPU MSM / compute_t (merged baseline)
 | `comparison/` | Runnable benchmarks and shared helpers |
 | `comparison/examples/r1cs_stats.rs` | Print Eva step-circuit R1CS dimensions |
 | `comparison/examples/phase0_baseline.rs` | Phase 0: Eva stats + NeutronNova smoke test |
+| `comparison/examples/phase1_benchmark.rs` | Phase 1: Nova vs NeutronNova timed comparison |
 
 ## Quick start
 
@@ -50,8 +51,12 @@ cpu-backend          ← CPU MSM / compute_t (merged baseline)
 # From repo root — print Eva step-circuit R1CS statistics
 BLOCKS_PER_STEP=256 cargo run --release -p comparison --example r1cs_stats
 
-# Phase 0: Eva R1CS stats + NeutronNova reference prove on BN254
+# Phase 0: Eva R1CS stats + NeutronNova smoke test
 NUM_STEPS=4 cargo run --release -p comparison --example phase0_baseline
+
+# Phase 1: Nova vs NeutronNova comparison
+QUICK=1 cargo run --release -p comparison --example phase1_benchmark
+MATCH_EVA=1 QUICK=1 cargo run --release -p comparison --example phase1_benchmark
 ```
 
 Environment variables:
@@ -73,7 +78,8 @@ Environment variables:
 - [x] Branch created, documentation scaffold
 - [x] `comparison` crate with Eva R1CS stats extraction
 - [x] NeutronNova smoke test on BN254 via Spartan2
-- [ ] Nova `prove_step` timing harness in `comparison` crate
+- [x] Phase 1 Nova timing harness + matched-size placeholder benchmark
+- [ ] Nova `prove_step` at full BLOCKS_PER_STEP=256 scale
 - [ ] Bellpepper re-synthesis of Eva step circuit (Phase 1)
 - [ ] Lookup argument port (Phase 2)
 - [ ] Full video pipeline comparison (Phase 3)
