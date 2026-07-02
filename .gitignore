@@ -9,3 +9,5 @@ folding-schemes/src/frontend/circom/test_folder/cubic_circuit_js/
 
 # generated contracts at test time
 solidity-verifiers/generated
+*.yuv
+my_clip_edited.mp4
