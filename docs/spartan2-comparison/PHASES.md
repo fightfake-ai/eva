@@ -44,7 +44,10 @@ NUM_STEPS=4 cargo run --release -p comparison --example phase0_baseline
 - [x] Nova baseline: time `AugmentedFCircuit` synthesis + `compute_cmT` + `prove_step`
 - [x] NeutronNova baseline: time `prep_prove + prove` with `MATCH_EVA=1` constraint matching
 - [x] `phase1_benchmark` example + initial results in `results/phase1.md`
-- [ ] Full-scale run at BLOCKS_PER_STEP=256 (~1.43M constraints)
+- [x] `phase1_scale` multi-scale sweep (blocks 4, 16, 64)
+- [x] Full-scale Nova run at BLOCKS_PER_STEP=256 (~1.43M constraints)
+- [x] Peak RSS for Nova full-scale (~6.2 GB)
+- [x] Full-scale NeutronNova at BLOCKS_PER_STEP=256 (~5.1 s/step, ~6.7 GB RSS)
 
 **Exit criteria:**
 
@@ -59,7 +62,8 @@ NUM_STEPS=4 cargo run --release -p comparison --example phase0_baseline
 
 **Tasks:**
 
-- [ ] Document Eva lookup protocol (`folding-schemes/src/frontend/`, `AugmentedFCircuit` integration)
+- [ ] Document lookup witness layout (see [LOOKUPS.md](./LOOKUPS.md))
+- [x] Document Eva lookup protocol (`folding-schemes/src/frontend/`, `AugmentedFCircuit` integration)
 - [ ] Evaluate Spartan2 / Lasso zero-check reduction vs custom lookup
 - [ ] Prototype lookup in bellpepper (or hybrid ark→bellpepper R1CS export if feasible)
 

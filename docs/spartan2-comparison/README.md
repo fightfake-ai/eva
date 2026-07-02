@@ -44,6 +44,7 @@ cpu-backend          ← CPU MSM / compute_t (merged baseline)
 | `comparison/examples/r1cs_stats.rs` | Print Eva step-circuit R1CS dimensions |
 | `comparison/examples/phase0_baseline.rs` | Phase 0: Eva stats + NeutronNova smoke test |
 | `comparison/examples/phase1_benchmark.rs` | Phase 1: Nova vs NeutronNova timed comparison |
+| `comparison/examples/phase1_scale.rs` | Phase 1: multi-scale sweep (blocks 4, 16, 64) |
 
 ## Quick start
 
@@ -57,6 +58,12 @@ NUM_STEPS=4 cargo run --release -p comparison --example phase0_baseline
 # Phase 1: Nova vs NeutronNova comparison
 QUICK=1 cargo run --release -p comparison --example phase1_benchmark
 MATCH_EVA=1 QUICK=1 cargo run --release -p comparison --example phase1_benchmark
+
+# Multi-scale sweep (blocks 4, 16, 64)
+MATCH_EVA=1 cargo run --release -p comparison --example phase1_scale
+
+# Full Eva Nova-only (NeutronNova at 1.4M constraints may OOM)
+BLOCKS_PER_STEP=256 SKIP_NN=1 cargo run --release -p comparison --example phase1_benchmark
 ```
 
 Environment variables:
@@ -70,17 +77,19 @@ Environment variables:
 ## Documents in this folder
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — side-by-side stack comparison (Nova vs NeutronNova)
+- [LOOKUPS.md](./LOOKUPS.md) — Eva lookup argument porting notes (Phase 2)
 - [PHASES.md](./PHASES.md) — phased port plan with status checklist
 - [METRICS.md](./METRICS.md) — what we measure and how to record results
 
-## Current status (Phase 0)
+## Current status
 
-- [x] Branch created, documentation scaffold
-- [x] `comparison` crate with Eva R1CS stats extraction
-- [x] NeutronNova smoke test on BN254 via Spartan2
-- [x] Phase 1 Nova timing harness + matched-size placeholder benchmark
-- [ ] Nova `prove_step` at full BLOCKS_PER_STEP=256 scale
-- [ ] Bellpepper re-synthesis of Eva step circuit (Phase 1)
+- [x] Phase 0: branch, docs, R1CS stats, NeutronNova smoke test
+- [x] Phase 1: Nova timing harness + matched-size placeholder benchmark
+- [x] Phase 1: multi-scale sweep (`phase1_scale`, blocks 4/16/64)
+- [x] Nova `prove_step` at full BLOCKS_PER_STEP=256 (~5.5 s prove, ~1.43M constraints)
+- [x] Peak RSS for Nova full-scale run (~6.2 GB)
+- [x] Full-scale NeutronNova at 1.43M constraints (~5.1 s/step, ~6.7 GB RSS)
+- [ ] Bellpepper re-synthesis of Eva step circuit (Phase 2 prerequisite)
 - [ ] Lookup argument port (Phase 2)
 - [ ] Full video pipeline comparison (Phase 3)
 

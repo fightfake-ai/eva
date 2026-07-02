@@ -38,15 +38,59 @@ Eva augmented constraints at 4 blocks/step: **96,312**
 - Important caveat: Nova `prove_step` is one folding step; NeutronNova `prove` includes
   multi-fold + Spartan final SNARK for the batch.
 
-## Full Eva scale (BLOCKS_PER_STEP=256)
+## Scaling study (`phase1_scale`, `MATCH_EVA=1`, `NUM_STEPS=2`)
 
-Not yet run — ~1.43M constraints, expect long runtime and high RAM.
-Run manually:
+Placeholder degree matched to Eva augmented constraint count at each scale.
+
+| blocks | constraints | nova_prove_ms | nova_cmT_ms | nova_preprocess_ms | nn_prove/step_ms | nn/nova |
+|--------|-------------|---------------|-------------|--------------------|--------------------|---------|
+| 4 | 96,312 | 390.0 | 216.7 | 5,664 | 877.8 | 2.25 |
+| 16 | 159,900 | 462.8 | 225.0 | 6,647 | 658.3 | 1.42 |
+| 64 | 413,640 | 4,262.1 | 1,722.7 | 28,268 | 1,597.0 | 0.37 |
+
+**Observations:**
+
+- Nova `prove_step` scales super-linearly between 16→64 blocks (~9× time for ~2.6× constraints),
+  dominated by `compute_cmT` and witness MSM at larger R1CS sizes.
+- NeutronNova placeholder prove/step improves relative to Nova as constraint count grows:
+  at 64 blocks NN is **~2.7× faster** than Nova `prove_step` (ratio 0.37).
+- Nova `preprocess` (one-time setup) grows from ~5.7 s (4 blocks) to ~28 s (64 blocks).
+- Still comparing different operations: Nova = single fold step; NeutronNova = fold batch + Spartan SNARK.
+
+Run:
 
 ```bash
-BLOCKS_PER_STEP=256 MATCH_EVA=1 NUM_STEPS=2 \
-  cargo run --release -p comparison --example phase1_benchmark
+MATCH_EVA=1 cargo run --release -p comparison --example phase1_scale
 ```
+
+## Full Eva scale (`BLOCKS_PER_STEP=256`, `MATCH_EVA=1`, `NUM_STEPS=2`)
+
+| Backend | Operation | Time | Constraints |
+|---------|-----------|------|-------------|
+| Nova | synthesis | 10,488 ms | 1,429,212 |
+| Nova | preprocess | 44,020 ms | 1,429,212 |
+| Nova | compute_cmT | 2,096 ms | 1,429,212 |
+| Nova | prove_step | 5,972 ms | 1,429,212 |
+| NeutronNova | setup | 3,079 ms | 1,429,212 |
+| NeutronNova | prep_prove | 13.5 ms | 1,429,212 |
+| NeutronNova | prove (batch, 2 steps) | 10,213 ms | 1,429,212 × 2 |
+| NeutronNova | prove (per step) | 5,106 ms | 1,429,212 |
+| NeutronNova | verify | 294 ms | batch |
+
+**At full Eva scale (~1.43M constraints):**
+
+- NeutronNova amortized prove/step is **~1.17× faster** than Nova `prove_step` (5.1 s vs 6.0 s).
+- Caveat: placeholder squaring circuit, not Eva THASH/lookup logic; NN prove includes
+  multi-fold + Spartan SNARK while Nova `prove_step` is a single fold.
+- Scaling trend: NN advantage grows from medium scale (64 blocks, ~2.7×) but narrows at
+  full scale — likely due to Spartan final SNARK dominating NN batch cost at 1.43M constraints.
+
+### Peak RSS (full scale, `/usr/bin/time -l`)
+
+| Run | max RSS |
+|-----|---------|
+| Nova only (`SKIP_NN=1`) | **6.19 GB** |
+| Nova + NeutronNova | **6.68 GB** |
 
 ## Commands
 
@@ -56,18 +100,27 @@ QUICK=1 cargo run --release -p comparison --example phase1_benchmark
 
 # Matched constraint count (uses Eva's constraint count for placeholder degree)
 QUICK=1 MATCH_EVA=1 cargo run --release -p comparison --example phase1_benchmark
+
+# Multi-scale sweep (blocks 4, 16, 64)
+MATCH_EVA=1 cargo run --release -p comparison --example phase1_scale
+
+# Full Eva Nova-only
+BLOCKS_PER_STEP=256 SKIP_NN=1 MATCH_EVA=1 cargo run --release -p comparison --example phase1_benchmark
 ```
 
 ## Phase 1 interpretation
 
-- Infrastructure works: side-by-side Nova vs NeutronNova timing harness.
-- At small/matched scale, **Nova folding step beats NeutronNova batch prove** — but
-  this compares different things (single fold vs fold+SNARK).
-- Full-scale Eva (1.43M constraints) benchmark still needed before any migration decision.
-- Still no Eva logic in NeutronNova — placeholder only.
+- Infrastructure works: side-by-side Nova vs NeutronNova timing harness with shared `phase1` module.
+- At small scale (~96k), Nova folding step beats NeutronNova batch prove (~1.7–2.3×).
+- At medium scale (~414k), NeutronNova placeholder **beats** Nova prove_step (~2.7×) — but
+  this is a synthetic squaring circuit, not Eva's THASH/lookup logic.
+- Full-scale Nova: **~6.0 s prove_step** + **~2.1 s compute_cmT** at 1.43M constraints on CPU.
+- Full-scale NeutronNova placeholder: **~5.1 s prove/step** — modest ~17% win over Nova fold step,
+  but on synthetic circuit without lookups.
+- Phase 1 exit criterion (>2× improvement) **not met** at full scale on placeholder circuit.
+- Lookup port (Phase 2) required before any migration decision.
 
 ## Next steps
 
-- Run full-scale benchmark at BLOCKS_PER_STEP=256
-- Record peak RSS with `/usr/bin/time -l`
-- Phase 2: lookup argument port (if full-scale numbers warrant it)
+- Phase 2: lookup argument port (see [LOOKUPS.md](../LOOKUPS.md))
+- Re-run full-scale comparison after Eva step circuit is in bellpepper with real logic
