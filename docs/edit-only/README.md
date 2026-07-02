@@ -1,56 +1,66 @@
-# Edit-only proofs
+# Lossless encoding in Eva
 
-This branch adds an **edit-only** IVC circuit that proves video transformations
-without H.264 encoding constraints.
+Eva's default path proves **edit + H.264 forward encode** and binds the output to
+predictors and quantized coefficients from JM dumps (~1.4M constraints/step at 256 blocks).
 
-## Motivation
+**Lossless encoding** means skipping that H.264 encode proof: input and output are both
+**macroblock YUV pixels** (spatial domain), and the proof only attests the edit transform.
 
-The full Eva step circuit (`EditEncodeCircuit`) proves:
+| | Lossy (default) | Lossless (this branch) |
+|---|---|---|
+| Input | Macroblock YUV from JM dumps | Same |
+| Circuit proves | Edit + DCT/quant encode | Edit only |
+| h1 | Hash of **original** pixels | Same |
+| h2 | Hash of preds + **coeffs** + QP + edit cfg | Hash of **edited pixels** + edit cfg |
+| Witnesses needed | orig + preds + coeffs + encode cfg | orig pixels + edit cfg only |
 
-1. Edit gadget (crop, brightness, …)
-2. H.264 forward encode (residual → DCT → quant)
-3. Binding to predictor / QP / coefficients from JM dumps
+This is **not** "raw `.yuv` file vs H.264 container" — both paths use the same
+macroblock-shaped pixel witnesses. Lossless means no lossy re-quantization in the proof.
 
-That is ~1.4M constraints per step at `BLOCKS_PER_STEP=256`. For many use cases
-you only need to attest **“these original pixels, after edit E, produce these
-edited pixels”** — without tying the proof to a compressed bitstream.
-
-## New code
+## Code
 
 | Path | Purpose |
 |------|---------|
-| `video/src/edit_only.rs` | `EditOnlyCircuit` implementing `FCircuit` |
-| `video/examples/edit_bright_only.rs` | Runnable Nova prove + verify demo |
-| `video/src/edit_only.rs` tests | Native vs constraints + augmented circuit |
+| `video/src/edit_only.rs` | `EditOnlyCircuit` — lossless IVC step |
+| `video/examples/edit_bright_only.rs` | Nova prove + verify smoke test |
+| `video/examples/edit_lossless_decider.rs` | Full pipeline: Nova + Groth16 decider |
+| `video/examples/hash_verifier_lossless.rs` | Native h2 over edited pixels (off-chain check) |
 
-## What the edit-only circuit checks
+Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock` (re-exported from `video`).
 
-Per macroblock:
+## End-to-end flow
 
-- **Witness:** original Y/U/V pixels (from `foreman/orig_*`)
-- **Constraint:** `edit_circuit` (e.g. brightness multiply)
-- **h1:** Griffin hash of **original** pixels (recorder binding, same idea as full Eva)
-- **h2:** Griffin hash of **edited** pixels + edit config (e.g. brightness scale)
-
-No `pred_*`, `coeff_*`, `type_enc`, or lookup-based quant constraints.
+```
+hash_recorder (foreman/)     →  h1 chain over original pixels
+EditOnlyCircuit Nova proof   →  IVC state (h1, h2) in-circuit
+hash_verifier_lossless       →  native h2 over edited pixels (should match proof z[1])
+edit_lossless_decider        →  Groth16 decider + signature on h1
+```
 
 ## Run
 
 ```bash
 export DATA_PATH=/path/to/data_parsed
 
-# Fast smoke test
+# Fast Nova smoke (4 blocks/step, 2 steps)
 QUICK=1 cargo run --release -p video --example edit_bright_only
 
-# Unit tests (no dataset required)
+# Native h2 for brightness edit (compare to proof final state[1])
+cargo run --release -p video --example hash_verifier_lossless
+
+# Full lossless pipeline with decider (slow: Groth16 setup)
+QUICK=1 cargo run --release -p video --example edit_lossless_decider
+
+# Unit tests (no dataset)
 cargo test -p video edit_only --release
 ```
 
-## Extending to other edits
+## Extending
 
 `EditOnlyCircuit<F, E>` is generic over `EditGadget` (`Brightness`, `Removing` for crop, etc.).
-Copy `edit_bright_only.rs` and change the `Op` type and edit config.
+For crop, copy the edit-config loop from `edit_crop_decider` / `hash_verifier_crop` and use
+`Removing` instead of `Brightness`.
 
 ## Branch
 
-`edit-only-proof` (from `spartan2-comparison`).
+`edit-only-proof`

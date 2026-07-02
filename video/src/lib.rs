@@ -58,7 +58,9 @@ pub mod griffin;
 pub mod utils;
 pub mod var;
 
-pub use edit_only::{EditOnlyCircuit, EditOnlyExternalInputs};
+pub use edit_only::{
+    hash_edited_macroblock, hash_orig_macroblock, EditOnlyCircuit, EditOnlyExternalInputs,
+};
 
 const SCALES: [[u64; 6]; 3] = [
     [13107, 11916, 10082, 9362, 8192, 7282],

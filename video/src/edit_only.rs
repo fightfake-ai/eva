@@ -41,6 +41,47 @@ use crate::griffin::{
 use crate::var::I64Var;
 use crate::MB_BITS;
 
+/// Griffin hash of original macroblock Y/U/V pixels (one partial h1 term).
+pub fn hash_orig_macroblock<F: PrimeField + Absorb>(
+    griffin: &Griffin<F>,
+    (y, u, v): &(Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>),
+) -> F {
+    griffin.hash(
+        &vec![]
+            .into_iter()
+            .chain(y.iter())
+            .chain(u.iter())
+            .chain(v.iter())
+            .copied()
+            .collect::<Vec<_>>()
+            .chunks(F::MODULUS_BIT_SIZE as usize / MB_BITS)
+            .map(F::from_be_bytes_mod_order)
+            .collect::<Vec<_>>(),
+    )
+}
+
+/// Griffin hash of edited pixels + edit config (one partial h2 term).
+pub fn hash_edited_macroblock<F: PrimeField + Absorb, E: EditGadget>(
+    griffin: &Griffin<F>,
+    (y, u, v): &(Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>),
+    cfg: &E::Cfg,
+) -> F {
+    if !cfg.should_keep_native() {
+        return F::zero();
+    }
+    let (ey, eu, ev) = E::edit_native(y, u, v, cfg);
+    let mut words = Vec::new();
+    words.extend(ey.iter().copied());
+    words.extend(eu.iter().copied());
+    words.extend(ev.iter().copied());
+    let mut field_elems = words
+        .chunks(F::MODULUS_BIT_SIZE as usize / MB_BITS)
+        .map(F::from_be_bytes_mod_order)
+        .collect::<Vec<_>>();
+    field_elems.extend(cfg.compactify::<F>());
+    griffin.hash(&field_elems)
+}
+
 /// External inputs for one edit-only IVC step (no encode data).
 #[derive(Clone, Debug)]
 pub struct EditOnlyExternalInputs<C: Default + Clone> {

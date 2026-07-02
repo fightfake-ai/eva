@@ -1,8 +1,7 @@
-//! Edit-only Nova proof: brightness adjustment without H.264 encode constraints.
+//! Lossless encoding demo: brightness edit on macroblock YUV without H.264 encode proof.
 //!
-//! This is a stripped-down variant of `edit_bright_decider` that:
-//! - Only needs **original** macroblocks from `DATA_PATH/foreman` (no `foreman_bright` preds/coeffs)
-//! - Proves the edit gadget + rolling Griffin hash (no DCT / quant / predictors)
+//! This is the Nova-only smoke test; see `edit_lossless_decider` for the full decider pipeline
+//! and `hash_verifier_lossless` for the native h2 check over edited pixels.
 //!
 //! # Usage
 //!
@@ -72,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let blocks_per_step = blocks_per_step();
     let data = Path::new(env!("DATA_PATH")).join("foreman");
 
-    println!("=== Edit-only proof (brightness, no encode) ===");
+    println!("=== Lossless encoding proof (brightness, Nova only) ===");
     println!("blocks_per_step={blocks_per_step}");
     println!("data={}", data.display());
 
@@ -143,12 +142,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     end_timer!(verify_timer);
 
-    println!("Edit-only Nova proof verified successfully.");
+    println!("Lossless encoding Nova proof verified successfully.");
     println!();
-    println!("Compared to edit_bright_decider:");
-    println!("  - No foreman_bright/ preds or coeff_* witnesses");
-    println!("  - No encode_luma_4x4 / lookup quant constraints");
-    println!("  - Proves: orig pixels + brightness edit => rolling hash state");
+    println!("Next steps:");
+    println!("  hash_verifier_lossless  — native h2 over edited pixels (compare to state[1])");
+    println!("  edit_lossless_decider   — full Nova + Groth16 decider");
 
     Ok(())
 }
