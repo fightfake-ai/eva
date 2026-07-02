@@ -31,6 +31,56 @@ macroblock-shaped pixel witnesses. Lossless means no lossy re-quantization in th
 Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_macroblocks`,
 `macroblocks_to_yuv420` (re-exported from `video`).
 
+## Quick start: your own video
+
+**Do not** put `.mp4` in `data_parsed/`. Eva only reads macroblock dumps.
+
+| Step | Where / what |
+|------|----------------|
+| 1. Your file | `my_clip.mp4` anywhere (Desktop, `~/videos`, …) |
+| 2. ffmpeg YUV | `my_clip.yuv` (planar `yuv420p`; width & height **÷ 16**) |
+| 3. Eva input | `data_parsed/<name>/orig_y_enc`, `orig_u_enc`, `orig_v_enc` via `yuv_to_macroblocks` |
+| 4. Prove | `export DATA_PATH=.../data_parsed` then `VIDEO=<name> cargo run … edit_bright_only` |
+
+`DATA_PATH` is **compile-time** — set it in the shell before `cargo run` (rebuild if you change it).
+`VIDEO` selects the subfolder under `DATA_PATH` (default `foreman`).
+
+```bash
+cd /path/to/eva-miha
+mkdir -p data_parsed/my_clip
+
+# mp4 → YUV
+ffmpeg -i ~/videos/my_clip.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 30 my_clip.yuv
+
+# YUV → Eva macroblocks
+cargo run --release -p video --example yuv_to_macroblocks -- \
+  my_clip.yuv data_parsed/my_clip 352 288 30
+
+export DATA_PATH="$(pwd)/data_parsed"
+VIDEO=my_clip QUICK=1 cargo run --release -p video --example edit_bright_only
+```
+
+## What “native edit” means (and what it is not)
+
+**Native edits exist** — they are fixed transforms in `video/src/edit/constraints.rs`
+(brightness, crop, invert, grayscale, mask). The proof runs `edit_circuit` on original
+pixels + a **config**; you never upload a separately edited video as the witness.
+
+| | Native Eva edit | Runway / Premiere / ffmpeg filters |
+|--|-----------------|-------------------------------------|
+| Where it runs | Inside the zk circuit (`EditGadget`) | Outside Eva |
+| Can be proved? | ✅ if gadget is implemented | ❌ |
+| Separate “edit app”? | **No** — config is set in Rust examples | Yes (those tools) |
+| Preview off-chain | `edit_native` / `BRIGHTNESS=` in `macroblocks_to_yuv` | Those tools’ export |
+
+So: there is **no Eva video editor**. You choose a gadget + config in code (e.g.
+`BrightnessCfg(416)`), the circuit applies it, and `h2` binds the result. For a demo,
+use Runway/ffmpeg only to obtain the **original** clip; the **proved** change is the Eva gadget.
+
+**Lossless tooling today:** only **brightness** is wired end-to-end (`edit_bright_only`,
+`BRIGHTNESS=` preview). Other gadgets work in the **lossy** `edit_*_decider` examples;
+lossless copies (`edit_crop_only`, etc.) still need to be added (see [Extending](#extending)).
+
 ## Native Eva edits (what you *can* prove)
 
 The lossless path does **not** witness an edited video file. It witnesses:
