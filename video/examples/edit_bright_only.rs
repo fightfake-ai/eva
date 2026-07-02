@@ -42,7 +42,7 @@ use folding_schemes::{
 use rand::thread_rng;
 use video::edit::constraints::{Brightness, BrightnessCfg};
 use video::griffin::params::GriffinParams;
-use video::{parse_prover_data, EditOnlyCircuit, EditOnlyExternalInputs};
+use video::{parse_orig_blocks, EditOnlyCircuit, EditOnlyExternalInputs};
 
 type Op = Brightness;
 
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("blocks_per_step={blocks_per_step}");
     println!("data={}", data.display());
 
-    let (blocks, _, _, _) = parse_prover_data(data.clone(), data, None)?;
+    let blocks = parse_orig_blocks(&data)?;
     let available_steps = blocks.len() / blocks_per_step;
     let num_steps = if std::env::var("QUICK").is_ok() {
         2.min(available_steps)

@@ -114,6 +114,32 @@ ffmpeg -f rawvideo -pix_fmt yuv420p -s 352x288 -r 30 -i my_clip_edited.yuv \
   -c:v libx264 -pix_fmt yuv420p my_clip_edited.mp4
 ```
 
+### Video length (why only ~1 second?)
+
+Raw `.yuv` has **no timestamps** — duration = `num_frames ÷ playback_fps`.
+
+| Your pack step | Result |
+|----------------|--------|
+| `yuv_to_macroblocks … 352 288 30` | **30 frames** in `orig_*_enc` |
+| `ffplay … -s 352x288` (default ~25 fps) | ~1.2 s |
+| `ffmpeg … -r 30 -i …` when making mp4 | **exactly 1.0 s** at 30 fps |
+
+For a longer clip, pack **more frames** when converting from mp4:
+
+```bash
+# 10 seconds at 30 fps → 300 frames
+ffmpeg -i my_clip.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 300 my_clip.yuv
+cargo run --release -p video --example yuv_to_macroblocks -- \
+  my_clip.yuv data_parsed/my_clip 352 288 300
+# Use 300 as the last argument to macroblocks_to_yuv as well
+```
+
+Check frame count: `orig_y_enc` bytes ÷ 256 ÷ (width/16 ÷ height/16 macroblocks per frame).
+For 352×288 that's 396 macroblocks/frame (`orig_y_enc` size ÷ 256 ÷ 396).
+
+**Note:** Lossless folders only need `orig_*_enc`. Do **not** use `parse_prover_data` paths
+for custom clips — `edit_bright_only` uses `parse_orig_blocks` (encode files not required).
+
 ## What “native edit” means (and what it is not)
 
 **Native edits exist** — they are fixed transforms in `video/src/edit/constraints.rs`

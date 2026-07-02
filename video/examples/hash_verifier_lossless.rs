@@ -19,13 +19,13 @@ use video::{
         griffin::{Griffin, Permutation},
         params::GriffinParams,
     },
-    hash_edited_macroblock, parse_prover_data,
+    hash_edited_macroblock, parse_orig_blocks,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let blocks_per_step = 256;
     let data = Path::new(env!("DATA_PATH")).join("foreman");
-    let (blocks, _, _, _) = parse_prover_data(data.clone(), data, None)?;
+    let blocks = parse_orig_blocks(&data)?;
     let num_steps = blocks.len() / blocks_per_step;
 
     let brightness = BrightnessCfg(416);

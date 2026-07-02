@@ -8,6 +8,8 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
 
+use rayon::prelude::*;
+
 use crate::edit::constraints::{Brightness, BrightnessCfg, EditGadget};
 use crate::encode::Matrix;
 
@@ -223,6 +225,34 @@ pub fn write_macroblock_dir(dir: &Path, orig_y: &[u8], orig_u: &[u8], orig_v: &[
     File::create(dir.join("orig_u_enc"))?.write_all(orig_u)?;
     File::create(dir.join("orig_v_enc"))?.write_all(orig_v)?;
     Ok(())
+}
+
+/// Read `orig_*_enc` and return macroblock matrices for the lossless prover.
+pub fn parse_orig_blocks(
+    dir: &Path,
+) -> Result<Vec<(Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>)>, std::io::Error> {
+    let (orig_y, orig_u, orig_v) = read_macroblock_dir(dir)?;
+    Ok(orig_y
+        .par_chunks_exact(MB_Y_BYTES)
+        .zip(
+            orig_u
+                .par_chunks_exact(MB_UV_BYTES)
+                .zip(orig_v.par_chunks_exact(MB_UV_BYTES)),
+        )
+        .map(|(y, (u, v))| {
+            (
+                Matrix::from_vec(y.to_vec()),
+                Matrix::from_vec(u.to_vec()),
+                Matrix::from_vec(v.to_vec()),
+            )
+        })
+        .collect())
+}
+
+/// Number of macroblocks in `orig_y_enc`.
+pub fn macroblock_count_from_dir(dir: &Path) -> Result<usize, std::io::Error> {
+    let orig_y = fs::read(dir.join("orig_y_enc"))?;
+    Ok(orig_y.len() / MB_Y_BYTES)
 }
 
 /// Read macroblock files from `dir`.

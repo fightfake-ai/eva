@@ -28,7 +28,7 @@ use video::decider::{Decider, DeciderEthCircuit};
 use video::edit::constraints::{Brightness, BrightnessCfg};
 use video::griffin::params::GriffinParams;
 use video::utils::srs_size;
-use video::{parse_prover_data, EditOnlyCircuit, EditOnlyExternalInputs};
+use video::{parse_orig_blocks, EditOnlyCircuit, EditOnlyExternalInputs};
 
 use ark_bn254::{constraints::GVar, Fq, Fr, G1Projective as Projective};
 use ark_ff::{BigInteger, PrimeField, UniformRand, Zero};
@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("=== Lossless encoding proof (brightness edit, no H.264 encode) ===");
 
-    let (blocks, _, _, _) = parse_prover_data(data.clone(), data, None)?;
+    let blocks = parse_orig_blocks(&data)?;
     let available_steps = blocks.len() / blocks_per_step;
     let num_steps = if std::env::var("QUICK").is_ok() {
         2.min(available_steps)

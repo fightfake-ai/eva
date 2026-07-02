@@ -183,7 +183,7 @@ impl<F: PrimeField + Absorb, E: EditGadget> EditOnlyCircuit<F, E> {
     }
 
     fn fold_step_hashes(
-        cs: ConstraintSystemRef<F>,
+        _cs: ConstraintSystemRef<F>,
         griffin: &GriffinCircuit<F>,
         z_i: &[FpVar<F>],
         h1s: Vec<FpVar<F>>,
