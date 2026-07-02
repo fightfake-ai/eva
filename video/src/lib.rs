@@ -55,11 +55,16 @@ pub mod edit;
 pub mod edit_only;
 pub mod encode;
 pub mod griffin;
+pub mod macroblock_yuv;
 pub mod utils;
 pub mod var;
 
 pub use edit_only::{
     hash_edited_macroblock, hash_orig_macroblock, EditOnlyCircuit, EditOnlyExternalInputs,
+};
+pub use macroblock_yuv::{
+    macroblocks_per_frame, macroblocks_to_yuv420, read_macroblock_dir, write_macroblock_dir,
+    yuv420_frame_bytes, yuv420_to_macroblocks, MB_UV_BYTES, MB_Y_BYTES,
 };
 
 const SCALES: [[u64; 6]; 3] = [

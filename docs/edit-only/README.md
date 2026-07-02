@@ -25,8 +25,49 @@ macroblock-shaped pixel witnesses. Lossless means no lossy re-quantization in th
 | `video/examples/edit_bright_only.rs` | Nova prove + verify smoke test |
 | `video/examples/edit_lossless_decider.rs` | Full pipeline: Nova + Groth16 decider |
 | `video/examples/hash_verifier_lossless.rs` | Native h2 over edited pixels (off-chain check) |
+| `video/examples/yuv_to_macroblocks.rs` | **mp4/ffmpeg YUV → Eva macroblock files** |
+| `video/examples/macroblocks_to_yuv.rs` | **Macroblocks → YUV for ffplay** (optional `BRIGHTNESS=`) |
 
-Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock` (re-exported from `video`).
+Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_macroblocks`,
+`macroblocks_to_yuv420` (re-exported from `video`).
+
+## Custom video (e.g. Runway export)
+
+Eva cannot prove arbitrary Runway edits — only built-in gadgets (`Brightness`, crop, …).
+A practical demo: use Runway for the **source clip**, prove a **brightness** (or crop) edit.
+
+```bash
+# 1. Export from Runway → mp4, then raw YUV (size must be multiple of 16)
+ffmpeg -i runway.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 30 runway.yuv
+
+# 2. Pack into Eva macroblock files
+cargo run --release -p video --example yuv_to_macroblocks -- \
+  runway.yuv ./data_parsed/runway_demo 352 288 30
+
+# 3. Watch original / edited preview
+cargo run --release -p video --example macroblocks_to_yuv -- \
+  ./data_parsed/runway_demo runway_orig.yuv 352 288 30
+BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \
+  ./data_parsed/runway_demo runway_bright.yuv 352 288 30
+ffplay -f rawvideo -pix_fmt yuv420p -s 352x288 runway_bright.yuv
+
+# 4. Prove (lossless, no encode) — set VIDEO to your folder name
+export DATA_PATH=/path/to/data_parsed
+VIDEO=runway_demo QUICK=1 cargo run --release -p video --example edit_bright_only
+```
+
+### What `yuv_to_macroblocks` does
+
+1. Reads **planar YUV 4:2:0** (Y plane, then U, then V — ffmpeg `yuv420p` layout).
+2. For each 16×16 luma region, copies 256 bytes into `orig_y_enc` (row-major pixels).
+3. For each 8×8 chroma region, copies into `orig_u_enc` / `orig_v_enc`.
+4. Macroblock order matches Eva: left→right, top→bottom (same as `edit_crop_decider`).
+
+### What `macroblocks_to_yuv` does
+
+The inverse: stitches macroblocks back into a playable `.yuv` file. With `BRIGHTNESS=<u16>`,
+applies the same luma scaling as `BrightnessCfg` in the proof so you can preview the
+**proved** edit (not the Runway effect).
 
 ## End-to-end flow
 

@@ -69,7 +69,8 @@ fn blocks_per_step() -> usize {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rng = &mut thread_rng();
     let blocks_per_step = blocks_per_step();
-    let data = Path::new(env!("DATA_PATH")).join("foreman");
+    let video_name = std::env::var("VIDEO").unwrap_or_else(|_| "foreman".into());
+    let data = Path::new(env!("DATA_PATH")).join(&video_name);
 
     println!("=== Lossless encoding proof (brightness, Nova only) ===");
     println!("blocks_per_step={blocks_per_step}");
