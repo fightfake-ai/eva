@@ -52,10 +52,13 @@ use crate::{
 
 pub mod decider;
 pub mod edit;
+pub mod edit_only;
 pub mod encode;
 pub mod griffin;
 pub mod utils;
 pub mod var;
+
+pub use edit_only::{EditOnlyCircuit, EditOnlyExternalInputs};
 
 const SCALES: [[u64; 6]; 3] = [
     [13107, 11916, 10082, 9362, 8192, 7282],
