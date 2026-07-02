@@ -145,7 +145,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Lossless encoding Nova proof verified successfully.");
     println!();
-    println!("Next steps:");
+    println!("This prover does NOT write an edited video file.");
+    println!("To export a playable edited video (same brightness as this proof):");
+    println!("  BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \\");
+    println!("    data_parsed/{video_name} edited.yuv <width> <height> <frames>");
+    println!("  ffplay -f rawvideo -pix_fmt yuv420p -s <width>x<height> edited.yuv");
+    println!();
+    println!("Other next steps:");
     println!("  hash_verifier_lossless  — native h2 over edited pixels (compare to state[1])");
     println!("  edit_lossless_decider   — full Nova + Groth16 decider");
 

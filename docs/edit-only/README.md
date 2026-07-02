@@ -40,7 +40,10 @@ Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_mac
 | 1. Your file | `my_clip.mp4` anywhere (Desktop, `~/videos`, …) |
 | 2. ffmpeg YUV | `my_clip.yuv` (planar `yuv420p`; width & height **÷ 16**) |
 | 3. Eva input | `data_parsed/<name>/orig_y_enc`, `orig_u_enc`, `orig_v_enc` via `yuv_to_macroblocks` |
-| 4. Prove | `export DATA_PATH=.../data_parsed` then `VIDEO=<name> cargo run … edit_bright_only` |
+| 4. **Playable edited video** | `macroblocks_to_yuv` + `BRIGHTNESS=` → `.yuv` or `.mp4` (see below) |
+| 5. Prove (optional) | `export DATA_PATH=.../data_parsed` then `VIDEO=<name> cargo run … edit_bright_only` |
+
+Steps 4 and 5 are **independent** — you do not need to run the proof first to export a video.
 
 `DATA_PATH` is **compile-time** — set it in the shell before `cargo run` (rebuild if you change it).
 `VIDEO` selects the subfolder under `DATA_PATH` (default `foreman`).
@@ -52,12 +55,63 @@ mkdir -p data_parsed/my_clip
 # mp4 → YUV
 ffmpeg -i ~/videos/my_clip.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 30 my_clip.yuv
 
-# YUV → Eva macroblocks
+# YUV → Eva macroblocks (only originals — no edited file exists yet)
 cargo run --release -p video --example yuv_to_macroblocks -- \
   my_clip.yuv data_parsed/my_clip 352 288 30
 
+# Playable EDITED video (separate from proving — applies brightness off-chain)
+BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \
+  data_parsed/my_clip my_clip_edited.yuv 352 288 30
+ffplay -f rawvideo -pix_fmt yuv420p -s 352x288 my_clip_edited.yuv
+# Or share as mp4:
+ffmpeg -f rawvideo -pix_fmt yuv420p -s 352x288 -r 30 -i my_clip_edited.yuv \
+  -c:v libx264 -pix_fmt yuv420p my_clip_edited.mp4
+
+# Cryptographic proof (does not write any video file)
 export DATA_PATH="$(pwd)/data_parsed"
 VIDEO=my_clip QUICK=1 cargo run --release -p video --example edit_bright_only
+```
+
+## Prove vs playable edited video
+
+Running `edit_bright_only` (or any prover) **does not create a video file**. It only:
+
+- checks the edit gadget + hashes in zero knowledge
+- prints an IVC final state (field elements)
+- optionally verifies the Nova proof in memory
+
+There is **no edited video on disk** after proving. Eva never writes `edited.mp4`.
+
+To **see** the edited result, run **`macroblocks_to_yuv`** on the same `orig_*_enc` files.
+It applies the same transform as the circuit (`Brightness::edit_native` when `BRIGHTNESS=416`)
+and writes a normal planar YUV file you can play or convert to mp4.
+
+```
+data_parsed/my_clip/orig_*_enc   (original pixels only)
+        │
+        ├─► macroblocks_to_yuv + BRIGHTNESS=416  ──►  my_clip_edited.yuv / .mp4   ← watch this
+        │
+        └─► edit_bright_only                       ──►  proof + hashes (no video file)
+```
+
+Use the **same** `BRIGHTNESS` value as `BrightnessCfg(...)` in the proof example (`416` today).
+Original (no edit): run `macroblocks_to_yuv` **without** `BRIGHTNESS`.
+
+### Export edited video (copy-paste)
+
+Replace `my_clip`, `352`, `288`, `30` with your folder name and dimensions.
+
+```bash
+# Edited (brightness — matches edit_bright_only)
+BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \
+  data_parsed/my_clip my_clip_edited.yuv 352 288 30
+
+# Play
+ffplay -f rawvideo -pix_fmt yuv420p -s 352x288 my_clip_edited.yuv
+
+# Or mp4
+ffmpeg -f rawvideo -pix_fmt yuv420p -s 352x288 -r 30 -i my_clip_edited.yuv \
+  -c:v libx264 -pix_fmt yuv420p my_clip_edited.mp4
 ```
 
 ## What “native edit” means (and what it is not)
