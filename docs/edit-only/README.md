@@ -31,10 +31,35 @@ macroblock-shaped pixel witnesses. Lossless means no lossy re-quantization in th
 Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_macroblocks`,
 `macroblocks_to_yuv420` (re-exported from `video`).
 
+## Native Eva edits (what you *can* prove)
+
+The lossless path does **not** witness an edited video file. It witnesses:
+
+1. **Original** macroblock YUV (`orig_*_enc`)
+2. An **edit config** per macroblock (gadget-specific)
+
+The circuit runs `edit_circuit` in zero-knowledge and binds the **resulting pixels** in `h2`.
+Preview off-chain with the matching `edit_native` (e.g. `BRIGHTNESS=416` in `macroblocks_to_yuv`).
+
+| Gadget (`EditGadget`) | Config | Effect | Lossless examples today | Lossy decider (encode + edit) |
+|----------------------|--------|--------|-------------------------|-------------------------------|
+| `Brightness` | `BrightnessCfg(scale)` — e.g. `416` ≈ ×1.62 luma | Scale Y; U/V unchanged | `edit_bright_only`, `edit_lossless_decider`, `hash_verifier_lossless` | `edit_bright_decider` |
+| `Removing` | `RemovingCfg(keep)` — per macroblock bool | Zero macroblock if outside crop | *copy from `edit_crop_decider`* | `edit_crop_decider`, `edit_cut_decider` |
+| `InvertColor` | `()` | `255 − pixel` on Y/U/V | *not wired yet* | `edit_inv_decider` |
+| `Grayscale` | `()` | Keep Y; U/V → 128 | *not wired yet* | `edit_gray_decider` |
+| `Masking` | `MaskCfg(...)` | Per-pixel mask | *not wired yet* | `edit_mask_decider` |
+| `NoOp` | `()` | Identity (no pixel change) | *not wired yet* | `edit_noop_decider` |
+
+Implementation: `video/src/edit/constraints.rs`. Generic circuit: `EditOnlyCircuit<Fr, YourGadget>`.
+
+**Demo recipe:** any video source (Runway, phone, `foreman`) → `yuv_to_macroblocks` → pick a
+**native** gadget above → prove with `EditOnlyCircuit`. Runway is only a convenient way to
+obtain the **original** clip; the proved transform is always an Eva gadget.
+
 ## Custom video (e.g. Runway export)
 
-Eva cannot prove arbitrary Runway edits — only built-in gadgets (`Brightness`, crop, …).
-A practical demo: use Runway for the **source clip**, prove a **brightness** (or crop) edit.
+Eva cannot prove arbitrary Runway/NLE edits — use a **native gadget** from the table above.
+A practical demo: Runway (or ffmpeg) for the **source clip**, then prove **brightness** or **crop**.
 
 ```bash
 # 1. Export from Runway → mp4, then raw YUV (size must be multiple of 16)
@@ -98,9 +123,13 @@ cargo test -p video edit_only --release
 
 ## Extending
 
-`EditOnlyCircuit<F, E>` is generic over `EditGadget` (`Brightness`, `Removing` for crop, etc.).
-For crop, copy the edit-config loop from `edit_crop_decider` / `hash_verifier_crop` and use
-`Removing` instead of `Brightness`.
+`EditOnlyCircuit<F, E>` is generic over `EditGadget`. To add a lossless example for crop:
+
+1. Copy `edit_bright_only.rs` → `edit_crop_only.rs`
+2. Set `type Op = Removing` and build `RemovingCfg` per macroblock (see `edit_crop_decider`)
+3. Preview with `Removing::edit_native` in a small script, or extend `macroblocks_to_yuv`
+
+Lossy-path references: `edit_*_decider` and `hash_verifier_*` for each gadget.
 
 ## Branch
 
