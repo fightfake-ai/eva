@@ -145,8 +145,8 @@ pub fn yuv420_to_macroblocks(
 
 /// Eva macroblock files → planar YUV 4:2:0 bytes for `num_frames` frame(s).
 ///
-/// If `brightness_scale` is `Some(s)`, applies [`Brightness`] per macroblock on export
-/// (for previewing the edited video off-chain).
+/// Pure format conversion — no edit. For native brightness + export, see
+/// [`native_brightness_export_yuv420`].
 pub fn macroblocks_to_yuv420(
     orig_y: &[u8],
     orig_u: &[u8],
@@ -154,7 +154,42 @@ pub fn macroblocks_to_yuv420(
     width: usize,
     height: usize,
     num_frames: usize,
-    brightness_scale: Option<u16>,
+) -> Result<Vec<u8>, String> {
+    export_yuv420_from_macroblocks(orig_y, orig_u, orig_v, width, height, num_frames, None)
+}
+
+/// Native [`Brightness::edit_native`] on each macroblock, then planar YUV 4:2:0 export.
+///
+/// Reference implementation only (not in-circuit). Matches in-circuit edit at
+/// [`BrightnessCfg`](crate::edit::constraints::BrightnessCfg)(`brightness_scale`).
+pub fn native_brightness_export_yuv420(
+    orig_y: &[u8],
+    orig_u: &[u8],
+    orig_v: &[u8],
+    width: usize,
+    height: usize,
+    num_frames: usize,
+    brightness_scale: u16,
+) -> Result<Vec<u8>, String> {
+    export_yuv420_from_macroblocks(
+        orig_y,
+        orig_u,
+        orig_v,
+        width,
+        height,
+        num_frames,
+        Some(BrightnessCfg(brightness_scale)),
+    )
+}
+
+fn export_yuv420_from_macroblocks(
+    orig_y: &[u8],
+    orig_u: &[u8],
+    orig_v: &[u8],
+    width: usize,
+    height: usize,
+    num_frames: usize,
+    native_brightness: Option<BrightnessCfg>,
 ) -> Result<Vec<u8>, String> {
     validate_dims(width, height)?;
     let mbs = macroblocks_per_frame(width, height)?;
@@ -177,7 +212,7 @@ pub fn macroblocks_to_yuv420(
     let frame_bytes = yuv420_frame_bytes(width, height)?;
     let chroma_w = width / 2;
     let mut out = vec![0u8; frame_bytes * num_frames];
-    let brightness = brightness_scale.map(BrightnessCfg);
+    let brightness = native_brightness.as_ref();
 
     for f in 0..num_frames {
         let frame_base = f * frame_bytes;
@@ -199,7 +234,7 @@ pub fn macroblocks_to_yuv420(
                 orig_v[global * MB_UV_BYTES..(global + 1) * MB_UV_BYTES].to_vec(),
             );
 
-            let (y, u, v) = if let Some(ref cfg) = brightness {
+            let (y, u, v) = if let Some(cfg) = brightness {
                 Brightness::edit_native(&y, &u, &v, cfg)
             } else {
                 (y, u, v)
@@ -297,7 +332,7 @@ mod tests {
         let height = 288;
         let src = synthetic_frame(width, height);
         let (y, u, v) = yuv420_to_macroblocks(&src, width, height, 1).unwrap();
-        let back = macroblocks_to_yuv420(&y, &u, &v, width, height, 1, None).unwrap();
+        let back = macroblocks_to_yuv420(&y, &u, &v, width, height, 1).unwrap();
         assert_eq!(src, back);
     }
 

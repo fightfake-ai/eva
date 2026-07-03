@@ -11,7 +11,7 @@
 //!
 //! Use that folder as `DATA_PATH/<name>/` when running `edit_bright_only` etc.
 //!
-//! # Prepare input with ffmpeg (from Runway mp4)
+//! # Prepare input with ffmpeg
 //!
 //! ```bash
 //! ffmpeg -i runway.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 30 runway.yuv

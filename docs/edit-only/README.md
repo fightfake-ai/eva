@@ -24,23 +24,36 @@ macroblock-shaped pixel witnesses. Lossless means no lossy re-quantization in th
 | `video/src/edit_only.rs` | `EditOnlyCircuit` — lossless IVC step |
 | `video/examples/edit_bright_only.rs` | Nova prove + verify smoke test |
 | `video/examples/edit_lossless_decider.rs` | Full pipeline: Nova + Groth16 decider |
-| `video/examples/hash_verifier_lossless.rs` | Native h2 over edited pixels (off-chain check) |
+| `video/examples/hash_verifier_lossless.rs` | Native-reference h2 over edited pixels (compare to proof) |
 | `video/examples/yuv_to_macroblocks.rs` | **mp4/ffmpeg YUV → Eva macroblock files** |
-| `video/examples/macroblocks_to_yuv.rs` | **Macroblocks → YUV for ffplay** (optional `BRIGHTNESS=`) |
+| `video/examples/native_edit_export_yuv.rs` | **Optional native edit + export to planar YUV** (`BRIGHTNESS=`) |
 
 Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_macroblocks`,
-`macroblocks_to_yuv420` (re-exported from `video`).
+`macroblocks_to_yuv420` (pure reassembly), `native_brightness_export_yuv420` (edit + export).
+
+### Naming: ingest vs export
+
+| Tool | What it does |
+|------|----------------|
+| `yuv_to_macroblocks` | **Ingest only** — planar YUV → `orig_*_enc` macroblock files |
+| `native_edit_export_yuv` | **Export** — optional `Brightness::edit_native`, then macroblocks → planar YUV |
+| `macroblocks_to_yuv420` | Library: pure reassembly (no edit) |
+| `native_brightness_export_yuv420` | Library: native brightness edit, then reassembly |
+
+The old name `macroblocks_to_yuv` suggested format conversion only; the export example
+always does two conceptual steps (native edit if requested, then YUV write).
 
 ## Quick start: your own video
 
-**Do not** put `.mp4` in `data_parsed/`. Eva only reads macroblock dumps.
+**Do not** put `.mp4` in `data_parsed/`. Eva only reads macroblock dumps. MP4 → YUV → macroblocks
+is trusted ingest (not proved); see [`capture-signing-and-ingest.md`](../capture-signing-and-ingest.md).
 
 | Step | Where / what |
 |------|----------------|
 | 1. Your file | `my_clip.mp4` anywhere (Desktop, `~/videos`, …) |
 | 2. ffmpeg YUV | `my_clip.yuv` (planar `yuv420p`; width & height **÷ 16**) |
 | 3. Eva input | `data_parsed/<name>/orig_y_enc`, `orig_u_enc`, `orig_v_enc` via `yuv_to_macroblocks` |
-| 4. **Playable edited video** | `macroblocks_to_yuv` + `BRIGHTNESS=` → `.yuv` or `.mp4` (see below) |
+| 4. **Playable edited video** | `native_edit_export_yuv` + `BRIGHTNESS=` → `.yuv` or `.mp4` (see below) |
 | 5. Prove (optional) | `export DATA_PATH=.../data_parsed` then `VIDEO=<name> cargo run … edit_bright_only` |
 
 Steps 4 and 5 are **independent** — you do not need to run the proof first to export a video.
@@ -59,8 +72,8 @@ ffmpeg -i ~/videos/my_clip.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 30 m
 cargo run --release -p video --example yuv_to_macroblocks -- \
   my_clip.yuv data_parsed/my_clip 352 288 30
 
-# Playable EDITED video (separate from proving — applies brightness off-chain)
-BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \
+# Playable EDITED video (uses edit_native reference — not the in-circuit prover)
+BRIGHTNESS=416 cargo run --release -p video --example native_edit_export_yuv -- \
   data_parsed/my_clip my_clip_edited.yuv 352 288 30
 ffplay -f rawvideo -pix_fmt yuv420p -s 352x288 my_clip_edited.yuv
 # Or share as mp4:
@@ -82,20 +95,20 @@ Running `edit_bright_only` (or any prover) **does not create a video file**. It 
 
 There is **no edited video on disk** after proving. Eva never writes `edited.mp4`.
 
-To **see** the edited result, run **`macroblocks_to_yuv`** on the same `orig_*_enc` files.
+To **see** the edited result, run **`native_edit_export_yuv`** on the same `orig_*_enc` files.
 It applies the same transform as the circuit (`Brightness::edit_native` when `BRIGHTNESS=416`)
 and writes a normal planar YUV file you can play or convert to mp4.
 
 ```
 data_parsed/my_clip/orig_*_enc   (original pixels only)
         │
-        ├─► macroblocks_to_yuv + BRIGHTNESS=416  ──►  my_clip_edited.yuv / .mp4   ← watch this
+        ├─► native_edit_export_yuv + BRIGHTNESS=416  ──►  my_clip_edited.yuv / .mp4   ← watch this
         │
         └─► edit_bright_only                       ──►  proof + hashes (no video file)
 ```
 
 Use the **same** `BRIGHTNESS` value as `BrightnessCfg(...)` in the proof example (`416` today).
-Original (no edit): run `macroblocks_to_yuv` **without** `BRIGHTNESS`.
+Original (no edit): run `native_edit_export_yuv` **without** `BRIGHTNESS`.
 
 ### Export edited video (copy-paste)
 
@@ -103,7 +116,7 @@ Replace `my_clip`, `352`, `288`, `30` with your folder name and dimensions.
 
 ```bash
 # Edited (brightness — matches edit_bright_only)
-BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \
+BRIGHTNESS=416 cargo run --release -p video --example native_edit_export_yuv -- \
   data_parsed/my_clip my_clip_edited.yuv 352 288 30
 
 # Play
@@ -131,7 +144,7 @@ For a longer clip, pack **more frames** when converting from mp4:
 ffmpeg -i my_clip.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 300 my_clip.yuv
 cargo run --release -p video --example yuv_to_macroblocks -- \
   my_clip.yuv data_parsed/my_clip 352 288 300
-# Use 300 as the last argument to macroblocks_to_yuv as well
+# Use 300 as the last argument to native_edit_export_yuv as well
 ```
 
 Check frame count: `orig_y_enc` bytes ÷ 256 ÷ (width/16 ÷ height/16 macroblocks per frame).
@@ -140,28 +153,7 @@ For 352×288 that's 396 macroblocks/frame (`orig_y_enc` size ÷ 256 ÷ 396).
 **Note:** Lossless folders only need `orig_*_enc`. Do **not** use `parse_prover_data` paths
 for custom clips — `edit_bright_only` uses `parse_orig_blocks` (encode files not required).
 
-## What “native edit” means (and what it is not)
-
-**Native edits exist** — they are fixed transforms in `video/src/edit/constraints.rs`
-(brightness, crop, invert, grayscale, mask). The proof runs `edit_circuit` on original
-pixels + a **config**; you never upload a separately edited video as the witness.
-
-| | Native Eva edit | Runway / Premiere / ffmpeg filters |
-|--|-----------------|-------------------------------------|
-| Where it runs | Inside the zk circuit (`EditGadget`) | Outside Eva |
-| Can be proved? | ✅ if gadget is implemented | ❌ |
-| Separate “edit app”? | **No** — config is set in Rust examples | Yes (those tools) |
-| Preview off-chain | `edit_native` / `BRIGHTNESS=` in `macroblocks_to_yuv` | Those tools’ export |
-
-So: there is **no Eva video editor**. You choose a gadget + config in code (e.g.
-`BrightnessCfg(416)`), the circuit applies it, and `h2` binds the result. For a demo,
-use Runway/ffmpeg only to obtain the **original** clip; the **proved** change is the Eva gadget.
-
-**Lossless tooling today:** only **brightness** is wired end-to-end (`edit_bright_only`,
-`BRIGHTNESS=` preview). Other gadgets work in the **lossy** `edit_*_decider` examples;
-lossless copies (`edit_crop_only`, etc.) still need to be added (see [Extending](#extending)).
-
-## Native Eva edits (what you *can* prove)
+## Native Eva edits (supported gadgets)
 
 The lossless path does **not** witness an edited video file. It witnesses:
 
@@ -169,7 +161,21 @@ The lossless path does **not** witness an edited video file. It witnesses:
 2. An **edit config** per macroblock (gadget-specific)
 
 The circuit runs `edit_circuit` in zero-knowledge and binds the **resulting pixels** in `h2`.
-Preview off-chain with the matching `edit_native` (e.g. `BRIGHTNESS=416` in `macroblocks_to_yuv`).
+To preview pixels without proving, use `edit_native` (e.g. `BRIGHTNESS=416` in `native_edit_export_yuv`).
+
+**Terminology:** each `EditGadget` has two implementations of the same transform:
+
+| | `edit_native` | `edit_circuit` |
+|--|---------------|----------------|
+| Where | Plain Rust (reference) | R1CS constraints inside `EditOnlyCircuit` |
+| Used for | Video export, `hash_edited_macroblock`, tests | Nova / IVC proof |
+| Proves anything? | No (but must match `edit_circuit`) | Yes |
+
+There is no separate Eva video editor — you set gadget + config in code (e.g. `BrightnessCfg(416)`).
+
+**Lossless tooling today:** only **brightness** is wired end-to-end (`edit_bright_only`,
+`BRIGHTNESS=` in `native_edit_export_yuv`). Other gadgets have **lossy** `edit_*_decider` examples;
+lossless copies (`edit_crop_only`, etc.) still need to be added (see [Extending](#extending)).
 
 | Gadget (`EditGadget`) | Config | Effect | Lossless examples today | Lossy decider (encode + edit) |
 |----------------------|--------|--------|-------------------------|-------------------------------|
@@ -184,8 +190,9 @@ Implementation: `video/src/edit/constraints.rs`. Generic circuit: `EditOnlyCircu
 
 ## Brightness: what code actually runs
 
-There are **two** brightness paths — preview (off-chain) and proof (in-circuit). Both apply the
-same per-pixel luma transform; only the proof path also builds R1CS constraints and Griffin hashes.
+Each `EditGadget` exposes **`edit_native`** (reference) and **`edit_circuit`** (constrained).
+For brightness, both implement the same luma scaling; the proof path uses `edit_circuit` plus
+Griffin hashes and Nova folding.
 
 ### The edit itself (shared math)
 
@@ -193,25 +200,88 @@ Defined in `video/src/edit/constraints.rs` on `impl EditGadget for Brightness`:
 
 | | Function | What it does |
 |--|----------|----------------|
-| **Off-chain** | `Brightness::edit_native` | For each Y pixel: `Y' = min(255, Y × scale ÷ 256)`. U and V copied unchanged. |
-| **In-circuit** | `Brightness::edit_circuit` | Same relation, constrained: proves `pixel × scale` decomposes correctly and output is `min(255, …)`. |
+| **Native (reference)** | `Brightness::edit_native` | For each Y pixel: `Y' = min(255, Y × scale ÷ 256)`. U and V copied unchanged. |
+| **In-circuit** | `Brightness::edit_circuit` | Same relation, as R1CS: proves `pixel × scale` decomposes correctly and output is `min(255, …)`. |
 
 Config type: `BrightnessCfg(scale: u16)` — e.g. `416` means multiply luma by `416/256 ≈ 1.62`.
 In the proof examples this is set in `edit_bright_only.rs` as `let brightness = BrightnessCfg(416)`.
 
-### A) Playable edited video — `macroblocks_to_yuv` + `BRIGHTNESS=416`
+### A) Playable edited video — `native_edit_export_yuv` + `BRIGHTNESS=416`
+
+Uses **`edit_native`** only (no R1CS, no proof). Example command:
+
+```bash
+BRIGHTNESS=416 cargo run --release -p video --example native_edit_export_yuv -- \
+  data_parsed/my_clip my_clip_edited.yuv 352 288 30
+```
+
+#### Where `BRIGHTNESS=416` is read
+
+| Step | File | What runs |
+|------|------|-----------|
+| 1 | `video/examples/native_edit_export_yuv.rs` | `main()` parses CLI args (`data_parsed/my_clip`, output path, 352, 288, 30) |
+| 2 | same, ~line 64 | `env::var("BRIGHTNESS")` → parse as `u16` → `Some(416)` |
+| 3 | same, ~line 66 | `read_macroblock_dir(&input_dir)` loads `orig_y_enc`, `orig_u_enc`, `orig_v_enc` |
+| 4 | same, ~line 100 | `native_brightness_export_yuv420(..., 416)` |
+| 5 | `video/src/macroblock_yuv.rs` | `export_yuv420_from_macroblocks(..., Some(BrightnessCfg(416)))` |
+| 6 | same, per macroblock | `Brightness::edit_native(&y, &u, &v, cfg)` then stitch into planar YUV |
+| 7 | `video/src/edit/constraints.rs` ~line 287 | `edit_native`: for each Y pixel, `min(255, Y × 416 ÷ 256)`; U/V unchanged |
+| 8 | `macroblock_yuv.rs` | `insert_y_block` / `insert_uv_block` |
+| 9 | `native_edit_export_yuv.rs` ~line 116 | `fs::write(output, yuv)` → `my_clip_edited.yuv` |
+
+If `BRIGHTNESS` is unset, step 4 calls `macroblocks_to_yuv420` instead (reassemble only).
+
+#### Call tree
 
 ```
-macroblocks_to_yuv (example)
-  └─ macroblocks_to_yuv420()          video/src/macroblock_yuv.rs
-       └─ per macroblock:
-            Brightness::edit_native() video/src/edit/constraints.rs
-            → reassemble planes → write .yuv
+native_edit_export_yuv::main()                    video/examples/native_edit_export_yuv.rs
+  ├─ env::var("BRIGHTNESS")  →  Option<u16>   (416)
+  ├─ read_macroblock_dir()                    video/src/macroblock_yuv.rs
+  │    └─ fs::read orig_y_enc, orig_u_enc, orig_v_enc
+  ├─ if BRIGHTNESS=416:
+  │    native_brightness_export_yuv420(..., 416)   video/src/macroblock_yuv.rs
+  │      └─ export_yuv420_from_macroblocks(..., Some(BrightnessCfg(416)))
+  │           └─ per macroblock: Brightness::edit_native → stitch planes
+  ├─ else:
+  │    macroblocks_to_yuv420(...)                (reassemble only)
+  └─ fs::write(my_clip_edited.yuv)
 ```
 
-No zk proof. Reads `orig_*_enc`, applies `edit_native`, writes planar YUV for ffplay/ffmpeg.
+No zk code runs on this path — no `EditOnlyCircuit`, no `edit_circuit`, no Nova.
+
+#### Key snippets
+
+`BRIGHTNESS` env → function argument (`native_edit_export_yuv.rs`):
+
+```rust
+let brightness = env::var("BRIGHTNESS").ok().and_then(|s| s.parse().ok());
+let yuv = match brightness {
+    Some(scale) => native_brightness_export_yuv420(&orig_y, &orig_u, &orig_v, width, height, num_frames, scale)?,
+    None => macroblocks_to_yuv420(&orig_y, &orig_u, &orig_v, width, height, num_frames)?,
+};
+```
+
+Inside `native_brightness_export_yuv420` (`macroblock_yuv.rs`):
+
+```rust
+let (y, u, v) = Brightness::edit_native(&y, &u, &v, &BrightnessCfg(brightness_scale));
+// then insert_y_block / insert_uv_block into planar output
+```
+
+The actual pixel transform (`constraints.rs`, `impl EditGadget for Brightness`):
+
+```rust
+y.iter()
+    .map(|&v| min(255, (v as u64 * cfg.0 as u64) >> 8) as u8)  // cfg.0 == 416
+    .collect()
+// u.clone(), v.clone() — chroma unchanged
+```
+
+Compare to the proof path: `edit_bright_only.rs` hard-codes `let brightness = BrightnessCfg(416)` and passes it into `EditOnlyCircuit`, which calls `Brightness::edit_circuit` instead of `edit_native`.
 
 ### B) Cryptographic proof — `edit_bright_only`
+
+Uses **`edit_circuit`** inside the IVC step:
 
 ```
 edit_bright_only (example)
@@ -240,40 +310,13 @@ Native reference for hashing (tests / `hash_verifier_lossless`): `hash_edited_ma
 
 ### Quick map: command → code
 
-| You run | Edit applied by | Output |
-|---------|-------------------|--------|
-| `BRIGHTNESS=416 … macroblocks_to_yuv` | `Brightness::edit_native` | `.yuv` / `.mp4` file |
-| `VIDEO=… edit_bright_only` | `Brightness::edit_circuit` (+ hashes, Nova) | proof; `IVC final state` |
+| You run | Implementation | Output |
+|---------|----------------|--------|
+| `BRIGHTNESS=416 … native_edit_export_yuv` | `edit_native` (reference) | `.yuv` / `.mp4` file |
+| `VIDEO=… edit_bright_only` | `edit_circuit` (+ hashes, Nova) | proof; `IVC final state` |
 | `hash_verifier_lossless` | `hash_edited_macroblock` → `edit_native` | printed `h2` (check vs proof) |
 
-**Demo recipe:** any video source (Runway, phone, `foreman`) → `yuv_to_macroblocks` → pick a
-**native** gadget above → prove with `EditOnlyCircuit`. Runway is only a convenient way to
-obtain the **original** clip; the proved transform is always an Eva gadget.
-
-## Custom video (e.g. Runway export)
-
-Eva cannot prove arbitrary Runway/NLE edits — use a **native gadget** from the table above.
-A practical demo: Runway (or ffmpeg) for the **source clip**, then prove **brightness** or **crop**.
-
-```bash
-# 1. Export from Runway → mp4, then raw YUV (size must be multiple of 16)
-ffmpeg -i runway.mp4 -vf scale=352:288 -pix_fmt yuv420p -frames:v 30 runway.yuv
-
-# 2. Pack into Eva macroblock files
-cargo run --release -p video --example yuv_to_macroblocks -- \
-  runway.yuv ./data_parsed/runway_demo 352 288 30
-
-# 3. Watch original / edited preview
-cargo run --release -p video --example macroblocks_to_yuv -- \
-  ./data_parsed/runway_demo runway_orig.yuv 352 288 30
-BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \
-  ./data_parsed/runway_demo runway_bright.yuv 352 288 30
-ffplay -f rawvideo -pix_fmt yuv420p -s 352x288 runway_bright.yuv
-
-# 4. Prove (lossless, no encode) — set VIDEO to your folder name
-export DATA_PATH=/path/to/data_parsed
-VIDEO=runway_demo QUICK=1 cargo run --release -p video --example edit_bright_only
-```
+## Tool reference
 
 ### What `yuv_to_macroblocks` does
 
@@ -282,18 +325,33 @@ VIDEO=runway_demo QUICK=1 cargo run --release -p video --example edit_bright_onl
 3. For each 8×8 chroma region, copies into `orig_u_enc` / `orig_v_enc`.
 4. Macroblock order matches Eva: left→right, top→bottom (same as `edit_crop_decider`).
 
-### What `macroblocks_to_yuv` does
+### What `native_edit_export_yuv` does
 
-The inverse: stitches macroblocks back into a playable `.yuv` file. With `BRIGHTNESS=<u16>`,
-applies the same luma scaling as `BrightnessCfg` in the proof so you can preview the
-**proved** edit (not the Runway effect).
+Two steps (step 1 is optional):
+
+1. **Native edit** — if `BRIGHTNESS=<u16>` is set, `native_brightness_export_yuv420` runs
+   `Brightness::edit_native` on every macroblock.
+2. **Export** — stitch macroblocks into planar YUV 4:2:0 and write the file.
+
+Without `BRIGHTNESS`, only step 2 runs via `macroblocks_to_yuv420`. This is the export
+counterpart to `yuv_to_macroblocks` (ingest). See
+[A) Playable edited video](#a-playable-edited-video--native_edit_export_yuv--brightness416).
+
+## Trust boundary
+
+Eva proofs start at `orig_*_enc` macroblock witnesses. Camera capture, MP4 decode, YUV packing,
+and export are outside the circuit unless you design otherwise. See
+[`docs/capture-signing-and-ingest.md`](../capture-signing-and-ingest.md) for what signatures bind to,
+the ingest gap, and how to close it.
 
 ## End-to-end flow
 
+Assumes witnesses are already in `orig_*_enc` form (see link above).
+
 ```
-hash_recorder (foreman/)     →  h1 chain over original pixels
+hash_recorder (foreman/)     →  h1 chain over original macroblock pixels (reference; not a real camera)
 EditOnlyCircuit Nova proof   →  IVC state (h1, h2) in-circuit
-hash_verifier_lossless       →  native h2 over edited pixels (should match proof z[1])
+hash_verifier_lossless       →  h2 via edit_native (reference; should match proof z[1])
 edit_lossless_decider        →  Groth16 decider + signature on h1
 ```
 
@@ -321,7 +379,7 @@ cargo test -p video edit_only --release
 
 1. Copy `edit_bright_only.rs` → `edit_crop_only.rs`
 2. Set `type Op = Removing` and build `RemovingCfg` per macroblock (see `edit_crop_decider`)
-3. Preview with `Removing::edit_native` in a small script, or extend `macroblocks_to_yuv`
+3. Preview with `Removing::edit_native` in a small script, or extend `native_edit_export_yuv`
 
 Lossy-path references: `edit_*_decider` and `hash_verifier_*` for each gadget.
 

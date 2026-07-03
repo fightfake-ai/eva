@@ -18,6 +18,19 @@ Before running the examples, download the `data_parsed` folder from Hugging Face
 
 You can also use your own video, but you need to extract the original & prediction macroblocks as well as the quantized coefficients from the JM library. Instructions for dataset preparation will be provided in the future.
 
+**Capture vs proof:** Real cameras do not output Eva’s `orig_*_enc` witness files. Proofs and
+decider signatures bind to macroblock pixels (h1), not to MP4 on disk. If you ingest from MP4/YUV,
+that conversion is outside the circuit unless you add more machinery. See
+[`docs/capture-signing-and-ingest.md`](docs/capture-signing-and-ingest.md).
+
+## Documentation
+
+| Doc | Topic |
+|-----|-------|
+| [`docs/capture-signing-and-ingest.md`](docs/capture-signing-and-ingest.md) | Trust boundary: cameras, signing, MP4/YUV ingest, closing the gap |
+| [`docs/edit-only/README.md`](docs/edit-only/README.md) | Lossless edit-only path (`edit-only-proof` branch) |
+| [`docs/spartan2-comparison/README.md`](docs/spartan2-comparison/README.md) | Nova vs Spartan2 benchmarks |
+
 ## How to run
 
 Simply execute `cargo run --release --example=<example>`.

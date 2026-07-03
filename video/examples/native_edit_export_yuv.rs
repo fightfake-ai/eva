@@ -1,25 +1,25 @@
-//! Convert Eva macroblock files → planar YUV 4:2:0 for playback.
+//! Export Eva macroblock files to playable planar YUV 4:2:0.
 //!
 //! # What this does
 //!
-//! Reassembles `orig_y_enc` / `orig_u_enc` / `orig_v_enc` into a standard **planar
-//! YUV 4:2:0** file you can play with ffplay or re-encode to mp4.
+//! 1. **Optional native edit** — if `BRIGHTNESS=<u16>` is set, runs
+//!    [`Brightness::edit_native`] on every macroblock (reference implementation, not in-circuit).
+//! 2. **Export** — stitches `orig_*_enc` into standard planar YUV for ffplay / ffmpeg.
 //!
-//! Optionally applies the same **brightness** edit Eva proves (`BRIGHTNESS=416`) so
-//! you can preview the edited video off-chain.
+//! Without `BRIGHTNESS`, step 1 is skipped (identity) and only reassembly runs.
 //!
 //! # Usage
 //!
 //! ```bash
-//! # Original pixels
-//! cargo run --release -p video --example macroblocks_to_yuv -- \
-//!   ./data_parsed/runway_demo runway_orig.yuv 352 288 30
+//! # Original pixels (no edit)
+//! cargo run --release -p video --example native_edit_export_yuv -- \
+//!   ./data_parsed/my_clip my_clip_orig.yuv 352 288 30
 //!
-//! # Preview after brightness edit (matches BrightnessCfg(416) in edit_bright_only)
-//! BRIGHTNESS=416 cargo run --release -p video --example macroblocks_to_yuv -- \
-//!   ./data_parsed/runway_demo runway_bright.yuv 352 288 30
+//! # Native brightness edit + export (matches BrightnessCfg(416) in edit_bright_only)
+//! BRIGHTNESS=416 cargo run --release -p video --example native_edit_export_yuv -- \
+//!   ./data_parsed/my_clip my_clip_edited.yuv 352 288 30
 //!
-//! ffplay -f rawvideo -pix_fmt yuv420p -s 352x288 runway_bright.yuv
+//! ffplay -f rawvideo -pix_fmt yuv420p -s 352x288 my_clip_edited.yuv
 //! ```
 
 use std::env;
@@ -27,13 +27,15 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use video::macroblock_yuv::{macroblocks_per_frame, macroblocks_to_yuv420, read_macroblock_dir};
+use video::macroblock_yuv::{
+    macroblocks_per_frame, macroblocks_to_yuv420, native_brightness_export_yuv420,
+    read_macroblock_dir,
+};
 
 fn usage() -> &'static str {
-    "Usage: macroblocks_to_yuv <macroblock_dir> <output.yuv> <width> <height> [num_frames]\n\
+    "Usage: native_edit_export_yuv <macroblock_dir> <output.yuv> <width> <height> [num_frames]\n\
      \n\
-     Reassembles orig_*_enc into planar YUV420p.\n\
-     Set BRIGHTNESS=<u16> to apply the Eva brightness edit on export.\n\
+     Optional native edit (BRIGHTNESS=<u16>) then export orig_*_enc to planar YUV420p.\n\
      If num_frames is omitted, inferred from orig_y_enc size."
 }
 
@@ -97,15 +99,19 @@ fn main() -> ExitCode {
         orig_y.len() / (mbs_per_frame * 256)
     };
 
-    let yuv = match macroblocks_to_yuv420(
-        &orig_y,
-        &orig_u,
-        &orig_v,
-        width,
-        height,
-        num_frames,
-        brightness,
-    ) {
+    let yuv = match brightness {
+        Some(scale) => native_brightness_export_yuv420(
+            &orig_y,
+            &orig_u,
+            &orig_v,
+            width,
+            height,
+            num_frames,
+            scale,
+        ),
+        None => macroblocks_to_yuv420(&orig_y, &orig_u, &orig_v, width, height, num_frames),
+    };
+    let yuv = match yuv {
         Ok(v) => v,
         Err(e) => {
             eprintln!("{e}");
@@ -120,7 +126,9 @@ fn main() -> ExitCode {
 
     println!("Wrote {} ({} bytes, {num_frames} frames at {width}×{height})", output.display(), yuv.len());
     if let Some(b) = brightness {
-        println!("  applied brightness scale {b} (Eva BrightnessCfg)");
+        println!("  native edit: brightness scale {b} (Brightness::edit_native)");
+    } else {
+        println!("  no native edit (reassemble only)");
     }
     println!();
     println!("Play:");
