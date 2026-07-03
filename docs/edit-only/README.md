@@ -182,6 +182,70 @@ Preview off-chain with the matching `edit_native` (e.g. `BRIGHTNESS=416` in `mac
 
 Implementation: `video/src/edit/constraints.rs`. Generic circuit: `EditOnlyCircuit<Fr, YourGadget>`.
 
+## Brightness: what code actually runs
+
+There are **two** brightness paths — preview (off-chain) and proof (in-circuit). Both apply the
+same per-pixel luma transform; only the proof path also builds R1CS constraints and Griffin hashes.
+
+### The edit itself (shared math)
+
+Defined in `video/src/edit/constraints.rs` on `impl EditGadget for Brightness`:
+
+| | Function | What it does |
+|--|----------|----------------|
+| **Off-chain** | `Brightness::edit_native` | For each Y pixel: `Y' = min(255, Y × scale ÷ 256)`. U and V copied unchanged. |
+| **In-circuit** | `Brightness::edit_circuit` | Same relation, constrained: proves `pixel × scale` decomposes correctly and output is `min(255, …)`. |
+
+Config type: `BrightnessCfg(scale: u16)` — e.g. `416` means multiply luma by `416/256 ≈ 1.62`.
+In the proof examples this is set in `edit_bright_only.rs` as `let brightness = BrightnessCfg(416)`.
+
+### A) Playable edited video — `macroblocks_to_yuv` + `BRIGHTNESS=416`
+
+```
+macroblocks_to_yuv (example)
+  └─ macroblocks_to_yuv420()          video/src/macroblock_yuv.rs
+       └─ per macroblock:
+            Brightness::edit_native() video/src/edit/constraints.rs
+            → reassemble planes → write .yuv
+```
+
+No zk proof. Reads `orig_*_enc`, applies `edit_native`, writes planar YUV for ffplay/ffmpeg.
+
+### B) Cryptographic proof — `edit_bright_only`
+
+```
+edit_bright_only (example)
+  └─ parse_orig_blocks()               video/src/macroblock_yuv.rs
+  └─ Nova::preprocess / prove_step
+       └─ EditOnlyCircuit               video/src/edit_only.rs
+            └─ process_macroblock() per 16×16 block:
+                 1. commit orig Y/U/V     MatrixVar::new_committed
+                 2. witness config        BrightnessCfgVar (scale 416)
+                 3. Brightness::edit_circuit()  → edited Y/U/V vars
+                 4. h1 = Griffin hash of **original** pixels
+                 5. h2 = Griffin hash of **edited** pixels + compactify(config)
+            └─ fold_step_hashes()        chain h1/h2 across macroblocks → IVC state
+```
+
+Witness input struct: `EditOnlyExternalInputs { blocks, edit_configs }` — **original pixels only**,
+plus one `BrightnessCfg` per macroblock. No edited video file is read.
+
+Native reference for hashing (tests / `hash_verifier_lossless`): `hash_edited_macroblock` in
+`edit_only.rs` calls `E::edit_native` then Griffin-hash — must match step `h2` partial hashes.
+
+### C) How config enters the hash (`h2`)
+
+`BrightnessCfg::compactify` appends the scale as one field element to the `h2` hash input
+(alongside edited pixel bytes). Crop/mask gadgets pack more data; brightness only adds `scale`.
+
+### Quick map: command → code
+
+| You run | Edit applied by | Output |
+|---------|-------------------|--------|
+| `BRIGHTNESS=416 … macroblocks_to_yuv` | `Brightness::edit_native` | `.yuv` / `.mp4` file |
+| `VIDEO=… edit_bright_only` | `Brightness::edit_circuit` (+ hashes, Nova) | proof; `IVC final state` |
+| `hash_verifier_lossless` | `hash_edited_macroblock` → `edit_native` | printed `h2` (check vs proof) |
+
 **Demo recipe:** any video source (Runway, phone, `foreman`) → `yuv_to_macroblocks` → pick a
 **native** gadget above → prove with `EditOnlyCircuit`. Runway is only a convenient way to
 obtain the **original** clip; the proved transform is always an Eva gadget.
