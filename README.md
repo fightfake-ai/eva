@@ -27,6 +27,8 @@ that conversion is outside the circuit unless you add more machinery. See
 
 | Doc | Topic |
 |-----|-------|
+| [`docs/eva-c2pa-integration.md`](docs/eva-c2pa-integration.md) | Proposal: combining Eva proofs with C2PA manifests, camera co-design roadmap |
+| [`docs/c2pa_camera_architecture.md`](docs/c2pa_camera_architecture.md) | Background: C2PA bindings, camera trust boundary, signing points |
 | [`docs/capture-signing-and-ingest.md`](docs/capture-signing-and-ingest.md) | Trust boundary: cameras, signing, MP4/YUV ingest, closing the gap |
 | [`docs/edit-only/README.md`](docs/edit-only/README.md) | Lossless edit-only path (`edit-only-proof` branch) |
 | [`docs/spartan2-comparison/README.md`](docs/spartan2-comparison/README.md) | Nova vs Spartan2 benchmarks |
