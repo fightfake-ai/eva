@@ -29,19 +29,16 @@ macroblock-shaped pixel witnesses. Lossless means no lossy re-quantization in th
 | `video/examples/native_edit_export_yuv.rs` | **Optional native edit + export to planar YUV** (`BRIGHTNESS=`) |
 
 Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_macroblocks`,
-`macroblocks_to_yuv420` (pure reassembly), `native_brightness_export_yuv420` (edit + export).
+`macroblocks_to_yuv420` (phase 2: export), `native_brightness_edit_macroblocks` (phase 1: edit).
 
-### Naming: ingest vs export
+### Naming: ingest, edit, export
 
-| Tool | What it does |
-|------|----------------|
-| `yuv_to_macroblocks` | **Ingest only** — planar YUV → `orig_*_enc` macroblock files |
-| `native_edit_export_yuv` | **Export** — optional `Brightness::edit_native`, then macroblocks → planar YUV |
-| `macroblocks_to_yuv420` | Library: pure reassembly (no edit) |
-| `native_brightness_export_yuv420` | Library: native brightness edit, then reassembly |
-
-The old name `macroblocks_to_yuv` suggested format conversion only; the export example
-always does two conceptual steps (native edit if requested, then YUV write).
+| Tool / function | Phase | What it does |
+|-----------------|-------|----------------|
+| `yuv_to_macroblocks` | Ingest | Planar YUV → `orig_*_enc` macroblock files |
+| `native_brightness_edit_macroblocks` | **1 — native edit** | `edit/native_macroblocks.rs` — `edit_native` per macroblock |
+| `macroblocks_to_yuv420` | **2 — export** | `macroblock_yuv.rs` — macroblock bytes → planar YUV |
+| `native_edit_export_yuv` | 1 + 2 (example) | Optional `BRIGHTNESS=` then writes `.yuv` |
 
 ## Quick start: your own video
 
@@ -222,14 +219,14 @@ BRIGHTNESS=416 cargo run --release -p video --example native_edit_export_yuv -- 
 | 1 | `video/examples/native_edit_export_yuv.rs` | `main()` parses CLI args (`data_parsed/my_clip`, output path, 352, 288, 30) |
 | 2 | same, ~line 64 | `env::var("BRIGHTNESS")` → parse as `u16` → `Some(416)` |
 | 3 | same, ~line 66 | `read_macroblock_dir(&input_dir)` loads `orig_y_enc`, `orig_u_enc`, `orig_v_enc` |
-| 4 | same, ~line 100 | `native_brightness_export_yuv420(..., 416)` |
-| 5 | `video/src/macroblock_yuv.rs` | `export_yuv420_from_macroblocks(..., Some(BrightnessCfg(416)))` |
-| 6 | same, per macroblock | `Brightness::edit_native(&y, &u, &v, cfg)` then stitch into planar YUV |
-| 7 | `video/src/edit/constraints.rs` ~line 287 | `edit_native`: for each Y pixel, `min(255, Y × 416 ÷ 256)`; U/V unchanged |
-| 8 | `macroblock_yuv.rs` | `insert_y_block` / `insert_uv_block` |
-| 9 | `native_edit_export_yuv.rs` ~line 116 | `fs::write(output, yuv)` → `my_clip_edited.yuv` |
+| 4 | same, ~line 102 | **Phase 1:** `native_brightness_edit_macroblocks(..., 416)` → edited byte streams |
+| 5 | same, ~line 118 | **Phase 2:** `macroblocks_to_yuv420(&edited_y, …)` → planar YUV |
+| 6 | `video/src/edit/native_macroblocks.rs` | Phase 1 calls `Brightness::edit_native` per macroblock |
+| 7 | `video/src/edit/constraints.rs` ~line 287 | `edit_native`: `min(255, Y × 416 ÷ 256)` on luma |
+| 8 | `macroblock_yuv.rs` | Phase 2: `insert_y_block` / `insert_uv_block` stitch planes |
+| 9 | `native_edit_export_yuv.rs` ~line 130 | `fs::write(output, yuv)` → `my_clip_edited.yuv` |
 
-If `BRIGHTNESS` is unset, step 4 calls `macroblocks_to_yuv420` instead (reassemble only).
+If `BRIGHTNESS` is unset, only phase 2 runs on the original `orig_*_enc` bytes.
 
 #### Call tree
 
@@ -239,11 +236,10 @@ native_edit_export_yuv::main()                    video/examples/native_edit_exp
   ├─ read_macroblock_dir()                    video/src/macroblock_yuv.rs
   │    └─ fs::read orig_y_enc, orig_u_enc, orig_v_enc
   ├─ if BRIGHTNESS=416:
-  │    native_brightness_export_yuv420(..., 416)   video/src/macroblock_yuv.rs
-  │      └─ export_yuv420_from_macroblocks(..., Some(BrightnessCfg(416)))
-  │           └─ per macroblock: Brightness::edit_native → stitch planes
+  │    native_brightness_edit_macroblocks(..., 416)   phase 1 — edit/native_macroblocks.rs
+  │    macroblocks_to_yuv420(edited_y, edited_u, edited_v, …)   phase 2
   ├─ else:
-  │    macroblocks_to_yuv420(...)                (reassemble only)
+  │    macroblocks_to_yuv420(orig_*, …)                phase 2 only
   └─ fs::write(my_clip_edited.yuv)
 ```
 
@@ -256,16 +252,19 @@ No zk code runs on this path — no `EditOnlyCircuit`, no `edit_circuit`, no Nov
 ```rust
 let brightness = env::var("BRIGHTNESS").ok().and_then(|s| s.parse().ok());
 let yuv = match brightness {
-    Some(scale) => native_brightness_export_yuv420(&orig_y, &orig_u, &orig_v, width, height, num_frames, scale)?,
+    Some(scale) => {
+        let (y, u, v) = native_brightness_edit_macroblocks(&orig_y, &orig_u, &orig_v, width, height, num_frames, scale)?;
+        macroblocks_to_yuv420(&y, &u, &v, width, height, num_frames)?
+    }
     None => macroblocks_to_yuv420(&orig_y, &orig_u, &orig_v, width, height, num_frames)?,
 };
 ```
 
-Inside `native_brightness_export_yuv420` (`macroblock_yuv.rs`):
+Phase 1 (`edit/native_macroblocks.rs`):
 
 ```rust
 let (y, u, v) = Brightness::edit_native(&y, &u, &v, &BrightnessCfg(brightness_scale));
-// then insert_y_block / insert_uv_block into planar output
+// writes edited bytes to out_y / out_u / out_v
 ```
 
 The actual pixel transform (`constraints.rs`, `impl EditGadget for Brightness`):
@@ -327,11 +326,11 @@ Native reference for hashing (tests / `hash_verifier_lossless`): `hash_edited_ma
 
 ### What `native_edit_export_yuv` does
 
-Two steps (step 1 is optional):
+Two phases (phase 1 is optional):
 
-1. **Native edit** — if `BRIGHTNESS=<u16>` is set, `native_brightness_export_yuv420` runs
+1. **Native edit** — if `BRIGHTNESS=<u16>` is set, `native_brightness_edit_macroblocks` runs
    `Brightness::edit_native` on every macroblock.
-2. **Export** — stitch macroblocks into planar YUV 4:2:0 and write the file.
+2. **Export** — `macroblocks_to_yuv420` stitches macroblocks into planar YUV 4:2:0 and writes the file.
 
 Without `BRIGHTNESS`, only step 2 runs via `macroblocks_to_yuv420`. This is the export
 counterpart to `yuv_to_macroblocks` (ingest). See

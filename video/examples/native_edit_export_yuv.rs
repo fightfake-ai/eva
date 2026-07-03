@@ -27,9 +27,9 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use video::macroblock_yuv::{
-    macroblocks_per_frame, macroblocks_to_yuv420, native_brightness_export_yuv420,
-    read_macroblock_dir,
+use video::{
+    edit::native_macroblocks::native_brightness_edit_macroblocks,
+    macroblock_yuv::{macroblocks_per_frame, macroblocks_to_yuv420, read_macroblock_dir},
 };
 
 fn usage() -> &'static str {
@@ -100,15 +100,31 @@ fn main() -> ExitCode {
     };
 
     let yuv = match brightness {
-        Some(scale) => native_brightness_export_yuv420(
-            &orig_y,
-            &orig_u,
-            &orig_v,
-            width,
-            height,
-            num_frames,
-            scale,
-        ),
+        Some(scale) => {
+            let (edited_y, edited_u, edited_v) = match native_brightness_edit_macroblocks(
+                &orig_y,
+                &orig_u,
+                &orig_v,
+                width,
+                height,
+                num_frames,
+                scale,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    eprintln!("{e}");
+                    return ExitCode::FAILURE;
+                }
+            };
+            macroblocks_to_yuv420(
+                &edited_y,
+                &edited_u,
+                &edited_v,
+                width,
+                height,
+                num_frames,
+            )
+        }
         None => macroblocks_to_yuv420(&orig_y, &orig_u, &orig_v, width, height, num_frames),
     };
     let yuv = match yuv {

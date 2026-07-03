@@ -1,4 +1,5 @@
 pub mod constraints;
+pub mod native_macroblocks;
 
 use crate::encode::Matrix;
 

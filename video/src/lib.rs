@@ -62,10 +62,11 @@ pub mod var;
 pub use edit_only::{
     hash_edited_macroblock, hash_orig_macroblock, EditOnlyCircuit, EditOnlyExternalInputs,
 };
+pub use edit::native_macroblocks::native_brightness_edit_macroblocks;
 pub use macroblock_yuv::{
-    macroblock_count_from_dir, macroblocks_per_frame, macroblocks_to_yuv420,
-    native_brightness_export_yuv420, parse_orig_blocks, read_macroblock_dir, write_macroblock_dir,
-    yuv420_frame_bytes, yuv420_to_macroblocks, MB_UV_BYTES, MB_Y_BYTES,
+    macroblock_count_from_dir, macroblocks_per_frame, macroblocks_to_yuv420, parse_orig_blocks,
+    read_macroblock_dir, write_macroblock_dir, yuv420_frame_bytes, yuv420_to_macroblocks,
+    MB_UV_BYTES, MB_Y_BYTES,
 };
 
 const SCALES: [[u64; 6]; 3] = [

@@ -10,7 +10,6 @@ use std::path::Path;
 
 use rayon::prelude::*;
 
-use crate::edit::constraints::{Brightness, BrightnessCfg, EditGadget};
 use crate::encode::Matrix;
 
 pub const MB_Y_BYTES: usize = 256;
@@ -143,54 +142,14 @@ pub fn yuv420_to_macroblocks(
     Ok((orig_y, orig_u, orig_v))
 }
 
-/// Eva macroblock files → planar YUV 4:2:0 bytes for `num_frames` frame(s).
-///
-/// Pure format conversion — no edit. For native brightness + export, see
-/// [`native_brightness_export_yuv420`].
-pub fn macroblocks_to_yuv420(
+pub(crate) fn validate_macroblock_inputs(
     orig_y: &[u8],
     orig_u: &[u8],
     orig_v: &[u8],
     width: usize,
     height: usize,
     num_frames: usize,
-) -> Result<Vec<u8>, String> {
-    export_yuv420_from_macroblocks(orig_y, orig_u, orig_v, width, height, num_frames, None)
-}
-
-/// Native [`Brightness::edit_native`] on each macroblock, then planar YUV 4:2:0 export.
-///
-/// Reference implementation only (not in-circuit). Matches in-circuit edit at
-/// [`BrightnessCfg`](crate::edit::constraints::BrightnessCfg)(`brightness_scale`).
-pub fn native_brightness_export_yuv420(
-    orig_y: &[u8],
-    orig_u: &[u8],
-    orig_v: &[u8],
-    width: usize,
-    height: usize,
-    num_frames: usize,
-    brightness_scale: u16,
-) -> Result<Vec<u8>, String> {
-    export_yuv420_from_macroblocks(
-        orig_y,
-        orig_u,
-        orig_v,
-        width,
-        height,
-        num_frames,
-        Some(BrightnessCfg(brightness_scale)),
-    )
-}
-
-fn export_yuv420_from_macroblocks(
-    orig_y: &[u8],
-    orig_u: &[u8],
-    orig_v: &[u8],
-    width: usize,
-    height: usize,
-    num_frames: usize,
-    native_brightness: Option<BrightnessCfg>,
-) -> Result<Vec<u8>, String> {
+) -> Result<(usize, usize, usize), String> {
     validate_dims(width, height)?;
     let mbs = macroblocks_per_frame(width, height)?;
     let total_mbs = mbs
@@ -208,11 +167,27 @@ fn export_yuv420_from_macroblocks(
             orig_v.len()
         ));
     }
+    Ok((mbs, need_y, need_uv))
+}
+
+/// Export: Eva macroblock byte streams → planar YUV 4:2:0 for `num_frames` frame(s).
+///
+/// Pure format conversion only. For native brightness edit on macroblock bytes first, see
+/// [`crate::edit::native_macroblocks::native_brightness_edit_macroblocks`].
+pub fn macroblocks_to_yuv420(
+    macroblock_y: &[u8],
+    macroblock_u: &[u8],
+    macroblock_v: &[u8],
+    width: usize,
+    height: usize,
+    num_frames: usize,
+) -> Result<Vec<u8>, String> {
+    let (mbs, _, _) =
+        validate_macroblock_inputs(macroblock_y, macroblock_u, macroblock_v, width, height, num_frames)?;
 
     let frame_bytes = yuv420_frame_bytes(width, height)?;
     let chroma_w = width / 2;
     let mut out = vec![0u8; frame_bytes * num_frames];
-    let brightness = native_brightness.as_ref();
 
     for f in 0..num_frames {
         let frame_base = f * frame_bytes;
@@ -224,25 +199,18 @@ fn export_yuv420_from_macroblocks(
             let global = f * mbs + mb_idx;
             let (mb_x, mb_y) = macroblock_xy(width, mb_idx);
 
-            let y = Matrix::<u8, 16, 16>::from_vec(
-                orig_y[global * MB_Y_BYTES..(global + 1) * MB_Y_BYTES].to_vec(),
-            );
-            let u = Matrix::<u8, 8, 8>::from_vec(
-                orig_u[global * MB_UV_BYTES..(global + 1) * MB_UV_BYTES].to_vec(),
-            );
-            let v = Matrix::<u8, 8, 8>::from_vec(
-                orig_v[global * MB_UV_BYTES..(global + 1) * MB_UV_BYTES].to_vec(),
-            );
-
-            let (y, u, v) = if let Some(cfg) = brightness {
-                Brightness::edit_native(&y, &u, &v, cfg)
-            } else {
-                (y, u, v)
-            };
-
-            let y_arr: [u8; MB_Y_BYTES] = y.iter().copied().collect::<Vec<_>>().try_into().unwrap();
-            let u_arr: [u8; MB_UV_BYTES] = u.iter().copied().collect::<Vec<_>>().try_into().unwrap();
-            let v_arr: [u8; MB_UV_BYTES] = v.iter().copied().collect::<Vec<_>>().try_into().unwrap();
+            let y_arr: [u8; MB_Y_BYTES] = macroblock_y
+                [global * MB_Y_BYTES..(global + 1) * MB_Y_BYTES]
+                .try_into()
+                .unwrap();
+            let u_arr: [u8; MB_UV_BYTES] = macroblock_u
+                [global * MB_UV_BYTES..(global + 1) * MB_UV_BYTES]
+                .try_into()
+                .unwrap();
+            let v_arr: [u8; MB_UV_BYTES] = macroblock_v
+                [global * MB_UV_BYTES..(global + 1) * MB_UV_BYTES]
+                .try_into()
+                .unwrap();
 
             insert_y_block(y_plane, width, mb_x, mb_y, &y_arr);
             insert_uv_block(u_plane, chroma_w, mb_x, mb_y, &u_arr);
