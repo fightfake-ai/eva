@@ -30,65 +30,120 @@ use Eva as a new assertion type that upgrades one specific claim (the edit descr
 Eva's proof system has two layers.
 
 **Layer 1 — Nova IVC** proves, step by step over each batch of macroblocks, that the edit
-gadget was applied correctly and that the Griffin hash chain (h1, h2) was advanced correctly.
-After `num_steps` steps, the IVC has produced two field elements `[h1, h2]` and a *running
-instance* — a cryptographic accumulation (via Pedersen commitments) of all the step witnesses.
+gadget was applied correctly and that the Griffin hash chains (h1, h2) were advanced correctly.
+The IVC state `z = [h1_acc, h2_acc]` starts at `z_0 = [0, 0]` and is updated by every step.
+After `num_steps` steps the IVC has produced a final state `z_i = [h1, h2]` — both values are
+accumulated over *all* macroblocks, not just the last one — and a *running instance* U_i, a
+cryptographic accumulation (via Pedersen commitments) of all the step witnesses so far, plus a
+fresh *current instance* u_i for the most recent (not yet folded) step.
 
 **Layer 2 — Groth16 decider** wraps the entire IVC argument in a single, compact Groth16 proof.
-The Groth16 circuit takes the final running instance (U_i, u_i) and performs one last Nova
-folding step *inside the circuit*, then checks whether the result satisfies the step circuit's
-R1CS. That last check is the key: by Nova's security, if the folded instance satisfies the R1CS,
-then every preceding folding step was also correct, and the entire IVC computation is valid.
-So the Groth16 decider really is "just checking the final folded instance" — but that is not
-a trivial check: the running instance is a commitment to the entire computation, and the R1CS
-check certifies the whole chain.
+The circuit is in `video/src/decider.rs` (`generate_constraints`). Its key operations in order:
 
-On top of the R1CS check, the decider circuit also verifies two auxiliary facts:
+**Step 1 — sigma verification (lines 469–474).** `sigma = (sigma_r, sigma_s)` is a Schnorr-style
+signature over h1, computed by the prover using the device's private key `sk`. `vk = G * sk` is a
+public input; h1 and sigma are witnesses. The circuit verifies:
+`G * sigma_s - H(sigma_r, vk, h1) * vk = sigma_r` where H is a Poseidon CRH. So `sigma` is the
+device-key signature over h1 — the Groth16 circuit verifies this signature on the prover's behalf.
+Because both h1 and sigma are witnesses, the verifier never learns h1 directly; what the valid
+proof guarantees is: "there exists an h1 such that sigma is a valid signature over it under vk,
+and h1 is the correct first component of the IVC final state."
 
-**Final state consistency.** The IVC starts from `z_0 = [0, 0]` (declared as a public input to
-the decider). After exactly `i` steps (also a public input), the output is `z_i = [h1, h2]`.
-`z_i[1] = h2` is a public input; `z_i[0] = h1` is a witness (private). The circuit checks that
-the committed running instance's public I/O is consistent with exactly these values: it was
-initialised at `z_0`, ran for `i` steps, and produced `h2`. This rules out the prover supplying
-an IVC chain that ran from a different starting point, or ran a different number of steps, or
-claims a different h2.
+**Step 2 — instance reconstruction and state consistency check (line 485).**
+```rust
+let (u_i_x, U_i_vec) = U_i.clone().hash(&crh_params, i, z_0, z_i)?;
+```
+This computes the public I/O of the current instance u_i by hashing the running instance U_i
+together with `i` (step count, public input), `z_0` (initial state, public input), and `z_i =
+[h1, h2]` (final state, where h2 is a public input and h1 is a witness). This hash is what
+"checks" h1: the running instance U_i commits, through its accumulated Pedersen hashes, to the
+sequence of IVC steps that started from z_0 and ended at z_i. If the prover supplies a wrong h1,
+the resulting u_i_x will be inconsistent, and the R1CS check in Step 4 will fail. The verifier
+does not recompute the Griffin hash over macroblocks — that was the prover's work — it only
+checks polynomial equations. The macroblock hash computation is encoded in the committed witnesses
+inside U_i.
 
-**Signature verification.** `sigma = (sigma_r, sigma_s)` is a Schnorr-style signature over h1,
-computed by the prover using the device's private key `sk`. The device's public key
-`vk = G * sk` is a public input to the Groth16 circuit. Inside the circuit the Schnorr equation
-is verified: `G * sigma_s - H(sigma_r, vk, h1) * vk = sigma_r` (see
-`video/src/decider.rs` lines 399–474). Both `sigma` and `h1` are witnesses, so the verifier does
-not learn h1 directly. What the valid proof guarantees is: "there exists an h1 such that (a) it
-is the correct first component of the IVC final state, and (b) the device holding the private key
-for `vk` signed it." In other words, `sigma` is indeed the signature over h1 — the device key
-signs h1, and that signature is proved correct inside the Groth16 circuit, binding the zk
-argument to the specific device that captured the footage.
+**Step 3 — challenge and final fold (lines 509–525).** The Fiat-Shamir challenge `r` is
+recomputed in-circuit from `U_i`, `u_i`, and `cmT`, and the final Nova fold
+`U_{i+1} = NIFS::fold(r, U_i, u_i)` is performed inside the Groth16 circuit. This last fold is
+not done during the IVC run itself. Nova's protocol always keeps the last step's instance (`u_i`)
+separate from the running accumulator (`U_i`); self-verification in IVC works by having each new
+step check the previous fold, but the *last* step has no subsequent step to verify it. So the
+Groth16 circuit performs this final fold and its R1CS check explicitly, closing the chain.
 
-**Without the Groth16 decider** you could verify the Nova IVC directly, but this requires
-O(num_steps) elliptic-curve work for the verifier (one check per folding step), there is no
-sigma check, and the argument is not constant-size. The Groth16 decider is what turns the IVC
-into a fixed ~200-byte proof that is cheaply verifiable and can be embedded in a C2PA manifest.
+**Step 4 — relaxed R1CS satisfiability check (line 538).**
+```rust
+RelaxedR1CSGadget::check_native(r1cs, W_i1_E, U_i1.u, z)?;
+```
+The folded instance `U_{i+1}` must satisfy the relaxed R1CS of the step circuit. By Nova's
+security argument, if the final folded instance satisfies R1CS, then every preceding fold in the
+IVC was also valid. The entire computation — all `num_steps` macroblock batches — is certified by
+this single R1CS check.
 
-## 3. Eva's edit proof: what is and is not proved
+**Without the Groth16 decider** you can call Nova's own verifier directly. It also folds U_i and
+u_i and checks the resulting R1CS, but it does so on the raw commitment data (Pedersen commitment
+points for every witness polynomial), without sigma verification, and without compressing the
+argument. The verifier work is proportional to the instance size, not O(num_steps), but it is
+still much larger than checking a Groth16 proof, and the "proof" artifact itself (the running
+instance + current instance + all commitment data) is not a compact, embeddable blob. The Groth16
+decider is what produces the fixed ~200-byte proof that can be embedded in a C2PA manifest and
+verified with three pairings.
 
-Eva's "edit-only" circuit (the name means the encoder is excluded, not that only a single step
-runs) proves the following over the full video:
+## 3. Eva's two proof circuits
 
-- h1 is the Griffin hash chain over the **original** macroblocks (`orig_*_enc`).
-- h2 is the Griffin hash chain over the **edited** macroblocks (the same macroblock layout, with
-  the edit gadget applied to each pixel).
-- The edit gadget (e.g. `Brightness` with scale 416) was applied correctly to every macroblock.
+Eva has two IVC step circuits that can be used with the Groth16 decider:
 
-What is **not** proved: the encoding of the edited macroblocks into a final H.264/HEVC video
-file. After the proof is generated, the edited macroblocks are exported to planar YUV
-(`native_edit_export_yuv`) and then encoded with a standard tool (e.g. ffmpeg). That encoding
-step is outside the proof. The proof only covers the pixel-domain transformation: original
-macroblocks → edited macroblocks. The subsequent re-encoding of edited macroblocks to a
-deliverable video file is a trusted post-processing step.
+### EditEncodeCircuit (full Eva)
 
-This is a deliberate design choice: including the full H.264 encoder in the circuit would require
-millions of constraints per frame just for entropy coding (CABAC), before any pixel operations —
-not tractable at video resolutions today.
+`EditEncodeCircuit<F, E>` (`video/src/lib.rs`) is the primary circuit. Each IVC step proves,
+for one batch of macroblocks, that:
+
+1. The edit gadget `E` was correctly applied to each original macroblock's pixels.
+2. The H.264 encoding pipeline was correctly applied to the *edited* pixels: DCT residuals,
+   quantisation at the declared QP, intra/inter prediction modes, and the resulting H.264 NAL
+   unit coefficients match the committed witness.
+3. The Griffin hash chains h1 (over original pixels) and h2 (over edited pixels) were advanced
+   correctly.
+
+This is the strongest proof path: it covers the pixel transformation *and* the entire H.264
+codec pipeline. The edited video's specific bitstream — including quantisation decisions, QP,
+prediction modes — is part of the proof statement. The circuit requires the encoder's internal
+state (macroblock types, QP per block, prediction blocks) as witnesses; these come from running
+the H.264 encoder in "witness-generation mode" before the proving step.
+
+Examples using this circuit: `edit_bright_decider.rs`, `encode_decider.rs`, and the
+other `edit_*_decider.rs` examples.
+
+### EditOnlyCircuit (lossless / encode-free path)
+
+`EditOnlyCircuit<F, E>` (`video/src/edit_only.rs`) is a specialised circuit that omits the
+H.264 encode constraints entirely. Each IVC step proves only:
+
+1. The edit gadget `E` was correctly applied to each original macroblock's pixels.
+2. The Griffin hash chains h1 and h2 were advanced correctly.
+
+What is **not** proved by this circuit: the re-encoding of the edited macroblocks into a
+deliverable H.264/HEVC video file. After the proof is generated, the edited macroblocks are
+exported to planar YUV (`native_edit_export_yuv`) and re-encoded with a standard tool (e.g.
+ffmpeg). That encoding step is outside the proof and is a trusted post-processing step.
+
+The tradeoff is simpler witnesses (no encoder internals needed), faster proving, and a proof
+statement that is independent of the specific H.264 encoder used for delivery. Examples:
+`edit_bright_only.rs`, `edit_lossless_decider.rs`.
+
+### Which circuit for the C2PA integration?
+
+Both circuits feed the same Groth16 decider (§2) and produce the same h1/h2 field elements in
+`z_i`. For the `org.eva.edit_proof.v1` assertion, either can be used; the assertion schema
+should include a `circuit_variant` field so verifiers know which R1CS to use when checking the
+proof.
+
+Edit-only is likely the more practical near-term choice for C2PA integration: it does not depend
+on having the H.264 encoder's internal state available during witness generation, which simplifies
+the capture pipeline considerably. Full Eva's stronger guarantee — that the specific encoded
+bitstream corresponds to the declared edit — becomes relevant when the verifier needs to check
+that a specific delivered MP4 file is the one the proof covers, not just that the pixel
+transformation was correct.
 
 ## 4. Mapping Eva concepts onto C2PA constructs
 
@@ -234,14 +289,32 @@ data, but Eva-specific work must be added: the Griffin TA (not SHA-256; differen
 macroblock tiling if the API delivers full frames, writing `org.eva.capture.v1` into the manifest
 at the same point the BMFF binding is written, and ensuring all of this runs inside the TEE.
 
-**Security boundary at Level 1:** the TEE protects the hash *computation* — a compromised OS
-cannot read or alter what runs in the secure world. What the TEE does not protect is the
-*input* to the hash: the pixel data arrives from the encoder SDK, which is software. A
-compromised camera SDK or a manipulated encoder input could pass fabricated pixels to the TEE
-callback. The TEE would then faithfully hash the fake pixels. For the threat model Level 1
-addresses — an editor makes edits after capture and wants to prove those edits are the only
-changes — this is sufficient. Level 1 does not cover sensor-level or ISP-level fabrication of
-pixel data before the SDK delivers it.
+**What the camera SDK is and why it is in the Normal World.**
+TrustZone splits the processor into two isolated environments that share the same hardware:
+
+- **Normal World (REE — Rich Execution Environment):** where the main OS (Linux, Android, RTOS)
+  runs. All application software lives here, including the camera SDK. The SDK is complex
+  (format conversions, codecs, network interfaces, metadata handling) and needs access to OS
+  services and peripherals; it cannot run in a TEE.
+- **Secure World (TEE — Trusted Execution Environment):** where small, carefully audited
+  Trusted Applications (TAs) run in hardware isolation. The OS cannot read or write the secure
+  world's memory.
+
+The Griffin hash TA runs in the Secure World. The camera SDK — in the Normal World — sends
+macroblock data to it via the TEE Client API. The TA hashes the data, signs h1 with the device
+key (which also lives in the Secure World and never leaves it), and returns only h1 and sigma to
+the Normal World caller.
+
+**Security boundary at Level 1:** the TEE protects the hash *function and the device key* — a
+compromised OS cannot read the device key or alter the Griffin TA's code. What the TEE does
+*not* protect is what data is passed *into* the TEE: the pixel data arrives from the camera SDK
+(Normal World software). A compromised SDK — whether through a vulnerability, a software supply
+chain attack, or a manipulated camera app — controls what macroblock bytes it sends to the TEE
+call. The TA would faithfully hash whatever arrives. For the threat model Level 1 addresses — an
+editor makes edits after capture and wants to prove those edits are the only changes — this is
+sufficient. Level 1 does not protect against a compromised SDK fabricating the input to the hash.
+That requires Level 2, where the pixel bus feeds the hash engine directly in silicon, bypassing
+all software including the camera SDK.
 
 ### Level 2 — dedicated hash engine on the pixel bus
 
