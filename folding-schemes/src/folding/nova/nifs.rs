@@ -1,8 +1,6 @@
 use ark_crypto_primitives::sponge::Absorb;
 use ark_ec::CurveGroup;
 use ark_std::{cfg_into_iter, cfg_iter, end_timer, start_timer};
-use icicle_cuda_runtime::memory::DeviceVec;
-use icicle_cuda_runtime::stream::CudaStream;
 use rayon::prelude::*;
 use std::marker::PhantomData;
 
@@ -11,7 +9,7 @@ use crate::ccs::r1cs::R1CS;
 use crate::commitment::pedersen::Params;
 use crate::commitment::CommitmentScheme;
 use crate::utils::vec::*;
-use crate::{Error, MSM, MVM};
+use crate::{CudaStream, DeviceVec, Error, MSM, MVM};
 
 /// Implements the Non-Interactive Folding Scheme described in section 4 of
 /// [Nova](https://eprint.iacr.org/2021/370.pdf)

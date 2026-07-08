@@ -1,0 +1,46 @@
+[package]
+name = "comparison"
+version = "0.1.0"
+edition = "2021"
+description = "Nova vs Spartan2/NeutronNova comparison benchmarks for Eva"
+publish = false
+
+[dependencies]
+# Eva stack (Nova baseline)
+ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
+ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }
+ark-ec = "^0.5.0"
+ark-ff = { version = "^0.5.0", features = ["asm"] }
+ark-relations = { version = "^0.5.0", default-features = false }
+ark-r1cs-std = { version = "^0.5.0", default-features = false }
+ark-std = { version = "^0.5.0" }
+ark-crypto-primitives = { version = "^0.5.0", default-features = false, features = ["r1cs", "sponge", "crh"] }
+folding-schemes = { path = "../folding-schemes/", default-features = false, features = ["cpu"] }
+video = { path = "../video", default-features = false, features = ["cpu"] }
+rand = "0.8.5"
+
+# Spartan2 stack (NeutronNova baseline)
+spartan2 = "0.9"
+bellpepper = "0.4"
+bellpepper-core = "0.4"
+ff = "0.13"
+
+[features]
+default = ["cpu"]
+cpu = ["folding-schemes/cpu", "video/cpu"]
+
+[[example]]
+name = "r1cs_stats"
+path = "examples/r1cs_stats.rs"
+
+[[example]]
+name = "phase0_baseline"
+path = "examples/phase0_baseline.rs"
+
+[[example]]
+name = "phase1_benchmark"
+path = "examples/phase1_benchmark.rs"
+
+[[example]]
+name = "phase1_scale"
+path = "examples/phase1_scale.rs"

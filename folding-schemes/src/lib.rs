@@ -7,20 +7,52 @@ use ark_ec::CurveGroup;
 use ark_ff::PrimeField;
 use ark_r1cs_std::groups::CurveVar;
 use ark_std::rand::{CryptoRng, Rng};
-use ark_std::{end_timer, log2, start_timer};
-use ark_std::{fmt::Debug, rand::RngCore, Zero};
+#[cfg(feature = "cuda")]
+use ark_std::Zero;
+#[cfg(feature = "cuda")]
+use ark_std::{end_timer, start_timer};
+use ark_std::{fmt::Debug, rand::RngCore};
 use commitment::CommitmentScheme;
 use folding::nova::circuits::CF2;
 use folding::nova::decider_pedersen::DeciderEthCircuit;
-use icicle_core::traits::ArkConvertible;
-use icicle_cuda_runtime::device_context::{DeviceContext, DEFAULT_DEVICE_ID};
-use icicle_cuda_runtime::memory::{DeviceSlice, DeviceVec, HostOrDeviceSlice, HostSlice};
-use icicle_cuda_runtime::stream::CudaStream;
+#[cfg(feature = "cuda")]
 use rayon::prelude::*;
 use thiserror::Error;
-use utils::vec::CSRSparseMatrix;
+use utils::vec::{CSRSparseMatrix, PreparedMatrix};
 
 use crate::frontend::FCircuit;
+
+#[cfg(feature = "cuda")]
+use ark_std::log2;
+#[cfg(feature = "cuda")]
+use icicle_core::traits::ArkConvertible;
+#[cfg(feature = "cuda")]
+use icicle_cuda_runtime::device_context::{DeviceContext, DEFAULT_DEVICE_ID};
+#[cfg(feature = "cuda")]
+use icicle_cuda_runtime::memory::{DeviceSlice, HostOrDeviceSlice, HostSlice};
+#[cfg(feature = "cuda")]
+pub use icicle_cuda_runtime::{memory::DeviceVec, stream::CudaStream};
+
+#[cfg(feature = "cpu")]
+pub type DeviceVec<T> = Vec<T>;
+
+#[cfg(feature = "cpu")]
+pub struct CudaStream;
+
+#[cfg(feature = "cpu")]
+impl CudaStream {
+    pub fn create() -> Result<Self, Error> {
+        Ok(Self)
+    }
+
+    pub fn synchronize(&self) -> Result<(), Error> {
+        Ok(())
+    }
+
+    pub fn destroy(self) -> Result<(), Error> {
+        Ok(())
+    }
+}
 
 pub mod ccs;
 pub mod commitment;
@@ -210,13 +242,13 @@ pub trait MVM
 where
     Self: PrimeField,
 {
-    fn prepare_matrix(csr: &CSRSparseMatrix<Self>) -> HybridMatrix;
+    fn prepare_matrix(csr: &CSRSparseMatrix<Self>) -> PreparedMatrix<Self>;
 
     fn compute_t(
         stream: Option<&CudaStream>,
-        a: &HybridMatrix,
-        b: &HybridMatrix,
-        c: &HybridMatrix,
+        a: &PreparedMatrix<Self>,
+        b: &PreparedMatrix<Self>,
+        c: &PreparedMatrix<Self>,
         z1_u: &[Self],
         z1_x: &[Self],
         z1_wq: &[Self],
@@ -227,12 +259,18 @@ where
         t: &mut DeviceVec<Self>,
     );
 
+    #[cfg(feature = "cuda")]
     fn alloc_vec(len: usize) -> DeviceVec<Self> {
         let mut ptr = DeviceVec::cuda_malloc(len).unwrap();
         let zeros = vec![Self::zero(); len];
         ptr.copy_from_host(HostSlice::from_slice(zeros.cast()))
             .unwrap();
         ptr
+    }
+
+    #[cfg(feature = "cpu")]
+    fn alloc_vec(len: usize) -> DeviceVec<Self> {
+        vec![Self::zero(); len]
     }
 
     fn update_e(stream: Option<&CudaStream>, e: &mut DeviceVec<Self>, t: &DeviceVec<Self>, r: Self);
@@ -244,13 +282,13 @@ pub trait MSM<C: CurveGroup> {
     type T;
     type R;
 
-    fn precompute(generators: &[C::Affine]) -> icicle_cuda_runtime::memory::DeviceVec<Self::T>;
+    fn precompute(generators: &[C::Affine]) -> DeviceVec<Self::T>;
 
     fn var_msm(points: &[C::Affine], scalars: &[C::ScalarField], offset: usize) -> C;
 
     fn var_msm_precomputed(
         stream: Option<&CudaStream>,
-        points: &icicle_cuda_runtime::memory::DeviceSlice<Self::T>,
+        points: &DeviceVec<Self::T>,
         scalars: &[C::ScalarField],
         offset: usize,
         bitsize: Option<usize>,
@@ -258,7 +296,7 @@ pub trait MSM<C: CurveGroup> {
 
     fn var_msm_device_precomputed(
         stream: Option<&CudaStream>,
-        points: &icicle_cuda_runtime::memory::DeviceSlice<Self::T>,
+        points: &DeviceVec<Self::T>,
         scalars: &DeviceVec<C::ScalarField>,
         offset: usize,
     ) -> DeviceVec<Self::R>;
@@ -266,16 +304,17 @@ pub trait MSM<C: CurveGroup> {
     fn retrieve_msm_result(stream: Option<&CudaStream>, result: &DeviceVec<Self::R>) -> C;
 }
 
+#[cfg(feature = "cuda")]
 const PRECOMPUTE_FACTOR: usize = 4;
+#[cfg(feature = "cuda")]
 const C: i32 = 4;
 
+#[cfg(feature = "cuda")]
 impl MSM<ark_bn254::G1Projective> for ark_bn254::g1::Config {
     type T = icicle_bn254::curve::G1Affine;
     type R = icicle_bn254::curve::G1Projective;
 
-    fn precompute(
-        generators: &[ark_bn254::G1Affine],
-    ) -> icicle_cuda_runtime::memory::DeviceVec<Self::T> {
+    fn precompute(generators: &[ark_bn254::G1Affine]) -> DeviceVec<Self::T> {
         use icicle_core::msm::{self, MSMConfig};
         use icicle_core::traits::ArkConvertible;
         use icicle_cuda_runtime::{
@@ -355,7 +394,7 @@ impl MSM<ark_bn254::G1Projective> for ark_bn254::g1::Config {
 
     fn var_msm_precomputed(
         stream: Option<&CudaStream>,
-        points: &icicle_cuda_runtime::memory::DeviceSlice<Self::T>,
+        points: &DeviceVec<Self::T>,
         scalars: &[ark_bn254::Fr],
         _offset: usize,
         bitsize: Option<usize>,
@@ -393,7 +432,7 @@ impl MSM<ark_bn254::G1Projective> for ark_bn254::g1::Config {
 
     fn var_msm_device_precomputed(
         stream: Option<&CudaStream>,
-        points: &icicle_cuda_runtime::memory::DeviceSlice<Self::T>,
+        points: &DeviceVec<Self::T>,
         scalars: &DeviceVec<ark_bn254::Fr>,
         _offset: usize,
     ) -> DeviceVec<Self::R> {
@@ -480,8 +519,9 @@ impl MSM<ark_bn254::G1Projective> for ark_bn254::g1::Config {
     // }
 }
 
+#[cfg(feature = "cuda")]
 impl MVM for ark_bn254::Fr {
-    fn prepare_matrix(csr: &CSRSparseMatrix<ark_bn254::Fr>) -> HybridMatrix {
+    fn prepare_matrix(csr: &CSRSparseMatrix<ark_bn254::Fr>) -> PreparedMatrix<Self> {
         use icicle_cuda_runtime::{
             device_context::{DeviceContext, DEFAULT_DEVICE_ID},
             memory::HostSlice,
@@ -501,14 +541,14 @@ impl MVM for ark_bn254::Fr {
             &mut result,
         )
         .unwrap();
-        result
+        PreparedMatrix::new(result)
     }
 
     fn compute_t(
         stream: Option<&CudaStream>,
-        a: &HybridMatrix,
-        b: &HybridMatrix,
-        c: &HybridMatrix,
+        a: &PreparedMatrix<Self>,
+        b: &PreparedMatrix<Self>,
+        c: &PreparedMatrix<Self>,
         z1_u: &[Self],
         z1_x: &[Self],
         z1_wq: &[Self],
@@ -530,9 +570,9 @@ impl MVM for ark_bn254::Fr {
         }
 
         icicle_core::vec_ops::compute_t(
-            &a,
-            &b,
-            &c,
+            &a.inner,
+            &b.inner,
+            &c.inner,
             HostSlice::from_slice(z1_u.cast::<icicle_bn254::curve::ScalarField>()),
             HostSlice::from_slice(z1_x.cast::<icicle_bn254::curve::ScalarField>()),
             HostSlice::from_slice(z1_wq.cast::<icicle_bn254::curve::ScalarField>()),
@@ -585,13 +625,12 @@ impl MVM for ark_bn254::Fr {
     }
 }
 
+#[cfg(feature = "cuda")]
 impl MSM<ark_grumpkin::Projective> for ark_grumpkin::GrumpkinConfig {
     type T = icicle_grumpkin::curve::G1Affine;
     type R = icicle_grumpkin::curve::G1Projective;
 
-    fn precompute(
-        generators: &[ark_grumpkin::Affine],
-    ) -> icicle_cuda_runtime::memory::DeviceVec<Self::T> {
+    fn precompute(generators: &[ark_grumpkin::Affine]) -> DeviceVec<Self::T> {
         use icicle_core::msm::{self, MSMConfig};
         use icicle_core::traits::ArkConvertible;
         use icicle_cuda_runtime::{
@@ -671,7 +710,7 @@ impl MSM<ark_grumpkin::Projective> for ark_grumpkin::GrumpkinConfig {
 
     fn var_msm_precomputed(
         stream: Option<&CudaStream>,
-        points: &icicle_cuda_runtime::memory::DeviceSlice<Self::T>,
+        points: &DeviceVec<Self::T>,
         scalars: &[ark_grumpkin::Fr],
         _offset: usize,
         bitsize: Option<usize>,
@@ -709,7 +748,7 @@ impl MSM<ark_grumpkin::Projective> for ark_grumpkin::GrumpkinConfig {
 
     fn var_msm_device_precomputed(
         stream: Option<&CudaStream>,
-        points: &icicle_cuda_runtime::memory::DeviceSlice<Self::T>,
+        points: &DeviceVec<Self::T>,
         scalars: &DeviceVec<ark_grumpkin::Fr>,
         _offset: usize,
     ) -> DeviceVec<Self::R> {
@@ -785,8 +824,9 @@ impl MSM<ark_grumpkin::Projective> for ark_grumpkin::GrumpkinConfig {
     // }
 }
 
+#[cfg(feature = "cuda")]
 impl MVM for ark_grumpkin::Fr {
-    fn prepare_matrix(csr: &CSRSparseMatrix<ark_grumpkin::Fr>) -> HybridMatrix {
+    fn prepare_matrix(csr: &CSRSparseMatrix<ark_grumpkin::Fr>) -> PreparedMatrix<Self> {
         use icicle_cuda_runtime::{
             device_context::{DeviceContext, DEFAULT_DEVICE_ID},
             memory::HostSlice,
@@ -806,14 +846,14 @@ impl MVM for ark_grumpkin::Fr {
             &mut result,
         )
         .unwrap();
-        result
+        PreparedMatrix::new(result)
     }
 
     fn compute_t(
         stream: Option<&CudaStream>,
-        a: &HybridMatrix,
-        b: &HybridMatrix,
-        c: &HybridMatrix,
+        a: &PreparedMatrix<Self>,
+        b: &PreparedMatrix<Self>,
+        c: &PreparedMatrix<Self>,
         z1_u: &[Self],
         z1_x: &[Self],
         z1_wq: &[Self],
@@ -835,9 +875,9 @@ impl MVM for ark_grumpkin::Fr {
         }
 
         icicle_core::vec_ops::compute_t(
-            &a,
-            &b,
-            &c,
+            &a.inner,
+            &b.inner,
+            &c.inner,
             HostSlice::from_slice(z1_u.cast::<icicle_grumpkin::curve::ScalarField>()),
             HostSlice::from_slice(z1_x.cast::<icicle_grumpkin::curve::ScalarField>()),
             HostSlice::from_slice(z1_wq.cast::<icicle_grumpkin::curve::ScalarField>()),
@@ -890,7 +930,164 @@ impl MVM for ark_grumpkin::Fr {
     }
 }
 
+#[cfg(feature = "cpu")]
+fn csr_mat_vec<F: PrimeField>(m: &CSRSparseMatrix<F>, z: &[F]) -> Vec<F> {
+    m.row_ptr
+        .windows(2)
+        .map(|bounds| {
+            let start = bounds[0] as usize;
+            let end = bounds[1] as usize;
+            (start..end)
+                .map(|i| m.data[i] * z[m.col_idx[i] as usize])
+                .sum()
+        })
+        .collect()
+}
+
+#[cfg(feature = "cpu")]
+fn compute_t_cpu<F: PrimeField>(
+    a: &CSRSparseMatrix<F>,
+    b: &CSRSparseMatrix<F>,
+    c: &CSRSparseMatrix<F>,
+    z1_u: &[F],
+    z1_x: &[F],
+    z1_wq: &[F],
+    z2_u: &[F],
+    z2_x: &[F],
+    z2_wq: &[F],
+    e: &[F],
+    t: &mut [F],
+) {
+    let z1 = [z1_u, z1_x, z1_wq].concat();
+    let z2 = [z2_u, z2_x, z2_wq].concat();
+    let az1 = csr_mat_vec(a, &z1);
+    let bz1 = csr_mat_vec(b, &z1);
+    let cz1 = csr_mat_vec(c, &z1);
+    let az2 = csr_mat_vec(a, &z2);
+    let bz2 = csr_mat_vec(b, &z2);
+    let cz2 = csr_mat_vec(c, &z2);
+
+    for i in 0..t.len() {
+        t[i] = az1[i] * bz2[i] + az2[i] * bz1[i] - z1_u[0] * cz2[i] - z2_u[0] * cz1[i]
+            + az1[i] * bz1[i]
+            - z1_u[0] * cz1[i]
+            + az2[i] * bz2[i]
+            - z2_u[0] * cz2[i]
+            - e[i];
+    }
+}
+
+#[cfg(feature = "cpu")]
+macro_rules! impl_cpu_backend {
+    ($curve:ty, $config:ty, $scalar:ty, $affine:ty) => {
+        impl MSM<$curve> for $config {
+            type T = $affine;
+            type R = $curve;
+
+            fn precompute(generators: &[<$curve as CurveGroup>::Affine]) -> DeviceVec<Self::T> {
+                generators.to_vec()
+            }
+
+            fn var_msm(
+                points: &[<$curve as CurveGroup>::Affine],
+                scalars: &[$scalar],
+                _offset: usize,
+            ) -> $curve {
+                <$curve as ark_ec::VariableBaseMSM>::msm_unchecked(points, scalars)
+            }
+
+            fn var_msm_precomputed(
+                _stream: Option<&CudaStream>,
+                points: &DeviceVec<Self::T>,
+                scalars: &[$scalar],
+                offset: usize,
+                _bitsize: Option<usize>,
+            ) -> DeviceVec<Self::R> {
+                vec![Self::var_msm(
+                    &points[offset..offset + scalars.len()],
+                    scalars,
+                    0,
+                )]
+            }
+
+            fn var_msm_device_precomputed(
+                stream: Option<&CudaStream>,
+                points: &DeviceVec<Self::T>,
+                scalars: &DeviceVec<$scalar>,
+                offset: usize,
+            ) -> DeviceVec<Self::R> {
+                Self::var_msm_precomputed(stream, points, scalars, offset, None)
+            }
+
+            fn retrieve_msm_result(
+                _stream: Option<&CudaStream>,
+                result: &DeviceVec<Self::R>,
+            ) -> $curve {
+                result[0]
+            }
+        }
+
+        impl MVM for $scalar {
+            fn prepare_matrix(csr: &CSRSparseMatrix<$scalar>) -> PreparedMatrix<Self> {
+                PreparedMatrix::new(csr.clone())
+            }
+
+            fn compute_t(
+                _stream: Option<&CudaStream>,
+                a: &PreparedMatrix<Self>,
+                b: &PreparedMatrix<Self>,
+                c: &PreparedMatrix<Self>,
+                z1_u: &[Self],
+                z1_x: &[Self],
+                z1_wq: &[Self],
+                z2_u: &[Self],
+                z2_x: &[Self],
+                z2_wq: &[Self],
+                e: &DeviceVec<Self>,
+                t: &mut DeviceVec<Self>,
+            ) {
+                compute_t_cpu(
+                    &a.csr, &b.csr, &c.csr, z1_u, z1_x, z1_wq, z2_u, z2_x, z2_wq, e, t,
+                );
+            }
+
+            fn update_e(
+                _stream: Option<&CudaStream>,
+                e: &mut DeviceVec<Self>,
+                t: &DeviceVec<Self>,
+                r: Self,
+            ) {
+                for (e_i, t_i) in e.iter_mut().zip(t) {
+                    *e_i += r * t_i;
+                }
+            }
+
+            fn retrieve_e(e: &DeviceVec<Self>) -> Vec<Self> {
+                e.clone()
+            }
+        }
+    };
+}
+
+#[cfg(feature = "cpu")]
+impl_cpu_backend!(
+    ark_bn254::G1Projective,
+    ark_bn254::g1::Config,
+    ark_bn254::Fr,
+    ark_bn254::G1Affine
+);
+
+#[cfg(feature = "cpu")]
+impl_cpu_backend!(
+    ark_grumpkin::Projective,
+    ark_grumpkin::GrumpkinConfig,
+    ark_grumpkin::Fr,
+    ark_grumpkin::Affine
+);
+
+#[cfg(feature = "cuda")]
 use icicle_core::vec_ops::HybridMatrix;
+#[cfg(feature = "cuda")]
 use std::cmp::max;
 use std::mem::size_of;
 use std::slice::{from_raw_parts, from_raw_parts_mut};
@@ -926,8 +1123,11 @@ impl<From> CastSlice<From> for [From] {}
 mod tests {
     use std::time::Instant;
 
+    #[cfg(feature = "cuda")]
     use ark_ec::VariableBaseMSM;
-    use ark_ff::{FftField, Field, UniformRand};
+    use ark_ff::UniformRand;
+    #[cfg(feature = "cuda")]
+    use ark_ff::{FftField, Zero};
     use ark_r1cs_std::alloc::AllocVar;
     use ark_r1cs_std::fields::fp::FpVar;
     use ark_r1cs_std::fields::FieldVar;
@@ -936,12 +1136,16 @@ mod tests {
     use commitment::pedersen::Pedersen;
     use folding::nova::get_r1cs_from_cs;
     use folding::nova::nifs::NIFS;
+    #[cfg(feature = "cuda")]
     use icicle_core::traits::ArkConvertible;
+    #[cfg(feature = "cuda")]
     use rand::thread_rng;
 
     use crate::utils::vec::{vec_add, vec_sub};
 
     use super::*;
+
+    #[cfg(feature = "cuda")]
     #[test]
     fn msm() {
         let m = 1 << 10;
@@ -980,6 +1184,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "cuda")]
     #[test]
     fn test() {
         for i in 0..33 {
@@ -1003,6 +1208,7 @@ mod tests {
         println!("{:?}", [b].cast::<u8>());
     }
 
+    #[cfg(feature = "cuda")]
     #[test]
     fn msm2() {
         use ark_ec::{CurveGroup, VariableBaseMSM};

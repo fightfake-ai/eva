@@ -23,7 +23,6 @@ use ark_r1cs_std::{
 use ark_relations::r1cs::{ConstraintSystemRef, Namespace, SynthesisError};
 use ark_std::{add_to_trace, end_timer, fmt::Debug, start_timer, One, Zero};
 use core::{borrow::Borrow, marker::PhantomData};
-use icicle_cuda_runtime::{memory::DeviceVec, stream::CudaStream};
 
 use super::{
     cyclefold::{
@@ -36,7 +35,7 @@ use crate::folding::circuits::nonnative::{
     uint::NonNativeUintVar,
 };
 use crate::frontend::{FCircuit, LookupArgumentRef};
-use crate::{constants::N_BITS_RO, MSM};
+use crate::{constants::N_BITS_RO, CudaStream, DeviceVec, MSM};
 
 /// CF1 represents the ConstraintField used for the main Nova circuit which is over E1::Fr, where
 /// E1 is the main curve where we do the folding.

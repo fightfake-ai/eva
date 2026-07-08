@@ -5,14 +5,12 @@ use ark_relations::r1cs::SynthesisError;
 use ark_std::{end_timer, start_timer, Zero};
 use ark_std::{rand::RngCore, UniformRand};
 use core::marker::PhantomData;
-use icicle_cuda_runtime::memory::DeviceVec;
-use icicle_cuda_runtime::stream::CudaStream;
 use std::sync::Arc;
 
 use super::CommitmentScheme;
 use crate::transcript::Transcript;
 use crate::utils::vec::{vec_add, vec_scalar_mul};
-use crate::{Error, MSM};
+use crate::{CudaStream, DeviceVec, Error, MSM};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Proof<C: CurveGroup> {
@@ -27,7 +25,7 @@ where
 {
     pub h: C,
     pub generators: Vec<C::Affine>,
-    pub device_generators: Arc<icicle_cuda_runtime::memory::DeviceVec<<C::Config as MSM<C>>::T>>,
+    pub device_generators: Arc<DeviceVec<<C::Config as MSM<C>>::T>>,
 }
 
 impl<C: CurveGroup> Clone for Params<C>
@@ -90,7 +88,7 @@ where
             return Ok(params.h.mul(r));
         }
 
-        let timer = start_timer!(|| "MSM on GPU");
+        let timer = start_timer!(|| "MSM");
         let msm = <C::Config as MSM<C>>::var_msm_precomputed(
             stream,
             &params.device_generators,
@@ -120,7 +118,7 @@ where
             return Err(Error::BlindingNotZero);
         }
 
-        let timer = start_timer!(|| "MSM on GPU");
+        let timer = start_timer!(|| "MSM");
         let msm = <C::Config as MSM<C>>::var_msm_device_precomputed(
             stream,
             &params.device_generators,

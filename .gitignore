@@ -1,8 +1,13 @@
 /target
 Cargo.lock
+
+# Eva dataset (download from Hugging Face; set DATA_PATH to this directory)
+data_parsed/
 # Circom generated files
 folding-schemes/src/frontend/circom/test_folder/cubic_circuit.r1cs
 folding-schemes/src/frontend/circom/test_folder/cubic_circuit_js/
 
 # generated contracts at test time
 solidity-verifiers/generated
+*.yuv
+my_clip_edited.mp4

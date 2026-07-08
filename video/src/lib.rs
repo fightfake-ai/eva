@@ -52,10 +52,22 @@ use crate::{
 
 pub mod decider;
 pub mod edit;
+pub mod edit_only;
 pub mod encode;
 pub mod griffin;
+pub mod macroblock_yuv;
 pub mod utils;
 pub mod var;
+
+pub use edit_only::{
+    hash_edited_macroblock, hash_orig_macroblock, EditOnlyCircuit, EditOnlyExternalInputs,
+};
+pub use edit::native_macroblocks::native_brightness_edit_macroblocks;
+pub use macroblock_yuv::{
+    macroblock_count_from_dir, macroblocks_per_frame, macroblocks_to_yuv420, parse_orig_blocks,
+    read_macroblock_dir, write_macroblock_dir, yuv420_frame_bytes, yuv420_to_macroblocks,
+    MB_UV_BYTES, MB_Y_BYTES,
+};
 
 const SCALES: [[u64; 6]; 3] = [
     [13107, 11916, 10082, 9362, 8192, 7282],
@@ -2000,6 +2012,7 @@ pub mod benches {
         Ok(())
     }
 
+    #[cfg(feature = "cuda")]
     #[bench]
     fn bench_gpu_compute_t(b: &mut test::Bencher) -> Result<(), Box<dyn Error>> {
         let rng = &mut thread_rng();

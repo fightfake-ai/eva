@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "folding-schemes",
-    "video"
+    "video",
+    "comparison",
 ]
 resolver = "2"
 
