@@ -637,14 +637,19 @@ fn pack_bool_grid<F: PrimeField>(grid: &Array2<bool>) -> Vec<F> {
 }
 
 fn pack_bits<F: PrimeField>(bits: &[bool]) -> Vec<F> {
+    // Field-native doubling rather than `1u64 << i`: chunks can be up to
+    // `MODULUS_BIT_SIZE` (~254 for BN254 Fr) bits wide, which overflows a
+    // native u64/u128 shift long before the field itself would.
     let chunk_bits = F::MODULUS_BIT_SIZE as usize;
     bits.chunks(chunk_bits)
         .map(|chunk| {
             let mut r = F::zero();
-            for (i, &b) in chunk.iter().enumerate() {
+            let mut power = F::one();
+            for &b in chunk {
                 if b {
-                    r += F::from(1u64 << i);
+                    r += power;
                 }
+                power.double_in_place();
             }
             r
         })
@@ -657,8 +662,10 @@ fn pack_bool_grid_var<F: PrimeField>(grid: &Array2<Boolean<F>>) -> Vec<FpVar<F>>
     bits.chunks(chunk_bits)
         .map(|chunk| {
             let mut r = FpVar::zero();
-            for (i, b) in chunk.iter().enumerate() {
-                r += FpVar::from(b.clone()) * FpVar::constant(F::from(1u64 << i));
+            let mut power = F::one();
+            for b in chunk {
+                r += FpVar::from(b.clone()) * FpVar::constant(power);
+                power.double_in_place();
             }
             r
         })
@@ -769,27 +776,33 @@ impl<F: PrimeField> AllocVar<RedactRectCfg, F> for RedactRectCfgVar<F> {
             Ok(grid)
         };
 
+        // NOTE: `y_replace`/`u_replace`/`v_replace` are *always* allocated as
+        // real circuit variables here, even when the native `full_y`/`full_u`/
+        // `full_v` flag is true (in which case the grid is all-`false` and
+        // logically redundant, since `redact_plane_circuit` ignores `partial`
+        // once `full` selects the fill value). Skipping the allocation in that
+        // case — e.g. using bare `Boolean::FALSE` Rust-level constants instead
+        // of witnessed variables — would make the number of constraint-system
+        // variables (and hence the whole R1CS shape) depend on the *value* of
+        // the witness rather than being fixed ahead of time, which breaks
+        // Nova/IVC folding across steps whose macroblocks don't all share the
+        // same full/partial pattern (the folding scheme reuses one fixed
+        // step-circuit topology for every step). `full_y` above is itself
+        // always allocated in `mode` (never a bare Rust `Boolean::Constant`
+        // when synthesized through `EditOnlyCircuit`, since configs are
+        // allocated with `new_witness`), so `compactify()`'s
+        // `Boolean::Constant(true)` fast path never actually triggers on this
+        // path either — the grid is always packed into the hash, so there is
+        // no allocation to skip for real savings here anyway.
         Ok(Self {
             in_frame_range: Boolean::new_variable(cs.clone(), || Ok(cfg.in_frame_range), mode)?,
             fill_y: cfg.fill_y,
             full_y: Boolean::new_variable(cs.clone(), || Ok(cfg.full_y), mode)?,
             full_u: Boolean::new_variable(cs.clone(), || Ok(cfg.full_u), mode)?,
             full_v: Boolean::new_variable(cs.clone(), || Ok(cfg.full_v), mode)?,
-            y_replace: if cfg.full_y {
-                Array2::from_elem((16, 16), Boolean::FALSE)
-            } else {
-                bool_grid(&cfg.y_replace, 16, 16)?
-            },
-            u_replace: if cfg.full_u {
-                Array2::from_elem((8, 8), Boolean::FALSE)
-            } else {
-                bool_grid(&cfg.u_replace, 8, 8)?
-            },
-            v_replace: if cfg.full_v {
-                Array2::from_elem((8, 8), Boolean::FALSE)
-            } else {
-                bool_grid(&cfg.v_replace, 8, 8)?
-            },
+            y_replace: bool_grid(&cfg.y_replace, 16, 16)?,
+            u_replace: bool_grid(&cfg.u_replace, 8, 8)?,
+            v_replace: bool_grid(&cfg.v_replace, 8, 8)?,
         })
     }
 }
