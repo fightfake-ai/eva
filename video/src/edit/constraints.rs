@@ -63,6 +63,27 @@ impl EditConfig for RemovingCfg {
         vec![F::from(self.0)]
     }
 }
+impl EditConfig for RedactRectCfg {
+    fn compactify<F: PrimeField>(&self) -> Vec<F> {
+        let mut out = vec![
+            F::from(self.fill_y as u64),
+            F::from(self.in_frame_range as u64),
+            F::from(self.full_y as u64),
+            F::from(self.full_u as u64),
+            F::from(self.full_v as u64),
+        ];
+        if !self.full_y {
+            out.extend(pack_bool_grid::<F>(&self.y_replace));
+        }
+        if !self.full_u {
+            out.extend(pack_bool_grid::<F>(&self.u_replace));
+        }
+        if !self.full_v {
+            out.extend(pack_bool_grid::<F>(&self.v_replace));
+        }
+        out
+    }
+}
 
 pub trait EditConfigVar<F: PrimeField> {
     fn should_keep_circuit(&self) -> Result<Boolean<F>, SynthesisError> {
@@ -109,6 +130,30 @@ impl<F: PrimeField> EditConfigVar<F> for RemovingCfgVar<F> {
 
     fn compactify(&self) -> Vec<FpVar<F>> {
         vec![FpVar::from(self.0.clone())]
+    }
+}
+impl<F: PrimeField> EditConfigVar<F> for RedactRectCfgVar<F> {
+    fn compactify(&self) -> Vec<FpVar<F>> {
+        let mut out = vec![
+            FpVar::constant(F::from(self.fill_y as u64)),
+            FpVar::from(self.in_frame_range.clone()),
+            FpVar::from(self.full_y.clone()),
+            FpVar::from(self.full_u.clone()),
+            FpVar::from(self.full_v.clone()),
+        ];
+        match &self.full_y {
+            Boolean::Constant(true) => {}
+            _ => out.extend(pack_bool_grid_var(&self.y_replace)),
+        }
+        match &self.full_u {
+            Boolean::Constant(true) => {}
+            _ => out.extend(pack_bool_grid_var(&self.u_replace)),
+        }
+        match &self.full_v {
+            Boolean::Constant(true) => {}
+            _ => out.extend(pack_bool_grid_var(&self.v_replace)),
+        }
+        out
     }
 }
 
@@ -585,6 +630,283 @@ impl EditGadget for Removing {
     }
 }
 
+/// Pack a row-major bool grid into field elements (one bit per bool).
+fn pack_bool_grid<F: PrimeField>(grid: &Array2<bool>) -> Vec<F> {
+    let bits = grid.iter().copied().collect::<Vec<_>>();
+    pack_bits::<F>(&bits)
+}
+
+fn pack_bits<F: PrimeField>(bits: &[bool]) -> Vec<F> {
+    let chunk_bits = F::MODULUS_BIT_SIZE as usize;
+    bits.chunks(chunk_bits)
+        .map(|chunk| {
+            let mut r = F::zero();
+            for (i, &b) in chunk.iter().enumerate() {
+                if b {
+                    r += F::from(1u64 << i);
+                }
+            }
+            r
+        })
+        .collect()
+}
+
+fn pack_bool_grid_var<F: PrimeField>(grid: &Array2<Boolean<F>>) -> Vec<FpVar<F>> {
+    let bits: Vec<_> = grid.iter().cloned().collect();
+    let chunk_bits = F::MODULUS_BIT_SIZE as usize;
+    bits.chunks(chunk_bits)
+        .map(|chunk| {
+            let mut r = FpVar::zero();
+            for (i, b) in chunk.iter().enumerate() {
+                r += FpVar::from(b.clone()) * FpVar::constant(F::from(1u64 << i));
+            }
+            r
+        })
+        .collect()
+}
+
+/// Rectangle redaction: replace pixels inside a fixed axis-aligned box (per macroblock).
+///
+/// Config is built from the global rectangle plus macroblock origin. When the whole
+/// 16×16 / 8×8 plane lies inside the box, a single boolean replaces the plane
+/// (like [`Removing`]); otherwise only edge pixels carry per-pixel replace flags.
+#[derive(Clone, Debug)]
+pub struct RedactRectCfg {
+    pub in_frame_range: bool,
+    pub fill_y: u8,
+    pub full_y: bool,
+    pub full_u: bool,
+    pub full_v: bool,
+    pub y_replace: Array2<bool>,
+    pub u_replace: Array2<bool>,
+    pub v_replace: Array2<bool>,
+}
+
+impl Default for RedactRectCfg {
+    fn default() -> Self {
+        Self {
+            in_frame_range: false,
+            fill_y: 0,
+            full_y: false,
+            full_u: false,
+            full_v: false,
+            y_replace: Array2::from_elem((16, 16), false),
+            u_replace: Array2::from_elem((8, 8), false),
+            v_replace: Array2::from_elem((8, 8), false),
+        }
+    }
+}
+
+impl RedactRectCfg {
+    /// Build config for one macroblock from a clamped pixel rectangle and frame gate.
+    pub fn from_rectangle(
+        origin_x: usize,
+        origin_y: usize,
+        in_frame_range: bool,
+        x1: usize,
+        y1: usize,
+        x2: usize,
+        y2: usize,
+        fill_y: u8,
+    ) -> Self {
+        let pixel_in_box =
+            |px: usize, py: usize| in_frame_range && px >= x1 && px < x2 && py >= y1 && py < y2;
+
+        let y_replace = Array2::from_shape_fn((16, 16), |(m, n)| {
+            pixel_in_box(origin_x + m, origin_y + n)
+        });
+        let u_replace = Array2::from_shape_fn((8, 8), |(m, n)| {
+            pixel_in_box(origin_x + m * 2, origin_y + n * 2)
+        });
+        let v_replace = u_replace.clone();
+
+        let full_y = y_replace.iter().all(|&b| b);
+        let full_u = u_replace.iter().all(|&b| b);
+        let full_v = v_replace.iter().all(|&b| b);
+
+        Self {
+            in_frame_range,
+            fill_y,
+            full_y,
+            full_u,
+            full_v,
+            y_replace,
+            u_replace,
+            v_replace,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct RedactRectCfgVar<F: PrimeField> {
+    pub in_frame_range: Boolean<F>,
+    pub fill_y: u8,
+    pub full_y: Boolean<F>,
+    pub full_u: Boolean<F>,
+    pub full_v: Boolean<F>,
+    pub y_replace: Array2<Boolean<F>>,
+    pub u_replace: Array2<Boolean<F>>,
+    pub v_replace: Array2<Boolean<F>>,
+}
+
+impl<F: PrimeField> AllocVar<RedactRectCfg, F> for RedactRectCfgVar<F> {
+    fn new_variable<T: Borrow<RedactRectCfg>>(
+        cs: impl Into<ark_relations::r1cs::Namespace<F>>,
+        f: impl FnOnce() -> Result<T, SynthesisError>,
+        mode: ark_r1cs_std::prelude::AllocationMode,
+    ) -> Result<Self, SynthesisError> {
+        let cs = cs.into().cs();
+        let cfg = f()?.borrow().clone();
+
+        let bool_grid = |values: &Array2<bool>, rows: usize, cols: usize| {
+            let mut grid = Array2::from_elem((rows, cols), Boolean::FALSE);
+            for i in 0..rows {
+                for j in 0..cols {
+                    grid[[i, j]] =
+                        Boolean::new_variable(cs.clone(), || Ok(values[[i, j]]), mode)?;
+                }
+            }
+            Ok(grid)
+        };
+
+        Ok(Self {
+            in_frame_range: Boolean::new_variable(cs.clone(), || Ok(cfg.in_frame_range), mode)?,
+            fill_y: cfg.fill_y,
+            full_y: Boolean::new_variable(cs.clone(), || Ok(cfg.full_y), mode)?,
+            full_u: Boolean::new_variable(cs.clone(), || Ok(cfg.full_u), mode)?,
+            full_v: Boolean::new_variable(cs.clone(), || Ok(cfg.full_v), mode)?,
+            y_replace: if cfg.full_y {
+                Array2::from_elem((16, 16), Boolean::FALSE)
+            } else {
+                bool_grid(&cfg.y_replace, 16, 16)?
+            },
+            u_replace: if cfg.full_u {
+                Array2::from_elem((8, 8), Boolean::FALSE)
+            } else {
+                bool_grid(&cfg.u_replace, 8, 8)?
+            },
+            v_replace: if cfg.full_v {
+                Array2::from_elem((8, 8), Boolean::FALSE)
+            } else {
+                bool_grid(&cfg.v_replace, 8, 8)?
+            },
+        })
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct RedactRect {}
+
+impl RedactRect {
+    pub fn redact_plane_native<const M: usize, const N: usize>(
+        data: &Matrix<u8, M, N>,
+        full: bool,
+        partial: &Array2<bool>,
+        fill: u8,
+    ) -> Matrix<u8, M, N> {
+        let mut out = data.clone();
+        if full {
+            for i in 0..M {
+                for j in 0..N {
+                    out[(i, j)] = fill;
+                }
+            }
+        } else {
+            for i in 0..M {
+                for j in 0..N {
+                    if partial[[i, j]] {
+                        out[(i, j)] = fill;
+                    }
+                }
+            }
+        }
+        out
+    }
+
+    pub fn redact_plane_circuit<F: PrimeField, const M: usize, const N: usize>(
+        data: &MatrixVar<I64Var<F>, M, N>,
+        full: &Boolean<F>,
+        partial: &Array2<Boolean<F>>,
+        fill: u8,
+    ) -> Result<MatrixVar<I64Var<F>, M, N>, SynthesisError> {
+        let fill_var = I64Var::constant(fill as i64);
+        let mut out = data.clone();
+        match full {
+            Boolean::Constant(true) => {
+                for i in 0..M {
+                    for j in 0..N {
+                        out[(i, j)] = fill_var.clone();
+                    }
+                }
+            }
+            Boolean::Constant(false) => {
+                for i in 0..M {
+                    for j in 0..N {
+                        out[(i, j)] = partial[[i, j]].select(&fill_var, &out[(i, j)])?;
+                    }
+                }
+            }
+            _ => {
+                for i in 0..M {
+                    for j in 0..N {
+                        let replaced = partial[[i, j]].select(&fill_var, &out[(i, j)])?;
+                        out[(i, j)] = full.select(&fill_var, &replaced)?;
+                    }
+                }
+            }
+        }
+        Ok(out)
+    }
+}
+
+impl EditGadget for RedactRect {
+    type Cfg = RedactRectCfg;
+    type CfgVar<F: PrimeField> = RedactRectCfgVar<F>;
+
+    fn edit_native(
+        y: &Matrix<u8, 16, 16>,
+        u: &Matrix<u8, 8, 8>,
+        v: &Matrix<u8, 8, 8>,
+        cfg: &Self::Cfg,
+    ) -> (Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>) {
+        let y_active = cfg.in_frame_range && cfg.full_y;
+        let u_active = cfg.in_frame_range && cfg.full_u;
+        let v_active = cfg.in_frame_range && cfg.full_v;
+        (
+            Self::redact_plane_native(y, y_active, &cfg.y_replace, cfg.fill_y),
+            Self::redact_plane_native(u, u_active, &cfg.u_replace, 128),
+            Self::redact_plane_native(v, v_active, &cfg.v_replace, 128),
+        )
+    }
+
+    fn edit_circuit<F: PrimeField>(
+        y: &MatrixVar<I64Var<F>, 16, 16>,
+        u: &MatrixVar<I64Var<F>, 8, 8>,
+        v: &MatrixVar<I64Var<F>, 8, 8>,
+        cfg: &Self::CfgVar<F>,
+    ) -> Result<
+        (
+            MatrixVar<I64Var<F>, 16, 16>,
+            MatrixVar<I64Var<F>, 8, 8>,
+            MatrixVar<I64Var<F>, 8, 8>,
+        ),
+        SynthesisError,
+    > {
+        let y_full = &cfg.in_frame_range & &cfg.full_y;
+        let u_full = &cfg.in_frame_range & &cfg.full_u;
+        let v_full = &cfg.in_frame_range & &cfg.full_v;
+        Ok((
+            Self::redact_plane_circuit(y, &y_full, &cfg.y_replace, cfg.fill_y)?,
+            Self::redact_plane_circuit(u, &u_full, &cfg.u_replace, 128)?,
+            Self::redact_plane_circuit(v, &v_full, &cfg.v_replace, 128)?,
+        ))
+    }
+
+    fn result_has_constant_encoding() -> (bool, bool, bool) {
+        (false, false, false)
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
     use ark_bn254::Fr;
@@ -616,5 +938,28 @@ pub mod tests {
             assert_eq!(uu, uu_var.value().unwrap().to_u8());
             assert_eq!(vv, vv_var.value().unwrap().to_u8());
         });
+    }
+
+    #[test]
+    fn test_redact_rect_matches_masking() {
+        let rng = &mut thread_rng();
+        let y = Matrix::from_iter((0..16 * 16).map(|_| rng.gen_range(0..=255)));
+        let u = Matrix::from_iter((0..8 * 8).map(|_| rng.gen_range(0..=255)));
+        let v = Matrix::from_iter((0..8 * 8).map(|_| rng.gen_range(0..=255)));
+
+        let cfg = RedactRectCfg::from_rectangle(48, 80, true, 52, 84, 100, 120, 0);
+        let (yy, uu, vv) = RedactRect::edit_native(&y, &u, &v, &cfg);
+
+        let cs = ConstraintSystem::<Fr>::new_ref();
+        let y_var = MatrixVar::new_witness(cs.clone(), || Ok(y.clone())).unwrap();
+        let u_var = MatrixVar::new_witness(cs.clone(), || Ok(u.clone())).unwrap();
+        let v_var = MatrixVar::new_witness(cs.clone(), || Ok(v.clone())).unwrap();
+        let cfg_var = RedactRectCfgVar::new_witness(cs.clone(), || Ok(cfg)).unwrap();
+        let (yy_var, uu_var, vv_var) =
+            RedactRect::edit_circuit(&y_var, &u_var, &v_var, &cfg_var).unwrap();
+
+        assert_eq!(yy, yy_var.value().unwrap().to_u8());
+        assert_eq!(uu, uu_var.value().unwrap().to_u8());
+        assert_eq!(vv, vv_var.value().unwrap().to_u8());
     }
 }
