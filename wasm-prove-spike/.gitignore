@@ -1,0 +1,3 @@
+spike-proof.bin
+pkg/*
+!pkg/run-spike.js

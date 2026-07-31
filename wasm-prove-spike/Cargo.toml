@@ -1,0 +1,51 @@
+[package]
+name = "wasm-prove-spike"
+version = "0.1.0"
+edition = "2021"
+description = "Spike A: tiny EditOnly brightness prove for wasm32 feasibility (see docs/SPIKE_A.md)"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "spike-a-native"
+path = "src/bin/native.rs"
+required-features = ["native-bin"]
+
+[dependencies]
+video = { path = "../video", default-features = false, features = ["cpu"] }
+folding-schemes = { path = "../folding-schemes", default-features = false, features = ["cpu"] }
+fightfake-core = { path = "../../fightfake-toolkit/fightfake-core", default-features = false, features = ["crypto-verify"], optional = true }
+
+ark-bn254 = { version = "^0.5.0", features = ["r1cs"] }
+ark-grumpkin = { version = "^0.5.0", features = ["r1cs"] }
+ark-ec = "^0.5.0"
+ark-ff = "^0.5.0"
+ark-groth16 = "^0.5.0"
+ark-snark = "^0.5.0"
+ark-serialize = "^0.5.0"
+ark-crypto-primitives = { version = "^0.5.0", default-features = false, features = ["r1cs", "sponge", "crh"] }
+ark-std = "^0.5.0"
+rand = "0.8"
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+wasm-bindgen = { version = "0.2", optional = true }
+getrandom = { version = "0.2", optional = true }
+console_error_panic_hook = { version = "0.1", optional = true }
+web-sys = { version = "0.3", optional = true, features = ["console"] }
+
+[dev-dependencies]
+fightfake-core = { path = "../../fightfake-toolkit/fightfake-core", default-features = false, features = ["crypto-verify"] }
+
+[features]
+default = []
+native-bin = ["dep:fightfake-core"]
+wasm = ["dep:wasm-bindgen", "dep:getrandom"]
+wasm-js = ["wasm", "getrandom/js", "dep:console_error_panic_hook", "dep:web-sys"]
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1

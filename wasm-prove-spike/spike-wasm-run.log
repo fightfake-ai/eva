@@ -1,0 +1,14 @@
+WASM Spike A starting (expect several minutes)…
+spike: start
+spike: nova preprocess
+spike: groth16 setup
+RuntimeError: unreachable (release build)
+
+Dev build backtrace (root cause):
+  alloc::rust_oom
+  → ark_relations::r1cs::LinearCombination grow during Groth16 trusted setup
+  → generate_random_parameters_with_reduction
+
+Conclusion: wasm linear memory exhausted during Groth16 setup.
+Nova preprocess completes; prove phases never reached.
+See docs/SPIKE_A.md for full analysis.

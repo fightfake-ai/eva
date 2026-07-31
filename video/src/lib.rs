@@ -1,4 +1,5 @@
-#![feature(test)]
+// Benches in this crate use `#![feature(test)]`; omit on wasm32 (not supported / not needed).
+#![cfg_attr(all(not(target_arch = "wasm32"), test), feature(test))]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]

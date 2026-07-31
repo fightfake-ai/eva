@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 ark-ec = "^0.5.0"
-ark-ff = { version = "^0.5.0", features = ["asm"] }
+ark-ff = { version = "^0.5.0", default-features = false }
 ark-poly = "^0.5.0"
-ark-std = { version = "^0.5.0", features = ["print-trace"] }
+ark-std = { version = "^0.5.0", default-features = false }
 ark-crypto-primitives = { version = "^0.5.0", default-features = false, features = ["r1cs", "sponge", "crh"] }
 ark-poly-commit = "^0.5.0"
 ark-relations = { version = "^0.5.0", default-features = false }
@@ -35,7 +35,7 @@ icicle-grumpkin = { git = "https://github.com/winderica/icicle", features = ["ar
 rand = "0.8.5"
 
 [features]
-default = ["parallel", "cpu"]
+default = ["parallel", "cpu", "asm", "trace"]
 cuda = [
     "dep:icicle-cuda-runtime",
     "dep:icicle-core",
@@ -43,6 +43,8 @@ cuda = [
     "dep:icicle-grumpkin",
 ]
 cpu = ["parallel"]
+asm = ["ark-ff/asm"]
+trace = ["ark-std/print-trace"]
 
 parallel = [
     "ark-std/parallel",
