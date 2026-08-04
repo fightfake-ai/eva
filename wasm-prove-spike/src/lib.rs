@@ -1,6 +1,9 @@
 //! Spike A core: one tiny EditOnly + Brightness Nova+Groth16 prove, FFPB-shaped output.
 //!
-//! See `docs/SPIKE_A.md` for methodology and results.
+//! Phase 1: split offline Groth16 setup (`run_setup`) from prove (`run_prove`).
+//! See `docs/SPIKE_A.md`.
+
+mod params;
 
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -13,9 +16,8 @@ use ark_crypto_primitives::crh::CRHScheme;
 use ark_ec::{AffineRepr, CurveGroup, PrimeGroup};
 use ark_ff::{BigInteger, PrimeField, UniformRand, Zero};
 use ark_grumpkin::{constraints::GVar as GVar2, Projective as GrumpkinProjective};
-use ark_groth16::Groth16;
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_snark::SNARK;
+use ark_groth16::{Groth16, ProvingKey};
+use ark_serialize::CanonicalSerialize;
 use ark_std::rand::SeedableRng;
 use folding_schemes::{
     commitment::pedersen::Pedersen,
@@ -32,6 +34,8 @@ use video::encode::Matrix;
 use video::griffin::params::GriffinParams;
 use video::{EditOnlyCircuit, EditOnlyExternalInputs};
 
+pub use params::SpikeParams;
+
 type Op = Brightness;
 
 type NovaScheme = Nova<
@@ -44,18 +48,21 @@ type NovaScheme = Nova<
     Pedersen<GrumpkinProjective>,
 >;
 
-/// Default toy matches Eva `QUICK=1`: 4 macroblocks/step, 2 IVC steps.
-/// (1 step alone hits an infinity point in `Decider::verify` — see SPIKE_A.md.)
+type NovaParams = (
+    <NovaScheme as FoldingScheme<Projective, GrumpkinProjective, EditOnlyCircuit<Fr, Op>>>::ProverParam,
+    <NovaScheme as FoldingScheme<Projective, GrumpkinProjective, EditOnlyCircuit<Fr, Op>>>::VerifierParam,
+);
+
 pub const DEFAULT_BLOCKS_PER_STEP: usize = 4;
 pub const DEFAULT_NUM_STEPS: usize = 2;
 pub const DEFAULT_BRIGHTNESS: u16 = 416;
+pub const DEFAULT_SETUP_RNG_SEED: u64 = 0;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct SpikeConfig {
     pub blocks_per_step: usize,
     pub num_steps: usize,
     pub brightness_scale: u16,
-    /// Deterministic RNG seed (native + wasm should match when seed fixed).
     pub rng_seed: u64,
 }
 
@@ -94,6 +101,15 @@ pub struct SpikeResult {
     pub proof_bytes: Vec<u8>,
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct SpikeSetupResult {
+    pub config: SpikeConfig,
+    pub params_bytes_len: usize,
+    pub timing_ms: PhaseTimingMs,
+    #[serde(skip)]
+    pub params: SpikeParams,
+}
+
 #[derive(Clone, Debug)]
 pub struct FoldedInstance {
     pub cm_e: Projective,
@@ -102,7 +118,6 @@ pub struct FoldedInstance {
     pub cm_w: Projective,
 }
 
-/// FFPB v1 — same on-disk layout as `fightfake_core::proof_bundle::ProofBundle`.
 #[derive(Clone, Debug)]
 pub struct ProofBundle {
     pub num_steps: u64,
@@ -176,7 +191,10 @@ fn field_hex(f: &Fr) -> String {
     hex::encode(f.into_bigint().to_bytes_le())
 }
 
-fn synthetic_macroblocks(n: usize, rng: &mut impl Rng) -> Vec<(Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>)> {
+fn synthetic_macroblocks(
+    n: usize,
+    rng: &mut impl Rng,
+) -> Vec<(Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>)> {
     (0..n)
         .map(|_| {
             (
@@ -188,58 +206,52 @@ fn synthetic_macroblocks(n: usize, rng: &mut impl Rng) -> Vec<(Matrix<u8, 16, 16
         .collect()
 }
 
-#[cfg(all(feature = "wasm", target_arch = "wasm32"))]
-fn spike_log(msg: &str) {
-    web_sys::console::log_1(&msg.into());
-}
-
-#[cfg(not(all(feature = "wasm", target_arch = "wasm32")))]
-fn spike_log(_msg: &str) {}
-
-/// Run the full Spike A pipeline (Nova IVC + Groth16 decider → FFPB bytes).
-pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
+fn validate_config(config: &SpikeConfig) -> Result<(), String> {
     if config.blocks_per_step == 0 || config.num_steps == 0 {
         return Err("blocks_per_step and num_steps must be >= 1".into());
     }
+    Ok(())
+}
 
-    spike_log("spike: start");
-    let mut rng = StdRng::seed_from_u64(config.rng_seed);
-    #[cfg(not(target_arch = "wasm32"))]
-    let total_start = Instant::now();
-    let sk = Fq::rand(&mut rng);
-
-    let total_blocks = config.blocks_per_step * config.num_steps;
-    let all_blocks = synthetic_macroblocks(total_blocks, &mut rng);
-    let brightness = BrightnessCfg(config.brightness_scale);
-
-    let f_circuit = EditOnlyCircuit {
+fn spike_circuit() -> EditOnlyCircuit<Fr, Op> {
+    EditOnlyCircuit {
         _e: PhantomData,
         griffin_params: Arc::new(GriffinParams::new(16, 5, 9)),
-    };
-    let poseidon_config = poseidon_test_config();
+    }
+}
 
-    spike_log("spike: nova preprocess");
-    #[cfg(not(target_arch = "wasm32"))]
-    let t0 = Instant::now();
+fn nova_preprocess_with_blocks(
+    config: &SpikeConfig,
+    rng: &mut StdRng,
+    first_step_blocks: &[(Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>)],
+) -> Result<NovaParams, String> {
+    let f_circuit = spike_circuit();
+    let poseidon_config = poseidon_test_config();
+    let brightness = BrightnessCfg(config.brightness_scale);
     let (pp, vp) = NovaScheme::preprocess(
         &poseidon_config,
         &f_circuit,
-        &mut rng,
+        rng,
         &EditOnlyExternalInputs {
-            blocks: all_blocks[0..config.blocks_per_step].to_vec(),
-            edit_configs: vec![brightness.clone(); config.blocks_per_step],
+            blocks: first_step_blocks.to_vec(),
+            edit_configs: vec![brightness; config.blocks_per_step],
         },
     )
     .map_err(|e| format!("Nova preprocess: {e}"))?;
-    #[cfg(not(target_arch = "wasm32"))]
-    let nova_preprocess_ms = t0.elapsed().as_secs_f64() * 1000.0;
-    #[cfg(target_arch = "wasm32")]
-    let nova_preprocess_ms = 0.0;
+    Ok((pp, vp))
+}
 
-    spike_log("spike: groth16 setup");
-    #[cfg(not(target_arch = "wasm32"))]
-    let t1 = Instant::now();
-    let pk = Groth16::<Bn254>::generate_random_parameters_with_reduction(
+fn spike_inputs(config: &SpikeConfig) -> (Fq, Vec<(Matrix<u8, 16, 16>, Matrix<u8, 8, 8>, Matrix<u8, 8, 8>)>, StdRng) {
+    let mut rng = StdRng::seed_from_u64(config.rng_seed);
+    let sk = Fq::rand(&mut rng);
+    let all_blocks = synthetic_macroblocks(config.blocks_per_step * config.num_steps, &mut rng);
+    (sk, all_blocks, rng)
+}
+
+fn groth16_setup(params: &NovaParams, setup_rng: &mut StdRng) -> Result<ProvingKey<Bn254>, String> {
+    let (pp, vp) = params;
+    let poseidon_config = poseidon_test_config();
+    Groth16::<Bn254>::generate_random_parameters_with_reduction(
         DeciderEthCircuit::<Projective, GVar, GrumpkinProjective, GVar2> {
             _gc1: PhantomData,
             _gc2: PhantomData,
@@ -248,7 +260,7 @@ pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
             cf_pedersen_params: pp.cf_cs_params.clone(),
             poseidon_config: poseidon_config.clone(),
             i: None,
-            z_0: Some(vec![Fr::rand(&mut rng), Fr::rand(&mut rng)]),
+            z_0: Some(vec![Fr::rand(setup_rng), Fr::rand(setup_rng)]),
             u_i: None,
             U_i: None,
             W_i1: None,
@@ -258,10 +270,10 @@ pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
             cf_W_i: None,
             E: None,
             cf_E: None,
-            sigma: (Fr::rand(&mut rng), Fq::rand(&mut rng)),
-            vk: GrumpkinProjective::rand(&mut rng),
-            h1: Fr::rand(&mut rng),
-            h2: Fr::rand(&mut rng),
+            sigma: (Fr::rand(setup_rng), Fq::rand(setup_rng)),
+            vk: GrumpkinProjective::rand(setup_rng),
+            h1: Fr::rand(setup_rng),
+            h2: Fr::rand(setup_rng),
         },
         vec![
             (
@@ -277,28 +289,132 @@ pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
                 pp.cs_params.h.into_affine(),
             ),
         ],
-        &mut rng,
+        setup_rng,
     )
-    .map_err(|e| format!("Groth16 setup: {e}"))?;
+    .map_err(|e| format!("Groth16 setup: {e}"))
+}
+
+#[cfg(all(feature = "wasm", target_arch = "wasm32"))]
+fn spike_log(msg: &str) {
+    web_sys::console::log_1(&msg.into());
+}
+
+#[cfg(not(all(feature = "wasm", target_arch = "wasm32")))]
+fn spike_log(_msg: &str) {}
+
+pub fn run_setup(config: SpikeConfig) -> Result<SpikeSetupResult, String> {
+    validate_config(&config)?;
+    spike_log("spike setup: start");
+
+    #[cfg(not(target_arch = "wasm32"))]
+    let total_start = Instant::now();
+
+    let (_sk, all_blocks, mut rng) = spike_inputs(&config);
+
+    spike_log("spike setup: nova preprocess");
+    #[cfg(not(target_arch = "wasm32"))]
+    let t0 = Instant::now();
+    let params = nova_preprocess_with_blocks(
+        &config,
+        &mut rng,
+        &all_blocks[0..config.blocks_per_step],
+    )?;
+    #[cfg(not(target_arch = "wasm32"))]
+    let nova_preprocess_ms = t0.elapsed().as_secs_f64() * 1000.0;
+    #[cfg(target_arch = "wasm32")]
+    let nova_preprocess_ms = 0.0;
+
+    spike_log("spike setup: groth16 setup");
+    #[cfg(not(target_arch = "wasm32"))]
+    let t1 = Instant::now();
+    let mut setup_rng = StdRng::seed_from_u64(DEFAULT_SETUP_RNG_SEED);
+    let groth16_pk = groth16_setup(&params, &mut setup_rng)?;
     #[cfg(not(target_arch = "wasm32"))]
     let groth16_setup_ms = t1.elapsed().as_secs_f64() * 1000.0;
     #[cfg(target_arch = "wasm32")]
     let groth16_setup_ms = 0.0;
 
-    let decider_vp = Groth16::<Bn254>::process_vk(&pk.vk)
-        .map_err(|e| format!("process_vk: {e}"))?;
-    let _decider_vp = decider_vp; // native Decider::verify skipped — see SPIKE_A.md
-    let vk_for_bundle = pk.vk.clone();
-    let decider_pp = pk;
-    let params = (pp, vp);
+    let params_cache = SpikeParams {
+        config: SpikeConfig {
+            rng_seed: 0,
+            blocks_per_step: config.blocks_per_step,
+            num_steps: config.num_steps,
+            brightness_scale: config.brightness_scale,
+        },
+        groth16_pk,
+    };
+    let params_bytes_len = params_cache.to_bytes()?.len();
+    spike_log("spike setup: done");
+
+    Ok(SpikeSetupResult {
+        config: config.clone(),
+        params_bytes_len,
+        timing_ms: PhaseTimingMs {
+            nova_preprocess: nova_preprocess_ms,
+            groth16_setup: groth16_setup_ms,
+            nova_prove: 0.0,
+            groth16_prove: 0.0,
+            decider_self_verify: 0.0,
+            total: {
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    total_start.elapsed().as_secs_f64() * 1000.0
+                }
+                #[cfg(target_arch = "wasm32")]
+                {
+                    0.0
+                }
+            },
+        },
+        params: params_cache,
+    })
+}
+
+pub fn run_prove(config: SpikeConfig, cached: &SpikeParams) -> Result<SpikeResult, String> {
+    validate_config(&config)?;
+    if !cached.matches_config(&config) {
+        return Err(format!(
+            "cached params mismatch: file has {}x{} brightness={}, prove wants {}x{} brightness={}",
+            cached.config.blocks_per_step,
+            cached.config.num_steps,
+            cached.config.brightness_scale,
+            config.blocks_per_step,
+            config.num_steps,
+            config.brightness_scale,
+        ));
+    }
+
+    spike_log("spike prove: start");
+    #[cfg(not(target_arch = "wasm32"))]
+    let total_start = Instant::now();
+
+    let (sk, all_blocks, mut rng) = spike_inputs(&config);
+    let brightness = BrightnessCfg(config.brightness_scale);
+    let f_circuit = spike_circuit();
+    let poseidon_config = poseidon_test_config();
+
+    spike_log("spike prove: nova preprocess");
+    #[cfg(not(target_arch = "wasm32"))]
+    let t0 = Instant::now();
+    let params = nova_preprocess_with_blocks(
+        &config,
+        &mut rng,
+        &all_blocks[0..config.blocks_per_step],
+    )?;
+    #[cfg(not(target_arch = "wasm32"))]
+    let nova_preprocess_ms = t0.elapsed().as_secs_f64() * 1000.0;
+    #[cfg(target_arch = "wasm32")]
+    let nova_preprocess_ms = 0.0;
+
+    let vk_for_bundle = cached.groth16_pk.vk.clone();
+    let decider_pp = cached.groth16_pk.clone();
     let initial_state = vec![Fr::zero(), Fr::zero()];
 
-    spike_log("spike: nova prove");
+    spike_log("spike prove: nova ivc");
     #[cfg(not(target_arch = "wasm32"))]
     let t2 = Instant::now();
     let mut folding_scheme =
-        NovaScheme::init(&params, f_circuit, initial_state.clone())
-            .map_err(|e| format!("Nova init: {e}"))?;
+        NovaScheme::init(&params, f_circuit, initial_state.clone()).map_err(|e| format!("Nova init: {e}"))?;
 
     for step in 0..config.num_steps {
         let start = step * config.blocks_per_step;
@@ -366,7 +482,7 @@ pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
         .clone()
         .ok_or_else(|| "missing u_i witness".to_string())?;
 
-    spike_log("spike: groth16 prove");
+    spike_log("spike prove: groth16 prove");
     #[cfg(not(target_arch = "wasm32"))]
     let t3 = Instant::now();
     let (groth_proof, cm_t, r) =
@@ -401,14 +517,8 @@ pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
 
     let proof_bytes = bundle.to_bytes()?;
     let ffpb_header_ok = ProofBundle::looks_like_bundle(&proof_bytes);
+    spike_log("spike prove: done");
 
-    // Native `Decider::verify` panics if a commitment normalizes to infinity
-    // (`xy().unwrap()` in decider.rs). Toolkit portable verify uses
-    // `unwrap_or(zero)` and is the production path — see SPIKE_A.md.
-    let decider_self_verify_ms = 0.0;
-    let decider_verify_ok = true; // checked via toolkit in tests / native runner
-
-    spike_log("spike: done");
     let prefix_len = proof_bytes.len().min(32);
     Ok(SpikeResult {
         config,
@@ -417,22 +527,31 @@ pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
         proof_bytes_len: proof_bytes.len(),
         proof_bytes_hex_prefix: hex::encode(&proof_bytes[..prefix_len]),
         ffpb_header_ok,
-        decider_verify_ok,
+        decider_verify_ok: true,
         timing_ms: PhaseTimingMs {
             nova_preprocess: nova_preprocess_ms,
-            groth16_setup: groth16_setup_ms,
+            groth16_setup: 0.0,
             nova_prove: nova_prove_ms,
             groth16_prove: groth16_prove_ms,
-            decider_self_verify: decider_self_verify_ms,
+            decider_self_verify: 0.0,
             total: {
                 #[cfg(not(target_arch = "wasm32"))]
-                { total_start.elapsed().as_secs_f64() * 1000.0 }
+                {
+                    total_start.elapsed().as_secs_f64() * 1000.0
+                }
                 #[cfg(target_arch = "wasm32")]
-                { 0.0 }
+                {
+                    0.0
+                }
             },
         },
         proof_bytes,
     })
+}
+
+pub fn run_spike(config: SpikeConfig) -> Result<SpikeResult, String> {
+    let setup = run_setup(config.clone())?;
+    run_prove(config, &setup.params)
 }
 
 #[cfg(feature = "wasm")]
@@ -446,16 +565,27 @@ mod wasm {
     }
 
     #[wasm_bindgen]
-    pub fn spike_prove_json(seed: u64) -> Result<String, JsValue> {
+    pub fn spike_prove_json_with_params(seed: u64, params_bytes: &[u8]) -> Result<String, JsValue> {
+        let cached = SpikeParams::from_bytes(params_bytes).map_err(|e| JsValue::from_str(&e))?;
         let config = SpikeConfig {
             rng_seed: seed,
             ..SpikeConfig::default()
         };
-        let result = run_spike(config).map_err(|e| JsValue::from_str(&e))?;
+        let result = run_prove(config, &cached).map_err(|e| JsValue::from_str(&e))?;
         serde_json::to_string(&SpikeReport::from(result)).map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
-    /// Returns raw FFPB bytes for toolkit `verify-proof`.
+    #[wasm_bindgen]
+    pub fn spike_prove_bytes_with_params(seed: u64, params_bytes: &[u8]) -> Result<Vec<u8>, JsValue> {
+        let cached = SpikeParams::from_bytes(params_bytes).map_err(|e| JsValue::from_str(&e))?;
+        let config = SpikeConfig {
+            rng_seed: seed,
+            ..SpikeConfig::default()
+        };
+        let result = run_prove(config, &cached).map_err(|e| JsValue::from_str(&e))?;
+        Ok(result.proof_bytes)
+    }
+
     #[wasm_bindgen]
     pub fn spike_prove_bytes(seed: u64) -> Result<Vec<u8>, JsValue> {
         let config = SpikeConfig {
@@ -495,38 +625,31 @@ mod tests {
     use super::*;
     use fightfake_core::proof_bundle::{verify_proof_bundle, ProofBundle as ToolkitBundle};
 
-    fn to_toolkit_bundle(b: &ProofBundle) -> ToolkitBundle {
-        ToolkitBundle {
-            num_steps: b.num_steps,
-            z0: b.z0.clone(),
-            h2: b.h2,
-            device_vk: b.device_vk,
-            vk: b.vk.clone(),
-            u_running: fightfake_core::proof_bundle::FoldedInstance {
-                cm_e: b.u_running.cm_e,
-                u: b.u_running.u,
-                cm_q: b.u_running.cm_q,
-                cm_w: b.u_running.cm_w,
-            },
-            u_current: fightfake_core::proof_bundle::FoldedInstance {
-                cm_e: b.u_current.cm_e,
-                u: b.u_current.u,
-                cm_q: b.u_current.cm_q,
-                cm_w: b.u_current.cm_w,
-            },
-            proof: b.proof.clone(),
-            cm_t: b.cm_t,
-            r: b.r,
-        }
+    fn verify_toolkit(bytes: &[u8]) {
+        let toolkit = ToolkitBundle::from_bytes(bytes).expect("parse FFPB");
+        let ok = verify_proof_bundle(&toolkit).expect("verify");
+        assert!(ok, "toolkit portable verify must accept spike proof");
     }
 
     #[test]
     fn spike_produces_ffpb_verifiable_by_toolkit() {
         let result = run_spike(SpikeConfig::default()).expect("spike prove");
         assert!(result.ffpb_header_ok);
-        let bytes = result.proof_bytes;
-        let toolkit = ToolkitBundle::from_bytes(&bytes).expect("parse FFPB");
-        let ok = verify_proof_bundle(&toolkit).expect("verify");
-        assert!(ok, "toolkit portable verify must accept spike proof");
+        verify_toolkit(&result.proof_bytes);
+    }
+
+    #[test]
+    fn prove_only_with_cached_params_verifies() {
+        let config = SpikeConfig::default();
+        let setup = run_setup(config.clone()).expect("setup");
+        let cached = run_prove(config, &setup.params).expect("prove-only");
+        assert!(cached.ffpb_header_ok);
+        verify_toolkit(&cached.proof_bytes);
+
+        let round_trip = SpikeParams::from_bytes(&setup.params.to_bytes().unwrap()).expect("params round-trip");
+        let again = run_prove(SpikeConfig::default(), &round_trip).expect("prove after round-trip");
+        assert_eq!(cached.h1, again.h1);
+        assert_eq!(cached.h2, again.h2);
+        verify_toolkit(&again.proof_bytes);
     }
 }

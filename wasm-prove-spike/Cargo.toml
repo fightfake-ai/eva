@@ -12,6 +12,16 @@ name = "spike-a-native"
 path = "src/bin/native.rs"
 required-features = ["native-bin"]
 
+[[bin]]
+name = "spike-a-setup"
+path = "src/bin/setup.rs"
+required-features = ["native-bin"]
+
+[[bin]]
+name = "spike-a-prove"
+path = "src/bin/prove.rs"
+required-features = ["native-bin"]
+
 [dependencies]
 video = { path = "../video", default-features = false, features = ["cpu"] }
 folding-schemes = { path = "../folding-schemes", default-features = false, features = ["cpu"] }

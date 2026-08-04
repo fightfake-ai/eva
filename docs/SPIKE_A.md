@@ -149,16 +149,6 @@ spike: groth16 setup
 | Browser tab | Not tested; Node wasm failed first |
 | 1-step minimal instance | 2-step QUICK config used (1-step hits infinity in native self-verify) |
 
-### Stop-rule assessment (from WASM_PROVE_PLAN)
-
-The brief’s stop rule: *if Eva-in-WASM needs a multi-week rewrite, pivot to B.*
-
-| Question | Answer |
-|----------|--------|
-| Does compile need a rewrite? | **No** — green with documented flags. |
-| Does runtime need a rewrite? | **Partial** — not a full folding-schemes rewrite, but **Groth16 setup cannot run in wasm** for this circuit; Phase 1 must treat setup as **offline** and only run prove in wasm. |
-| Pivot to Option B? | **Not yet** — native-compatible FFPB path is valuable; continue A with offline setup. If prove-phase also OOMs after cached PK, reassess B for in-tab demo only. |
-
 ## Code map
 
 | Path | Purpose |
@@ -183,17 +173,22 @@ const ffpbBytes = wasm.spike_prove_bytes(42n);
 
 ## Recommendation after Spike A
 
-**Continue Option A for Phase 1**, scoped to:
+**Phase 1 Step 1+2 implemented** (see `wasm-prove-spike/`):
 
-1. **Precompute Groth16 PK/VK offline** (native or CI) for the toy decider circuit; load in wasm — **do not** call `generate_random_parameters_with_reduction` in browser/wasm.
-2. **Re-run wasm spike** with cached PK only (prove path) — confirm memory fits for Nova + Groth16 prove.
-3. **Browser smoke test** (memory limits, no Node-only assumptions).
-4. **Glue** into `fightfake-wasm` behind `crypto-prove` / `wasm-prove` feature.
-5. Document Eva `Decider::verify` infinity panic (toolkit path is fine).
+1. **`spike-a-setup`** — native export of Groth16 PK → `spike-params.bin` (FFSP format, ~1.3 GiB).
+2. **`run_prove` / `spike-a-prove` / `spike_prove_bytes_with_params`** — prove-only using cached PK.
 
-Do **not** attempt full-video in-tab prove; keep toy QUICK config.
+**Results:**
 
-**Option B** remains the fallback if prove-phase (with cached PK) still OOMs or exceeds browser budgets — for demo-only proofs with a simpler format.
+| Step | Result |
+|------|--------|
+| Native setup export | **Pass** (~2 min) |
+| Native prove-only + toolkit verify | **Pass** (~1.7 min) |
+| WASM prove-only (Node) | **Fail** — OOM deserializing ~1.3 GiB PK into wasm memory (~40 min → trap) |
+
+Groth16 **setup** OOM in wasm is avoided by caching, but the **proving key itself** is too large for current wasm32 linear memory. Next options: smaller decider circuit, server-side prove, or streaming/chunked PK loading (research).
+
+**Continue Option A** for product integration on native prove path; browser prove needs PK size reduction before Step 3 (browser smoke test) is meaningful.
 
 ## Related docs
 

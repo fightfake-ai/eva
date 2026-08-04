@@ -1,14 +1,12 @@
-WASM Spike A starting (expect several minutes)…
-spike: start
-spike: nova preprocess
-spike: groth16 setup
-RuntimeError: unreachable (release build)
-
-Dev build backtrace (root cause):
-  alloc::rust_oom
-  → ark_relations::r1cs::LinearCombination grow during Groth16 trusted setup
-  → generate_random_parameters_with_reduction
-
-Conclusion: wasm linear memory exhausted during Groth16 setup.
-Nova preprocess completes; prove phases never reached.
-See docs/SPIKE_A.md for full analysis.
+WASM Spike A prove-only (cached params)…
+RuntimeError: unreachable
+    at wasm://wasm/0074a6c6:wasm-function[1682]:0x1bfd3d
+    at wasm://wasm/0074a6c6:wasm-function[1591]:0x1be575
+    at wasm://wasm/0074a6c6:wasm-function[514]:0x138bce
+    at wasm://wasm/0074a6c6:wasm-function[707]:0x1680c0
+    at wasm://wasm/0074a6c6:wasm-function[1535]:0x1b10fc
+    at Object.spike_prove_bytes_with_params (/Users/miha/projects/fightfake-projects/eva-miha/wasm-prove-spike/pkg/wasm_prove_spike.js:31:22)
+    at main (/Users/miha/projects/fightfake-projects/eva-miha/wasm-prove-spike/pkg/run-spike.js:21:22)
+    at Object.<anonymous> (/Users/miha/projects/fightfake-projects/eva-miha/wasm-prove-spike/pkg/run-spike.js:43:1)
+    at Module._compile (node:internal/modules/cjs/loader:1734:14)
+    at Object..js (node:internal/modules/cjs/loader:1899:10)

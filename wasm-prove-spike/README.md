@@ -4,37 +4,51 @@ Spike A harness: tiny Eva EditOnly brightness prove → FFPB output.
 
 **Full documentation:** [`../docs/SPIKE_A.md`](../docs/SPIKE_A.md)
 
-## Status (2026-07-31)
+## Status
 
 | Stage | Result |
 |-------|--------|
-| Native prove + FFPB verify | **Pass** (~3.5 min, `spike-proof.bin`) |
-| WASM compile | **Pass** (~2.1 MB `.wasm`) |
-| WASM runtime (Node) | **Fail** — OOM during Groth16 setup (see log) |
+| Native full prove | **Pass** (~3.5 min) |
+| Native setup export | **Pass** → `spike-params.bin` (~1.3 GiB Groth16 PK) |
+| Native prove-only (cached PK) | **Pass** (~1.7 min, toolkit verify OK) |
+| WASM compile | **Pass** |
+| WASM prove-only (Node) | **Fail** — OOM loading ~1.3 GiB PK into wasm linear memory |
 
-## Quick start
+## Phase 1 workflow
 
-### Native
+### Step 1 — Export params (native, once per toy config)
 
 ```bash
-cargo run --release -p wasm-prove-spike --features native-bin --bin spike-a-native
-cargo test -p wasm-prove-spike spike_produces --release
+cargo run --release -p wasm-prove-spike --features native-bin --bin spike-a-setup
 ```
 
-Writes `spike-proof.bin` and runs toolkit portable verify.
+Writes `spike-params.bin` (FFSP format: Groth16 proving key for the toy decider circuit).
 
-### WASM (Node)
+### Step 2 — Prove-only
+
+**Native:**
+
+```bash
+cargo run --release -p wasm-prove-spike --features native-bin --bin spike-a-prove
+```
+
+**WASM (Node):**
 
 ```bash
 wasm-pack build --target nodejs --features wasm-js
 node pkg/run-spike.js 42
 ```
 
-Requires nightly Rust and `wasm32-unknown-unknown`. See `../.cargo/config.toml` for getrandom + stack size.
+Requires `spike-params.bin` in `wasm-prove-spike/` (not committed — ~1.3 GiB).
 
-**Note:** Current spike calls Groth16 setup in wasm and **runs out of memory**. Phase 1 should load a precomputed proving key instead.
+### Full pipeline (baseline, includes setup)
 
-### Verify proof (native output)
+```bash
+cargo run --release -p wasm-prove-spike --features native-bin --bin spike-a-native
+cargo test -p wasm-prove-spike prove_only_with_cached --release --features native-bin
+```
+
+### Verify proof
 
 ```bash
 cd ../../fightfake-toolkit
@@ -42,6 +56,17 @@ cargo run --release -p fightfake-cli --features eva-backend,crypto-verify -- \
   verify-proof --proof ../eva-miha/wasm-prove-spike/spike-proof.bin
 ```
 
-## Logs
+## API (WASM)
 
-- `spike-wasm-run.log` — latest Node wasm run (phase markers + error backtrace if dev build)
+```javascript
+const params = fs.readFileSync("../spike-params.bin");
+const ffpb = wasm.spike_prove_bytes_with_params(42n, params);
+```
+
+`spike_prove_bytes(seed)` still runs full setup+prove (OOM in wasm for this circuit).
+
+## Artifacts (gitignored)
+
+- `spike-params.bin` — cached Groth16 PK (~1.3 GiB)
+- `spike-proof.bin` — FFPB output (~5.6 MB)
+- `pkg/` wasm-pack output (except `pkg/run-spike.js`)
