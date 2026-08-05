@@ -1,8 +1,11 @@
 # WASM prove plan
 
-Status: **Spike A complete** — see [`docs/SPIKE_A.md`](docs/SPIKE_A.md). Awaiting go-ahead for Phase 1.
+Status: **Spike A + Phase 1 (cached PK) complete; Track 1 still-image native path done.**
 
-Related brief: [`WASM_PROVE_AGENT_BRIEF.md`](./WASM_PROVE_AGENT_BRIEF.md).
+Related:
+- [`docs/SPIKE_A.md`](docs/SPIKE_A.md) — wasm prove spike
+- [`docs/TRACK1_STILL_IMAGES.md`](docs/TRACK1_STILL_IMAGES.md) — still-image EditOnly (native)
+- [`WASM_PROVE_AGENT_BRIEF.md`](./WASM_PROVE_AGENT_BRIEF.md)
 
 ## How prove works today
 

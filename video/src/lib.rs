@@ -57,6 +57,7 @@ pub mod edit_only;
 pub mod encode;
 pub mod griffin;
 pub mod macroblock_yuv;
+pub mod rgb_yuv;
 pub mod utils;
 pub mod var;
 
@@ -69,6 +70,7 @@ pub use macroblock_yuv::{
     read_macroblock_dir, write_macroblock_dir, yuv420_frame_bytes, yuv420_to_macroblocks,
     MB_UV_BYTES, MB_Y_BYTES,
 };
+pub use rgb_yuv::{crop_to_macroblock_grid, rgb8_to_yuv420p};
 
 const SCALES: [[u64; 6]; 3] = [
     [13107, 11916, 10082, 9362, 8192, 7282],

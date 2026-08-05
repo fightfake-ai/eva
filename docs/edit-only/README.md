@@ -26,7 +26,9 @@ macroblock-shaped pixel witnesses. Lossless means no lossy re-quantization in th
 | `video/examples/edit_lossless_decider.rs` | Full pipeline: Nova + Groth16 decider |
 | `video/examples/hash_verifier_lossless.rs` | Native-reference h2 over edited pixels (compare to proof) |
 | `video/examples/yuv_to_macroblocks.rs` | **mp4/ffmpeg YUV → Eva macroblock files** |
+| `video/examples/image_to_macroblocks.rs` | **PNG/JPEG/… → Eva macroblock files** (`num_frames=1`) |
 | `video/examples/native_edit_export_yuv.rs` | **Optional native edit + export to planar YUV** (`BRIGHTNESS=`) |
+| `video/src/rgb_yuv.rs` | RGB8 → YUV420p helper for still ingest |
 
 Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_macroblocks`,
 `macroblocks_to_yuv420` (phase 2: export), `native_brightness_edit_macroblocks` (phase 1: edit).
@@ -36,9 +38,39 @@ Native helpers: `hash_orig_macroblock`, `hash_edited_macroblock`, `yuv420_to_mac
 | Tool / function | Phase | What it does |
 |-----------------|-------|----------------|
 | `yuv_to_macroblocks` | Ingest | Planar YUV → `orig_*_enc` macroblock files |
+| `image_to_macroblocks` | Ingest | Still image → `orig_*_enc` (`num_frames=1`) |
 | `native_brightness_edit_macroblocks` | **1 — native edit** | `edit/native_macroblocks.rs` — `edit_native` per macroblock |
 | `macroblocks_to_yuv420` | **2 — export** | `macroblock_yuv.rs` — macroblock bytes → planar YUV |
 | `native_edit_export_yuv` | 1 + 2 (example) | Optional `BRIGHTNESS=` then writes `.yuv` |
+
+## Quick start: still image
+
+A still is just **one frame** of macroblocks (`num_frames = 1`). No ffmpeg required for ingest.
+
+| Step | What |
+|------|------|
+| 1. Your file | `photo.png` / `.jpg` / … (any size ≥ 16×16; cropped to ×16) |
+| 2. Eva macroblocks | `image_to_macroblocks` → `data_parsed/<name>/orig_*_enc` |
+| 3. Prove (optional) | `edit_bright_only` **or** toolkit `prove-edit --input photo.png` |
+
+```bash
+cd /path/to/eva-miha
+mkdir -p data_parsed/photo
+
+cargo run --release -p video --example image_to_macroblocks -- \
+  ~/pictures/photo.png data_parsed/photo
+
+# Cryptographic proof (does not write an image file)
+export DATA_PATH="$(pwd)/data_parsed"
+VIDEO=photo QUICK=1 cargo run --release -p video --example edit_bright_only
+
+# Or full toolkit workflow (decode + edit + proof + C2PA, 1-frame MP4 out):
+# cd ../fightfake-toolkit && cargo run --release -p fightfake-cli -- \
+#   prove-edit --input ~/pictures/photo.png --gadget brightness --out-dir out/
+```
+
+For **redact** on a still via toolkit, `--redact-frame-end` defaults to `1` when the
+input is an image; pass `--redact-width` / `--redact-height` (and optional x/y).
 
 ## Quick start: your own video
 
