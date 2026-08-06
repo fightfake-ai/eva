@@ -62,16 +62,27 @@ NUM_STEPS=4 cargo run --release -p comparison --example phase0_baseline
 
 **Tasks:**
 
-- [ ] Document lookup witness layout (see [LOOKUPS.md](./LOOKUPS.md))
+- [x] Document lookup witness layout (see [LOOKUPS.md](./LOOKUPS.md))
 - [x] Document Eva lookup protocol (`folding-schemes/src/frontend/`, `AugmentedFCircuit` integration)
+- [x] Prototype Option A LogUp in bellpepper (1-MB pixels + Q=2320, NeutronNova smoke)
 - [ ] Evaluate Spartan2 / Lasso zero-check reduction vs custom lookup
-- [ ] Prototype lookup in bellpepper (or hybrid ark→bellpepper R1CS export if feasible)
+- [x] Scale to Q≈2320 (full 1-MB NoOp committed queries) + record timings
+- [ ] FS challenge binding (`num_challenges` / Poseidon(cmQ) analogue)
+- [ ] Port encode bit-length gadgets; full Eva step as `SpartanCircuit`
 
 **Exit criteria:**
 
 - Step circuit with lookups proves under NeutronNova
 - Functional equivalence test against Nova step on same inputs
 
+**Run:**
+
+```bash
+NUM_QUERIES=384 cargo run --release -p comparison --example phase2_lookup_smoke
+cargo test -p comparison bellpepper --release
+```
+
+**Results:** [`results/phase2.md`](./results/phase2.md)
 ---
 
 ## Phase 3 — Full video pipeline

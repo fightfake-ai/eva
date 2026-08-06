@@ -2,12 +2,17 @@
 //!
 //! See `docs/spartan2-comparison/` for the full study design.
 
+pub mod bellpepper;
 pub mod eva_step;
 pub mod neutronnova;
 pub mod nova_baseline;
 pub mod phase1;
 pub mod r1cs_stats;
 
+pub use bellpepper::{
+    count_logup_constraints, run_logup_neutronnova, LogUpCircuit, LogUpConfig, LogUpTimings,
+    PIXELS_PER_MB, TABLE_SIZE,
+};
 pub use eva_step::{synthesize_augmented_step_r1cs, synthesize_step_only_r1cs, EvaCircuitKind};
 pub use neutronnova::{
     count_placeholder_constraints, degree_for_target_constraints, run_neutronnova_benchmark,

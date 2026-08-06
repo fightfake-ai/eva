@@ -44,3 +44,7 @@ path = "examples/phase1_benchmark.rs"
 [[example]]
 name = "phase1_scale"
 path = "examples/phase1_scale.rs"
+
+[[example]]
+name = "phase2_lookup_smoke"
+path = "examples/phase2_lookup_smoke.rs"

@@ -45,6 +45,8 @@ cpu-backend          ← CPU MSM / compute_t (merged baseline)
 | `comparison/examples/phase0_baseline.rs` | Phase 0: Eva stats + NeutronNova smoke test |
 | `comparison/examples/phase1_benchmark.rs` | Phase 1: Nova vs NeutronNova timed comparison |
 | `comparison/examples/phase1_scale.rs` | Phase 1: multi-scale sweep (blocks 4, 16, 64) |
+| `comparison/examples/phase2_lookup_smoke.rs` | Phase 2: LogUp bellpepper + NeutronNova smoke |
+| `comparison/src/bellpepper/` | Phase 2 LogUp gadgets + `SpartanCircuit` |
 
 ## Quick start
 
@@ -61,6 +63,9 @@ MATCH_EVA=1 QUICK=1 cargo run --release -p comparison --example phase1_benchmark
 
 # Multi-scale sweep (blocks 4, 16, 64)
 MATCH_EVA=1 cargo run --release -p comparison --example phase1_scale
+
+# Phase 2: LogUp (bellpepper) under NeutronNova — 1 MB pixels
+NUM_QUERIES=384 cargo run --release -p comparison --example phase2_lookup_smoke
 
 # Full Eva Nova-only (NeutronNova at 1.4M constraints may OOM)
 BLOCKS_PER_STEP=256 SKIP_NN=1 cargo run --release -p comparison --example phase1_benchmark
@@ -89,11 +94,10 @@ Environment variables:
 - [x] Nova `prove_step` at full BLOCKS_PER_STEP=256 (~5.5 s prove, ~1.43M constraints)
 - [x] Peak RSS for Nova full-scale run (~6.2 GB)
 - [x] Full-scale NeutronNova at 1.43M constraints (~5.1 s/step, ~6.7 GB RSS)
-- [ ] Bellpepper re-synthesis of Eva step circuit (Phase 2 prerequisite)
-- [ ] Lookup argument port (Phase 2)
-- [ ] Full video pipeline comparison (Phase 3)
-
-## Key blockers (documented early)
+- [x] Phase 2.0: lookup witness layout documented
+- [x] Phase 2.0: bellpepper LogUp + NeutronNova smoke (Q=16, 384, 2320)
+- [ ] Phase 2: FS challenge + encode gadgets (full bellpepper Eva step)
+- [ ] Full video pipeline comparison (Phase 3)## Key blockers (documented early)
 
 1. **Circuit frontend mismatch** — Eva uses `ark-r1cs-std`; Spartan2 uses **bellpepper**.
    Direct R1CS matrix reuse is possible for analysis, but NeutronNova proving requires

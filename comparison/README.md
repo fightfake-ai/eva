@@ -15,6 +15,9 @@ NUM_STEPS=4 cargo run --release -p comparison --example phase0_baseline
 
 # Phase 1: side-by-side Nova vs NeutronNova
 QUICK=1 cargo run --release -p comparison --example phase1_benchmark
+
+# Phase 2: LogUp under NeutronNova (1 MB pixels)
+NUM_QUERIES=384 cargo run --release -p comparison --example phase2_lookup_smoke
 ```
 
 ## Modules
@@ -25,3 +28,4 @@ QUICK=1 cargo run --release -p comparison --example phase1_benchmark
 | `eva_step` | Synthesize Eva step / augmented circuits via arkworks |
 | `nova_baseline` | Nova prove_step / compute_cmT / preprocess timings |
 | `neutronnova` | Spartan2 NeutronNova reference benchmark on BN254 |
+| `bellpepper` | Phase 2 LogUp gadgets + `LogUpCircuit` (`SpartanCircuit`) |
