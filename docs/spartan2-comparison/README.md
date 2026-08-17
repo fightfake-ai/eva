@@ -46,7 +46,8 @@ cpu-backend          ← CPU MSM / compute_t (merged baseline)
 | `comparison/examples/phase1_benchmark.rs` | Phase 1: Nova vs NeutronNova timed comparison |
 | `comparison/examples/phase1_scale.rs` | Phase 1: multi-scale sweep (blocks 4, 16, 64) |
 | `comparison/examples/phase2_lookup_smoke.rs` | Phase 2: LogUp bellpepper + NeutronNova smoke |
-| `comparison/src/bellpepper/` | Phase 2 LogUp gadgets + `SpartanCircuit` |
+| `comparison/examples/phase3_option_c.rs` | Option C: Groth16 vs Spartan final SNARK |
+| `comparison/src/bellpepper/` | Phase 2 LogUp + Option C relaxed-R1CS check |
 
 ## Quick start
 
@@ -83,6 +84,7 @@ Environment variables:
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — side-by-side stack comparison (Nova vs NeutronNova)
 - [LOOKUPS.md](./LOOKUPS.md) — Eva lookup argument porting notes (Phase 2)
+- [OPTION_C_TRANSPARENT.md](./OPTION_C_TRANSPARENT.md) — complete transparent decider (full Groth16 statement)
 - [PHASES.md](./PHASES.md) — phased port plan with status checklist
 - [METRICS.md](./METRICS.md) — what we measure and how to record results
 
@@ -96,8 +98,12 @@ Environment variables:
 - [x] Full-scale NeutronNova at 1.43M constraints (~5.1 s/step, ~6.7 GB RSS)
 - [x] Phase 2.0: lookup witness layout documented
 - [x] Phase 2.0: bellpepper LogUp + NeutronNova smoke (Q=16, 384, 2320)
+- [x] Phase 3 / Option C spike: Nova IVC + Groth16 vs Spartan primary final SNARK
+- [x] Phase 3 / Option C complete transparent: full `DeciderEthCircuit` via matrix Spartan
 - [ ] Phase 2: FS challenge + encode gadgets (full bellpepper Eva step)
-- [ ] Full video pipeline comparison (Phase 3)## Key blockers (documented early)
+- [ ] Full video pipeline comparison + recorded dual-path timings (Phase 3 complete)
+
+## Key blockers (documented early)
 
 1. **Circuit frontend mismatch** — Eva uses `ark-r1cs-std`; Spartan2 uses **bellpepper**.
    Direct R1CS matrix reuse is possible for analysis, but NeutronNova proving requires
@@ -109,8 +115,9 @@ Environment variables:
 3. **CycleFold** — NeutronNova does not use Nova's two-curve CycleFold pattern; the comparison
    must account for different recursion architectures.
 
-4. **Decider** — Eva finishes with Groth16 (`DeciderEthCircuit`). Spartan2 finishes with
-   Spartan over a relaxed R1CS instance. Proof size and on-chain verifier cost differ.
+4. **Decider** — Groth16 remains the production path (tiny proofs). Option C now also has a
+   **complete transparent** path proving the same `DeciderEthCircuit` R1CS via matrix Spartan
+   (`OPTION_C_TRANSPARENT.md`); proof size / verify cost still favor Groth16 for EVM.
 
 ## References
 

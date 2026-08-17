@@ -133,12 +133,14 @@ There is no drop-in mapping to Spartan2's API without reimplementing the lookup 
 - Spartan2 may expose patterns for this (see Jolt/Lasso lineage)
 - **Effort:** very high; **potential gain:** best asymptotics if it works
 
-### Option C: Hybrid — keep Nova step, Spartan decider only
+### Option C: Hybrid — keep Nova step, Spartan decider only ← **spike landed**
 
 - Continue Nova folding for step + lookups
-- Replace only Groth16 decider with Spartan
+- Replace only Groth16 decider with Spartan (or run **both** for comparison)
 - **Effort:** medium; **does not** capture NeutronNova folding wins
-
+- **Status:** `comparison` dual-path harness — see [`results/phase3_option_c.md`](./results/phase3_option_c.md)
+  - Groth16: full `DeciderEth` (primary + CycleFold + sigma)
+  - Spartan: primary relaxed R1CS only (bellpepper re-encoding; CycleFold/sigma TBD)
 ### Option D: R1CS export bridge (research)
 
 - Export arkworks R1CS matrices → Spartan2 `R1CSShape`

@@ -2,10 +2,12 @@
 //!
 //! See `docs/spartan2-comparison/` for the full study design.
 
+pub mod ark_to_spartan;
 pub mod bellpepper;
 pub mod eva_step;
 pub mod neutronnova;
 pub mod nova_baseline;
+pub mod option_c;
 pub mod phase1;
 pub mod r1cs_stats;
 
@@ -19,5 +21,6 @@ pub use neutronnova::{
     run_neutronnova_smoke, NeutronNovaTimings, PlaceholderConfig, PlaceholderStepCircuit,
 };
 pub use nova_baseline::{run_nova_baseline, NovaBaselineConfig, NovaBaselineTimings};
+pub use option_c::{run_option_c, OptionCConfig, OptionCResult, SpartanMode};
 pub use phase1::{format_scale_row, run_phase1_comparison, Phase1Config, Phase1Result};
 pub use r1cs_stats::{R1csStats, print_r1cs_stats, stats_from_r1cs};

@@ -15,12 +15,18 @@ ark-relations = { version = "^0.5.0", default-features = false }
 ark-r1cs-std = { version = "^0.5.0", default-features = false }
 ark-std = { version = "^0.5.0" }
 ark-crypto-primitives = { version = "^0.5.0", default-features = false, features = ["r1cs", "sponge", "crh"] }
+ark-groth16 = { version = "^0.5.0" }
+ark-snark = { version = "^0.5.0" }
+ark-serialize = "^0.5.0"
 folding-schemes = { path = "../folding-schemes/", default-features = false, features = ["cpu"] }
 video = { path = "../video", default-features = false, features = ["cpu"] }
 rand = "0.8.5"
+serde = { version = "1", features = ["derive"] }
+bincode = "1.3"
 
-# Spartan2 stack (NeutronNova baseline)
-spartan2 = "0.9"
+# Spartan2 stack (NeutronNova baseline).
+# Path dep: patched 0.9 with public matrix R1CS API (see third_party/spartan2/FORK.md).
+spartan2 = { path = "../third_party/spartan2" }
 bellpepper = "0.4"
 bellpepper-core = "0.4"
 ff = "0.13"
@@ -48,3 +54,11 @@ path = "examples/phase1_scale.rs"
 [[example]]
 name = "phase2_lookup_smoke"
 path = "examples/phase2_lookup_smoke.rs"
+
+[[example]]
+name = "phase3_option_c"
+path = "examples/phase3_option_c.rs"
+
+[[example]]
+name = "count_decider_constraints"
+path = "examples/count_decider_constraints.rs"

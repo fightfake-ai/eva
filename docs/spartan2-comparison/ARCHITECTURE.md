@@ -131,7 +131,7 @@ Grumpkin / CycleFold has no direct Spartan2 equivalent in Eva's sense.
 | `NIFS::compute_t` | Internal NeutronNova folding | N/A (replaced) |
 | `CycleFold` | Not used; different recursion model | **High** (redesign) |
 | `prove_step` streaming | Batch `prep_prove` + `prove` | **Medium** (API redesign) |
-| Groth16 decider | Spartan final SNARK | **High** (verifier change) |
+| Groth16 decider | Spartan final SNARK on same `DeciderEthCircuit` R1CS (Option C full) **or** NeutronNova fold+Spartan | **Medium** (matrix path done; EVM verifier still Groth16-sized) |
 | `ExternalInputs` (video blocks) | `precommitted` witness in `SpartanCircuit` | **Medium** |
 
 ---
@@ -146,3 +146,27 @@ Phase 0 **does not** port Eva's circuit. It establishes:
 
 Phase 1 will target a bellpepper circuit whose constraint count matches Eva's **step-only**
 R1CS (without lookups initially), then NeutronNova prove timing at matching `NUM_STEPS`.
+
+---
+
+## Option C — transparent final SNARK (hybrid)
+
+A practical path that keeps Eva’s Nova IVC + lookups + CycleFold, and only replaces the
+**final** Groth16 compression:
+
+See [`OPTION_C_TRANSPARENT.md`](./OPTION_C_TRANSPARENT.md).
+
+```
+Nova IVC + CycleFold + LogUp   (unchanged)
+            │
+            ▼
+   DeciderEthCircuit (ark R1CS)
+            │
+     ┌──────┴──────┐
+     ▼             ▼
+  Groth16      matrix Spartan (vendored API)
+  trusted      transparent, same statement
+```
+
+This avoids rewriting step circuits in bellpepper while delivering a complete
+transparent-setup proof of the decider statement.

@@ -85,21 +85,33 @@ cargo test -p comparison bellpepper --release
 **Results:** [`results/phase2.md`](./results/phase2.md)
 ---
 
-## Phase 3 — Full video pipeline
+## Phase 3 — Full video pipeline / Option C
 
-**Goal:** End-to-end comparison on real `data_parsed` video data.
+**Goal:** End-to-end comparison on real (or synthetic) video-scale IVC; include transparent final SNARK.
 
 **Tasks:**
 
-- [ ] Replace Nova `prove_step` loop with NeutronNova batch prover
-- [ ] Replace / compare Groth16 decider vs Spartan final proof
-- [ ] Measure full-video prove time, peak memory, proof size
+- [x] Option C spike: keep Nova IVC; dual final path Groth16 vs Spartan (`phase3_option_c`)
+- [x] Full transparent decider: ark `DeciderEthCircuit` → Spartan matrix prove (CycleFold + sigma)
+- [x] Document architecture: [`OPTION_C_TRANSPARENT.md`](./OPTION_C_TRANSPARENT.md)
+- [ ] Measure full-video prove time, peak memory, proof size (fill results after runs)
 - [ ] Document verifier cost (Ethereum gas if applicable)
 
 **Exit criteria:**
 
 - Same video authenticated under both stacks (functional test)
 - Written recommendation: stay on Nova, migrate, or hybrid
+
+**Run:**
+
+```bash
+SKIP_G16=1 SPARTAN_MODE=full cargo run --release -p comparison --example phase3_option_c
+SPARTAN_MODE=full cargo run --release -p comparison --example phase3_option_c
+SKIP_G16=1 SPARTAN_MODE=primary cargo run --release -p comparison --example phase3_option_c
+```
+
+**Docs:** [`OPTION_C_TRANSPARENT.md`](./OPTION_C_TRANSPARENT.md)  
+**Results:** [`results/phase3_option_c.md`](./results/phase3_option_c.md)
 
 ---
 
