@@ -1,4 +1,8 @@
-//! Full Eva **lossless** pipeline: Nova IVC over `EditOnlyCircuit` + Groth16 decider.
+//! Full Eva **lossless** pipeline: Nova IVC over `EditOnlyCircuit` + final decider.
+//!
+//! Both backends prove the same [`video::decider::DeciderEthCircuit`]:
+//! - `DECIDER=groth16` (default) — trusted setup, tiny proof
+//! - `DECIDER=spartan` — transparent Hyrax / Spartan
 //!
 //! Proves edit on macroblock YUV without H.264 encode constraints. Only needs
 //! original pixels from `DATA_PATH/foreman` (no preds/coeffs from a re-encoded folder).
@@ -6,6 +10,7 @@
 //! ```bash
 //! export DATA_PATH=/path/to/data_parsed
 //! QUICK=1 cargo run --release -p video --example edit_lossless_decider
+//! QUICK=1 DECIDER=spartan cargo run --release -p video --example edit_lossless_decider
 //! ```
 
 #![allow(non_snake_case)]
@@ -25,6 +30,8 @@ use ark_snark::SNARK;
 use ark_std::{add_to_trace, end_timer, start_timer};
 use rand::thread_rng;
 use video::decider::{Decider, DeciderEthCircuit};
+#[cfg(feature = "spartan")]
+use video::decider::SpartanDecider;
 use video::edit::constraints::{Brightness, BrightnessCfg};
 use video::griffin::params::GriffinParams;
 use video::utils::srs_size;
@@ -60,13 +67,21 @@ fn blocks_per_step() -> usize {
     }
 }
 
+fn decider_backend() -> String {
+    std::env::var("DECIDER")
+        .unwrap_or_else(|_| "groth16".into())
+        .to_lowercase()
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rng = &mut thread_rng();
     let sk = Fq::rand(rng);
     let blocks_per_step = blocks_per_step();
     let data = Path::new(env!("DATA_PATH")).join("foreman");
 
+    let backend = decider_backend();
     println!("=== Lossless encoding proof (brightness edit, no H.264 encode) ===");
+    println!("decider={backend}");
 
     let blocks = parse_orig_blocks(&data)?;
     let available_steps = blocks.len() / blocks_per_step;
@@ -99,53 +114,55 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
     )?;
 
-    let pk = Groth16::<Bn254>::generate_random_parameters_with_reduction(
-        DeciderEthCircuit::<Projective, GVar, Projective2, GVar2> {
-            _gc1: std::marker::PhantomData,
-            _gc2: std::marker::PhantomData,
-            r1cs: vp.r1cs.clone(),
-            cf_r1cs: vp.cf_r1cs.clone(),
-            cf_pedersen_params: pp.cf_cs_params.clone(),
-            poseidon_config: poseidon_config.clone(),
-            i: None,
-            z_0: Some(vec![Fr::rand(rng), Fr::rand(rng)]),
-            u_i: None,
-            U_i: None,
-            W_i1: None,
-            cmT: None,
-            r: None,
-            cf_U_i: None,
-            cf_W_i: None,
-            E: None,
-            cf_E: None,
-            sigma: (Fr::rand(rng), Fq::rand(rng)),
-            vk: Projective2::rand(rng),
-            h1: Fr::rand(rng),
-            h2: Fr::rand(rng),
-        },
-        vec![
-            (
-                &pp.cs_params.generators[..vp.r1cs.q],
-                pp.cs_params.h.into_affine(),
-            ),
-            (
-                &pp.cs_params.generators[..vp.r1cs.A.n_cols - 1 - vp.r1cs.l - vp.r1cs.q],
-                pp.cs_params.h.into_affine(),
-            ),
-            (
-                &pp.cs_params.generators[..vp.r1cs.A.n_rows],
-                pp.cs_params.h.into_affine(),
-            ),
-        ],
-        rng,
-    )?;
-    add_to_trace!(|| "SRS size", || format!("{}", srs_size(&pk, &pp.cs_params)));
+    let groth16_pk = if backend == "groth16" {
+        let pk = Groth16::<Bn254>::generate_random_parameters_with_reduction(
+            DeciderEthCircuit::<Projective, GVar, Projective2, GVar2> {
+                _gc1: std::marker::PhantomData,
+                _gc2: std::marker::PhantomData,
+                r1cs: vp.r1cs.clone(),
+                cf_r1cs: vp.cf_r1cs.clone(),
+                cf_pedersen_params: pp.cf_cs_params.clone(),
+                poseidon_config: poseidon_config.clone(),
+                i: None,
+                z_0: Some(vec![Fr::rand(rng), Fr::rand(rng)]),
+                u_i: None,
+                U_i: None,
+                W_i1: None,
+                cmT: None,
+                r: None,
+                cf_U_i: None,
+                cf_W_i: None,
+                E: None,
+                cf_E: None,
+                sigma: (Fr::rand(rng), Fq::rand(rng)),
+                vk: Projective2::rand(rng),
+                h1: Fr::rand(rng),
+                h2: Fr::rand(rng),
+            },
+            vec![
+                (
+                    &pp.cs_params.generators[..vp.r1cs.q],
+                    pp.cs_params.h.into_affine(),
+                ),
+                (
+                    &pp.cs_params.generators[..vp.r1cs.A.n_cols - 1 - vp.r1cs.l - vp.r1cs.q],
+                    pp.cs_params.h.into_affine(),
+                ),
+                (
+                    &pp.cs_params.generators[..vp.r1cs.A.n_rows],
+                    pp.cs_params.h.into_affine(),
+                ),
+            ],
+            rng,
+        )?;
+        add_to_trace!(|| "SRS size", || format!("{}", srs_size(&pk, &pp.cs_params)));
+        Some(pk)
+    } else {
+        None
+    };
     if std::env::var("SETUP_ONLY").is_ok() {
         return Ok(());
     }
-
-    let decider_vp = Groth16::<Bn254>::process_vk(&pk.vk)?;
-    let decider_pp = pk;
 
     let (circuit, initial_state, last_state, running_instance, incoming_instance) = {
         let params = (pp, vp);
@@ -222,23 +239,49 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let vk = Projective2::generator() * sk;
-    let proof = Decider::prove(decider_pp, rng, circuit)?;
+    match backend.as_str() {
+        "spartan" => {
+            #[cfg(feature = "spartan")]
+            {
+                let start = start_timer!(|| "SpartanDecider::prove");
+                let (proof, spk) = SpartanDecider::prove(circuit)?;
+                end_timer!(start);
+                let start = start_timer!(|| "SpartanDecider::verify");
+                let verified = SpartanDecider::verify(&spk, &proof)?;
+                end_timer!(start);
+                assert!(verified);
+                println!(
+                    "Lossless proof verified (Nova + transparent Spartan decider); cons={} padded={} vars={}",
+                    spk.num_constraints, spk.num_constraints_padded, spk.num_vars
+                );
+            }
+            #[cfg(not(feature = "spartan"))]
+            {
+                return Err("rebuild with `--features spartan` (on by default)".into());
+            }
+        }
+        "groth16" => {
+            let pk = groth16_pk.expect("Groth16 PK");
+            let decider_vp = Groth16::<Bn254>::process_vk(&pk.vk)?;
+            let proof = Decider::prove(pk, rng, circuit)?;
+            let start = start_timer!(|| "Decider verify");
+            let verified = Decider::verify(
+                decider_vp,
+                vk,
+                Fr::from(num_steps as u32),
+                initial_state,
+                last_state[1],
+                &running_instance,
+                &incoming_instance,
+                proof,
+            )?;
+            assert!(verified);
+            end_timer!(start);
+            println!("Lossless encoding proof verified (Nova + Groth16 decider).");
+        }
+        other => return Err(format!("unknown DECIDER={other} (use groth16 or spartan)").into()),
+    }
 
-    let start = start_timer!(|| "Decider verify");
-    let verified = Decider::verify(
-        decider_vp,
-        vk,
-        Fr::from(num_steps as u32),
-        initial_state,
-        last_state[1],
-        &running_instance,
-        &incoming_instance,
-        proof,
-    )?;
-    assert!(verified);
-    end_timer!(start);
-
-    println!("Lossless encoding proof verified (Nova + Groth16 decider).");
     println!("h1 (recorder binding) is signed via decider; h2 matches hash_verifier_lossless.");
 
     Ok(())

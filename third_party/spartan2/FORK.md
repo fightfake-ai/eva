@@ -1,8 +1,10 @@
-# Vendored Spartan2 0.9.0 (Eva Option C)
+# Vendored Spartan2 0.9.0
 
-Copied from crates.io `spartan2-0.9.0` with minimal patches so comparison
-can prove an **external** arkworks R1CS (the full `DeciderEthCircuit`) without
-re-encoding it as a bellpepper `SpartanCircuit`.
+Copied from crates.io `spartan2-0.9.0` with minimal patches so Eva can prove an
+**external** arkworks R1CS (`DeciderEthCircuit`) without re-encoding it as a
+bellpepper `SpartanCircuit`.
+
+Used by `video::decider::SpartanDecider`.
 
 ## Patches vs upstream
 
@@ -15,6 +17,6 @@ re-encoding it as a bellpepper `SpartanCircuit`.
 ## Standalone soundness wrapper
 
 Upstream `RelaxedR1CSSpartanProof` intentionally does **not** absorb
-`comm_W` / `comm_E` (it is meant to sit under NIFS). For Eva’s transparent
-decider we absorb those commitments into the Fiat–Shamir transcript **before**
-`prove` / `verify` (see `comparison/src/ark_to_spartan.rs`).
+`comm_W` / `comm_E` (it is meant to sit under NIFS). Eva’s transparent
+decider absorbs those commitments into the Fiat–Shamir transcript **before**
+`prove` / `verify` (`video/src/decider/spartan.rs`).

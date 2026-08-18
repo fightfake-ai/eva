@@ -164,9 +164,9 @@ Nova IVC + CycleFold + LogUp   (unchanged)
             │
      ┌──────┴──────┐
      ▼             ▼
-  Groth16      matrix Spartan (vendored API)
-  trusted      transparent, same statement
+  Decider      SpartanDecider
+  (Groth16)    (transparent)
 ```
 
-This avoids rewriting step circuits in bellpepper while delivering a complete
-transparent-setup proof of the decider statement.
+Both live in `video::decider`. This avoids rewriting step circuits in bellpepper while
+delivering a complete transparent-setup proof of the same decider statement.

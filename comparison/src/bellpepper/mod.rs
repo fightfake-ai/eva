@@ -3,7 +3,6 @@
 //! See `docs/spartan2-comparison/LOOKUPS.md` for witness layout and port plan.
 
 pub mod lookup;
-pub mod relaxed_check;
 pub mod step;
 
 pub use lookup::{build_histogram, expected_logup_constraints, TABLE_SIZE};

@@ -1,3 +1,20 @@
+//! Final compression of a finished Nova IVC run.
+//!
+//! Both backends prove the **same** [`DeciderEthCircuit`] statement (primary relaxed
+//! R1CS + CycleFold + device sigma):
+//!
+//! | Type | Setup | Typical use |
+//! |------|--------|-------------|
+//! | [`Decider`] | Groth16 (trusted) | On-chain / tiny proofs |
+//! | [`SpartanDecider`] | Hyrax + sum-check (transparent) | Offline / no toxic waste |
+//!
+//! Enable the Spartan backend with `--features spartan` (on by default).
+
+#[cfg(feature = "spartan")]
+mod spartan;
+#[cfg(feature = "spartan")]
+pub use spartan::{SpartanDecider, SpartanProof, SpartanVerifierKey};
+
 use ark_crypto_primitives::crh::poseidon::constraints::CRHGadget;
 use ark_crypto_primitives::crh::CRHSchemeGadget;
 use ark_crypto_primitives::sponge::Absorb;

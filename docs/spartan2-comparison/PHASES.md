@@ -91,8 +91,7 @@ cargo test -p comparison bellpepper --release
 
 **Tasks:**
 
-- [x] Option C spike: keep Nova IVC; dual final path Groth16 vs Spartan (`phase3_option_c`)
-- [x] Full transparent decider: ark `DeciderEthCircuit` → Spartan matrix prove (CycleFold + sigma)
+- [x] Dual deciders in `video`: Groth16 `Decider` + transparent `SpartanDecider`
 - [x] Document architecture: [`OPTION_C_TRANSPARENT.md`](./OPTION_C_TRANSPARENT.md)
 - [ ] Measure full-video prove time, peak memory, proof size (fill results after runs)
 - [ ] Document verifier cost (Ethereum gas if applicable)
@@ -105,9 +104,8 @@ cargo test -p comparison bellpepper --release
 **Run:**
 
 ```bash
-SKIP_G16=1 SPARTAN_MODE=full cargo run --release -p comparison --example phase3_option_c
-SPARTAN_MODE=full cargo run --release -p comparison --example phase3_option_c
-SKIP_G16=1 SPARTAN_MODE=primary cargo run --release -p comparison --example phase3_option_c
+QUICK=1 cargo run --release -p video --example edit_lossless_decider
+QUICK=1 DECIDER=spartan cargo run --release -p video --example edit_lossless_decider
 ```
 
 **Docs:** [`OPTION_C_TRANSPARENT.md`](./OPTION_C_TRANSPARENT.md)  

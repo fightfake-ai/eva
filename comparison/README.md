@@ -28,11 +28,9 @@ NUM_QUERIES=384 cargo run --release -p comparison --example phase2_lookup_smoke
 | `eva_step` | Synthesize Eva step / augmented circuits via arkworks |
 | `nova_baseline` | Nova prove_step / compute_cmT / preprocess timings |
 | `neutronnova` | Spartan2 NeutronNova reference benchmark on BN254 |
-| `bellpepper` | Phase 2 LogUp gadgets + Option C relaxed-R1CS check |
-| `option_c` | Nova IVC + Groth16 Decider vs Spartan primary SNARK |
+| `bellpepper` | Phase 2 LogUp gadgets |
+| `neutronnova` | Spartan2 NeutronNova reference benchmark on BN254 |
 
-```bash
-# Option C dual-path (default 4 blocks, 4 steps)
-cargo run --release -p comparison --example phase3_option_c
-```
+Final Groth16 vs transparent Spartan deciders live in `video::decider`
+(`Decider` / `SpartanDecider`), not in this crate.
 

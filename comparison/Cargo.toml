@@ -15,9 +15,6 @@ ark-relations = { version = "^0.5.0", default-features = false }
 ark-r1cs-std = { version = "^0.5.0", default-features = false }
 ark-std = { version = "^0.5.0" }
 ark-crypto-primitives = { version = "^0.5.0", default-features = false, features = ["r1cs", "sponge", "crh"] }
-ark-groth16 = { version = "^0.5.0" }
-ark-snark = { version = "^0.5.0" }
-ark-serialize = "^0.5.0"
 folding-schemes = { path = "../folding-schemes/", default-features = false, features = ["cpu"] }
 video = { path = "../video", default-features = false, features = ["cpu"] }
 rand = "0.8.5"
@@ -54,11 +51,3 @@ path = "examples/phase1_scale.rs"
 [[example]]
 name = "phase2_lookup_smoke"
 path = "examples/phase2_lookup_smoke.rs"
-
-[[example]]
-name = "phase3_option_c"
-path = "examples/phase3_option_c.rs"
-
-[[example]]
-name = "count_decider_constraints"
-path = "examples/count_decider_constraints.rs"

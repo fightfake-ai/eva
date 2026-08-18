@@ -46,8 +46,7 @@ cpu-backend          ← CPU MSM / compute_t (merged baseline)
 | `comparison/examples/phase1_benchmark.rs` | Phase 1: Nova vs NeutronNova timed comparison |
 | `comparison/examples/phase1_scale.rs` | Phase 1: multi-scale sweep (blocks 4, 16, 64) |
 | `comparison/examples/phase2_lookup_smoke.rs` | Phase 2: LogUp bellpepper + NeutronNova smoke |
-| `comparison/examples/phase3_option_c.rs` | Option C: Groth16 vs Spartan final SNARK |
-| `comparison/src/bellpepper/` | Phase 2 LogUp + Option C relaxed-R1CS check |
+| `video/src/decider/` | Groth16 [`Decider`] + transparent [`SpartanDecider`] |
 
 ## Quick start
 
@@ -98,8 +97,7 @@ Environment variables:
 - [x] Full-scale NeutronNova at 1.43M constraints (~5.1 s/step, ~6.7 GB RSS)
 - [x] Phase 2.0: lookup witness layout documented
 - [x] Phase 2.0: bellpepper LogUp + NeutronNova smoke (Q=16, 384, 2320)
-- [x] Phase 3 / Option C spike: Nova IVC + Groth16 vs Spartan primary final SNARK
-- [x] Phase 3 / Option C complete transparent: full `DeciderEthCircuit` via matrix Spartan
+- [x] Phase 3: dual deciders in `video` (`Decider` Groth16 + `SpartanDecider`)
 - [ ] Phase 2: FS challenge + encode gadgets (full bellpepper Eva step)
 - [ ] Full video pipeline comparison + recorded dual-path timings (Phase 3 complete)
 
@@ -115,8 +113,8 @@ Environment variables:
 3. **CycleFold** — NeutronNova does not use Nova's two-curve CycleFold pattern; the comparison
    must account for different recursion architectures.
 
-4. **Decider** — Groth16 remains the production path (tiny proofs). Option C now also has a
-   **complete transparent** path proving the same `DeciderEthCircuit` R1CS via matrix Spartan
+4. **Decider** — Groth16 (`Decider`) remains the production path (tiny proofs). A
+   **complete transparent** backend (`SpartanDecider`) proves the same `DeciderEthCircuit`
    (`OPTION_C_TRANSPARENT.md`); proof size / verify cost still favor Groth16 for EVM.
 
 ## References
