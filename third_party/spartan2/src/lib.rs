@@ -48,16 +48,31 @@ pub mod spartan; // Spartan without zero-knowledge
 pub mod spartan_relaxed; // Spartan for relaxed R1CS (non-ZK)
 pub mod spartan_zk; // Spartan with zero-knowledge
 
-/// Start a span + timer, return `(Span, Instant)`.
+/// Start a span + timer. On wasm, Instant panics, so the timer is a no-op.
 macro_rules! start_span {
     ($name:expr $(, $($fmt:tt)+)?) => {{
         let span       = tracing::info_span!($name $(, $($fmt)+)?);
-        let span_clone = span.clone();    // lives as long as the guard
+        let span_clone = span.clone();
         let _guard      = span_clone.enter();
-        (span, std::time::Instant::now())
+        #[cfg(not(target_arch = "wasm32"))]
+        let t = std::time::Instant::now();
+        #[cfg(target_arch = "wasm32")]
+        let t = $crate::WasmDummyTime;
+        (span, t)
     }};
 }
 pub(crate) use start_span;
+
+#[cfg(target_arch = "wasm32")]
+#[derive(Clone, Copy)]
+pub(crate) struct WasmDummyTime;
+
+#[cfg(target_arch = "wasm32")]
+impl WasmDummyTime {
+    pub(crate) fn elapsed(self) -> std::time::Duration {
+        std::time::Duration::ZERO
+    }
+}
 
 // The default width used for monolithic commitments.
 pub(crate) const DEFAULT_COMMITMENT_WIDTH: usize = 2048;

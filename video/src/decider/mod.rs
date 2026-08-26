@@ -1,19 +1,29 @@
 //! Final compression of a finished Nova IVC run.
 //!
-//! Both backends prove the **same** [`DeciderEthCircuit`] statement (primary relaxed
-//! R1CS + CycleFold + device sigma):
+//! | Type | Statement | Typical use |
+//! |------|-----------|-------------|
+//! | [`Decider`] | [`DeciderEthCircuit`] (Groth16) | On-chain / EVM |
+//! | [`SpartanDecider`] on [`DeciderEthCircuit`] | same ETH circuit, transparent SNARK | offline but still ~7M cons |
+//! | [`offline`] | native IVC verify + native-field Spartan of the **primary** R1CS | no EVM; wasm-sized wrap |
 //!
-//! | Type | Setup | Typical use |
-//! |------|--------|-------------|
-//! | [`Decider`] | Groth16 (trusted) | On-chain / tiny proofs |
-//! | [`SpartanDecider`] | Hyrax + sum-check (transparent) | Offline / no toxic waste |
-//!
-//! Enable the Spartan backend with `--features spartan` (on by default).
+//! Enable Spartan backends with `--features spartan` (on by default).
 
 #[cfg(feature = "spartan")]
 mod spartan;
 #[cfg(feature = "spartan")]
-pub use spartan::{SpartanDecider, SpartanProof, SpartanVerifierKey};
+pub use spartan::{
+    decode_proof, decode_vk, encode_proof, encode_vk, sha256_hex, SpartanDecider, SpartanProof,
+    SpartanVerifierKey, PROOF_MAGIC, VK_MAGIC,
+};
+
+#[cfg(feature = "spartan")]
+pub mod offline;
+#[cfg(feature = "spartan")]
+pub use offline::{
+    dummy_native_primary, native_primary_circuit_id, native_primary_from_running,
+    prove_native_primary, setup_native_primary, spartan_tiny_smoke, verify_native_primary,
+    NativePrimaryCircuit, OfflineWrap, SpartanSmoke,
+};
 
 use ark_crypto_primitives::crh::poseidon::constraints::CRHGadget;
 use ark_crypto_primitives::crh::CRHSchemeGadget;

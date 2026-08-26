@@ -1,20 +1,50 @@
 # wasm-prove-spike
 
-Spike A harness: tiny Eva EditOnly brightness prove → FFPB output.
+Two prove paths share this crate:
 
-**Full documentation:** [`../docs/SPIKE_A.md`](../docs/SPIKE_A.md)
+| Path | Target | Wrap | Status |
+|------|--------|------|--------|
+| **Editor / in-tab** | `wasm32` + `--features wasm-js` | `Nova::verify` + Spartan(`NativePrimaryCircuit`) | **This is `/editor`** |
+| Spike A (historical) | native `--features native-bin` | Groth16 `DeciderEthCircuit` | PK ~1.3 GiB; **not compiled into wasm** |
 
-## Status
+**Write-up:** [`../docs/offline-decider-and-wasm-spartan.md`](../docs/offline-decider-and-wasm-spartan.md)  
+**Groth16 OOM history:** [`../docs/SPIKE_A.md`](../docs/SPIKE_A.md)
 
-| Stage | Result |
-|-------|--------|
-| Native full prove | **Pass** (~3.5 min) |
-| Native setup export | **Pass** → `spike-params.bin` (~1.3 GiB Groth16 PK) |
-| Native prove-only (cached PK) | **Pass** (~1.7 min, toolkit verify OK) |
-| WASM compile | **Pass** |
-| WASM prove-only (Node) | **Fail** — OOM loading ~1.3 GiB PK into wasm linear memory |
+## Editor WASM (no EVM)
 
-## Phase 1 workflow
+```bash
+cd wasm-prove-spike
+wasm-pack build --target web --release --features wasm-js
+# copy pkg/wasm_prove_spike.js, .d.ts, _bg.wasm into
+# fightfake.ai-web/public/editor-prove/  (do not overwrite worker.js)
+```
+
+JS API used by `public/editor-prove/worker.js`: `nova_start`, `nova_step`, `nova_digest`, `nova_finish`.
+
+`nova_finish` JSON:
+
+| `proof_system` | Meaning |
+|----------------|---------|
+| `nova-offline-spartan` | IVC verified (incl. CycleFold) **and** primary Spartan verified |
+| `nova-ivc` | IVC verified; Spartan wrap failed (`wrap_error`) |
+| `nova-wasm` | Worker caught a trap after Nova; hashes from `nova_digest` |
+
+There are **no** `spike_prove_*` wasm exports. Groth16 lives in `src/eth_spike.rs` (`cfg(not(target_arch = "wasm32"))`).
+
+## Test Spartan in wasm32 (Node)
+
+Same wasm32 linear memory as a browser tab. Two stages: tiny `a*b=c` Spartan, then one 16×16 Nova fold + `NativePrimaryCircuit` wrap.
+
+```bash
+cd wasm-prove-spike
+wasm-pack build --target nodejs --out-dir pkg-node --release --features wasm-js
+node run-wasm-spartan.js
+```
+
+Success looks like `"wrap_ok": true` and `"proof_system": "nova-offline-spartan"`.
+`RuntimeError: unreachable` is still an OOM trap.
+
+## Spike A (native Groth16, historical)
 
 ### Step 1 — Export params (native, once per toy config)
 
@@ -22,26 +52,15 @@ Spike A harness: tiny Eva EditOnly brightness prove → FFPB output.
 cargo run --release -p wasm-prove-spike --features native-bin --bin spike-a-setup
 ```
 
-Writes `spike-params.bin` (FFSP format: Groth16 proving key for the toy decider circuit).
+Writes `spike-params.bin` (FFSP format: Groth16 proving key for the toy ETH decider).
 
-### Step 2 — Prove-only
-
-**Native:**
+### Step 2 — Prove-only (native)
 
 ```bash
 cargo run --release -p wasm-prove-spike --features native-bin --bin spike-a-prove
 ```
 
-**WASM (Node):**
-
-```bash
-wasm-pack build --target nodejs --features wasm-js
-node pkg/run-spike.js 42
-```
-
-Requires `spike-params.bin` in `wasm-prove-spike/` (not committed — ~1.3 GiB).
-
-### Full pipeline (baseline, includes setup)
+### Full pipeline
 
 ```bash
 cargo run --release -p wasm-prove-spike --features native-bin --bin spike-a-native
@@ -56,17 +75,8 @@ cargo run --release -p fightfake-cli --features eva-backend,crypto-verify -- \
   verify-proof --proof ../eva-miha/wasm-prove-spike/spike-proof.bin
 ```
 
-## API (WASM)
-
-```javascript
-const params = fs.readFileSync("../spike-params.bin");
-const ffpb = wasm.spike_prove_bytes_with_params(42n, params);
-```
-
-`spike_prove_bytes(seed)` still runs full setup+prove (OOM in wasm for this circuit).
-
 ## Artifacts (gitignored)
 
 - `spike-params.bin` — cached Groth16 PK (~1.3 GiB)
 - `spike-proof.bin` — FFPB output (~5.6 MB)
-- `pkg/` wasm-pack output (except `pkg/run-spike.js`)
+- `pkg/` wasm-pack output (except committed glue if any)

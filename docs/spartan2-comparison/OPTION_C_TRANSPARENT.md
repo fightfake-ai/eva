@@ -23,7 +23,9 @@ Decider    SpartanDecider
 ```
 
 Primary-only Spartan (bellpepper re-encoding of the folded step R1CS) was an
-incomplete spike and has been **removed**.
+incomplete spike and has been **removed** as a standalone wrap. The editor
+instead runs **`Nova::verify` (CycleFold on CPU) then Spartan on
+`NativePrimaryCircuit`** — see [`../offline-decider-and-wasm-spartan.md`](../offline-decider-and-wasm-spartan.md).
 
 ## Run
 
@@ -31,10 +33,11 @@ incomplete spike and has been **removed**.
 export DATA_PATH=/path/to/data_parsed
 QUICK=1 cargo run --release -p video --example edit_lossless_decider
 QUICK=1 DECIDER=spartan cargo run --release -p video --example edit_lossless_decider
+QUICK=1 DECIDER=offline cargo run --release -p video --example edit_lossless_decider
 ```
 
 `SpartanDecider` is behind `--features spartan` (on in `video`’s default features).
-`wasm-prove-spike` keeps `default-features = false` so it does not pull Spartan2.
+`wasm-prove-spike` (`wasm-js`) now depends on `video` with `spartan` and wraps via `NativePrimaryCircuit`. Native `DECIDER=spartan` still proves `DeciderEthCircuit`.
 
 ## How Spartan proves the ark circuit
 
@@ -46,3 +49,5 @@ QUICK=1 DECIDER=spartan cargo run --release -p video --example edit_lossless_dec
 
 Measured QUICK (`4` blocks × `4` steps): ~7.0M constraints, prove ~79 s,
 verify ~3.7 s, proof ~370 KB. See [results/phase3_option_c.md](./results/phase3_option_c.md).
+
+Spartan on **this** circuit still OOMs in wasm (same ETH encoding Groth16 died on). Analysis of leaving EVM-friendly wrap: [`../offline-decider-and-wasm-spartan.md`](../offline-decider-and-wasm-spartan.md).

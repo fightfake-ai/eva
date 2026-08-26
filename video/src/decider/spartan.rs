@@ -1,7 +1,11 @@
-//! Transparent Spartan backend for [`super::DeciderEthCircuit`].
+//! Transparent Spartan backend for any arkworks [`ConstraintSynthesizer`].
 //!
-//! Synthesizes the same arkworks circuit Groth16 uses, remaps columns to Spartan2
-//! layout, and proves with matrix-native `RelaxedR1CSSpartanProof` (`u = 1`, `E = 0`).
+//! Used by:
+//! - [`super::offline::NativePrimaryCircuit`] (wasm / editor — native-field primary R1CS)
+//! - [`super::DeciderEthCircuit`] (native `DECIDER=spartan` — EVM-shaped wrap, ~7M cons)
+//!
+//! Synthesizes the circuit, remaps columns to Spartan2 layout, and proves with
+//! matrix-native `RelaxedR1CSSpartanProof` (`u = 1`, `E = 0`).
 //!
 //! Ark / Eva column order: `z = [ ONE | X | committed Q | witness W ]`  
 //! Spartan2 column order:  `z = [ Q ‖ W | ONE | X ]`
@@ -18,6 +22,7 @@ use spartan2::traits::transcript::TranscriptEngineTrait;
 use spartan2::traits::Engine;
 
 use folding_schemes::Error;
+use sha2::{Digest, Sha256};
 
 type E = Bn254Engine;
 type Scalar = <E as Engine>::Scalar;
@@ -25,11 +30,64 @@ type PcsVk = <<E as Engine>::PCS as PCSEngineTrait<E>>::VerifierKey;
 
 const TRANSCRIPT_LABEL: &[u8] = b"EvaTransparentDecider";
 
+/// Canonical bytes for a [`SpartanProof`] (`FFSP1` + bincode).
+pub const PROOF_MAGIC: &[u8; 5] = b"FFSP1";
+/// Canonical bytes for a [`SpartanVerifierKey`] (`FFSV1` + bincode).
+pub const VK_MAGIC: &[u8; 5] = b"FFSV1";
+
+pub fn sha256_hex(bytes: &[u8]) -> String {
+    Sha256::digest(bytes)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+
+fn encode_magic(magic: &[u8; 5], value: &impl Serialize) -> Result<Vec<u8>, Error> {
+    let payload = bincode::serialize(value).map_err(|e| Error::Other(format!("bincode: {e}")))?;
+    let mut out = Vec::with_capacity(5 + payload.len());
+    out.extend_from_slice(magic);
+    out.extend_from_slice(&payload);
+    Ok(out)
+}
+
+fn decode_magic<T: serde::de::DeserializeOwned>(magic: &[u8; 5], bytes: &[u8]) -> Result<T, Error> {
+    if bytes.len() < 5 || &bytes[..5] != magic {
+        return Err(Error::Other("unexpected artifact magic".into()));
+    }
+    bincode::deserialize(&bytes[5..]).map_err(|e| Error::Other(format!("bincode: {e}")))
+}
+
+pub fn encode_proof(proof: &SpartanProof) -> Result<Vec<u8>, Error> {
+    encode_magic(PROOF_MAGIC, proof)
+}
+
+pub fn decode_proof(bytes: &[u8]) -> Result<SpartanProof, Error> {
+    decode_magic(PROOF_MAGIC, bytes)
+}
+
+pub fn encode_vk(vk: &SpartanVerifierKey) -> Result<Vec<u8>, Error> {
+    encode_magic(VK_MAGIC, vk)
+}
+
+pub fn decode_vk(bytes: &[u8]) -> Result<SpartanVerifierKey, Error> {
+    decode_magic(VK_MAGIC, bytes)
+}
+
 /// Proof of `DeciderEthCircuit` under transparent Spartan.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SpartanProof {
     pub proof: RelaxedR1CSSpartanProof<E>,
     pub instance: RelaxedR1CSInstance<E>,
+}
+
+impl SpartanProof {
+    pub fn public_io_le_bytes(&self) -> Vec<Vec<u8>> {
+        self.instance
+            .X()
+            .iter()
+            .map(|s| s.to_repr().as_ref().to_vec())
+            .collect()
+    }
 }
 
 /// Verifying material for [`SpartanDecider`] (circuit shape + Hyrax VK).
@@ -122,13 +180,27 @@ fn convert_matrix<F: ArkPrimeField>(
 }
 
 fn convert_ark_cs<F: ArkPrimeField>(cs: &ConstraintSystemRef<F>) -> Result<Conversion, Error> {
+    convert_ark_cs_inner(cs, true)
+}
+
+/// Shape + PCS VK only. Used to publish a well-known verifying key; the
+/// dummy witness need not satisfy the circuit.
+fn convert_ark_cs_shape<F: ArkPrimeField>(cs: &ConstraintSystemRef<F>) -> Result<Conversion, Error> {
+    convert_ark_cs_inner(cs, false)
+}
+
+fn convert_ark_cs_inner<F: ArkPrimeField>(
+    cs: &ConstraintSystemRef<F>,
+    require_sat: bool,
+) -> Result<Conversion, Error> {
     cs.finalize();
     let borrow = cs
         .borrow()
         .ok_or_else(|| Error::Other("CS borrow failed".into()))?;
-    if !borrow
-        .is_satisfied()
-        .map_err(|e| Error::Other(format!("is_satisfied: {e}")))?
+    if require_sat
+        && !borrow
+            .is_satisfied()
+            .map_err(|e| Error::Other(format!("is_satisfied: {e}")))?
     {
         return Err(Error::NotSatisfied);
     }
@@ -199,7 +271,7 @@ fn convert_ark_cs<F: ArkPrimeField>(cs: &ConstraintSystemRef<F>) -> Result<Conve
         .map(|v| ark_fr_to_spartan(*v))
         .collect();
 
-    {
+    if require_sat {
         let z: Vec<_> = [w.clone(), vec![Scalar::ONE], x.clone()].concat();
         let (az, bz, cz) = shape
             .multiply_vec(&z)
@@ -224,11 +296,35 @@ fn convert_ark_cs<F: ArkPrimeField>(cs: &ConstraintSystemRef<F>) -> Result<Conve
     })
 }
 
-/// Transparent final SNARK for [`super::DeciderEthCircuit`].
+/// Transparent SNARK for an arkworks R1CS (`NativePrimaryCircuit` or `DeciderEthCircuit`).
 pub struct SpartanDecider;
 
 impl SpartanDecider {
-    /// Prove `circuit` (typically `DeciderEthCircuit::from_nova(...)`).
+    fn vk_from_conversion(conv: Conversion) -> SpartanVerifierKey {
+        let (_ck, pcs_vk) = conv.shape.commitment_key();
+        SpartanVerifierKey {
+            shape: conv.shape,
+            pcs_vk,
+            num_constraints: conv.num_constraints,
+            num_constraints_padded: conv.num_constraints_padded,
+            num_vars: conv.num_vars,
+            num_io: conv.num_io,
+        }
+    }
+
+    /// Synthesize `circuit` and return the verifying key. Witness need not satisfy.
+    pub fn setup<C, F>(circuit: C) -> Result<SpartanVerifierKey, Error>
+    where
+        C: ConstraintSynthesizer<F>,
+        F: ArkPrimeField,
+    {
+        let cs = ConstraintSystem::<F>::new_ref();
+        circuit.generate_constraints(cs.clone())?;
+        let conv = convert_ark_cs_shape(&cs)?;
+        Ok(Self::vk_from_conversion(conv))
+    }
+
+    /// Prove `circuit`. Editor/wasm uses [`super::NativePrimaryCircuit`], not the ETH decider.
     pub fn prove<C, F>(circuit: C) -> Result<(SpartanProof, SpartanVerifierKey), Error>
     where
         C: ConstraintSynthesizer<F>,
@@ -329,5 +425,17 @@ mod tests {
         let (proof, vk) = SpartanDecider::prove(circuit).expect("prove");
         assert!(SpartanDecider::verify(&vk, &proof).expect("verify"));
         assert!(vk.num_constraints > 0);
+        let proof_bytes = encode_proof(&proof).expect("encode proof");
+        let vk_bytes = encode_vk(&vk).expect("encode vk");
+        let proof2 = decode_proof(&proof_bytes).expect("decode proof");
+        let vk2 = decode_vk(&vk_bytes).expect("decode vk");
+        assert!(SpartanDecider::verify(&vk2, &proof2).expect("verify roundtrip"));
+        let vk_setup = SpartanDecider::setup(TinyMul {
+            a: Fr::from(3u64),
+            b: Fr::from(5u64),
+            c: Fr::from(99u64),
+        })
+        .expect("setup unsat");
+        assert_eq!(sha256_hex(&vk_bytes), sha256_hex(&encode_vk(&vk_setup).expect("encode setup vk")));
     }
 }

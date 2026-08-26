@@ -1,16 +1,15 @@
 //! Full Eva **lossless** pipeline: Nova IVC over `EditOnlyCircuit` + final decider.
 //!
 //! Both backends prove the same [`video::decider::DeciderEthCircuit`]:
-//! - `DECIDER=groth16` (default) — trusted setup, tiny proof
-//! - `DECIDER=spartan` — transparent Hyrax / Spartan
-//!
-//! Proves edit on macroblock YUV without H.264 encode constraints. Only needs
-//! original pixels from `DATA_PATH/foreman` (no preds/coeffs from a re-encoded folder).
+//! - `DECIDER=groth16` (default) — trusted setup, tiny proof (`DeciderEthCircuit`)
+//! - `DECIDER=spartan` — transparent Hyrax on **the same ETH circuit** (~7M cons)
+//! - `DECIDER=offline` — `Nova::verify` + Spartan on the **primary** R1CS only (no EVM encoding)
 //!
 //! ```bash
 //! export DATA_PATH=/path/to/data_parsed
 //! QUICK=1 cargo run --release -p video --example edit_lossless_decider
 //! QUICK=1 DECIDER=spartan cargo run --release -p video --example edit_lossless_decider
+//! QUICK=1 DECIDER=offline cargo run --release -p video --example edit_lossless_decider
 //! ```
 
 #![allow(non_snake_case)]
@@ -200,6 +199,35 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             cyclefold_instance,
         )?;
 
+        if backend == "offline" {
+            #[cfg(feature = "spartan")]
+            {
+                use video::decider::{native_primary_from_running, prove_native_primary, verify_native_primary};
+                use folding_schemes::MVM;
+                let start = start_timer!(|| "OfflineDecider::native_primary Spartan");
+                let circuit = native_primary_from_running(
+                    params.1.r1cs.clone(),
+                    folding_scheme.U_i.u,
+                    folding_scheme.U_i.x.clone(),
+                    folding_scheme.W_i.QW.clone(),
+                    Fr::retrieve_e(&folding_scheme.E),
+                );
+                let (proof, spk) = prove_native_primary(circuit)?;
+                end_timer!(start);
+                assert!(verify_native_primary(&spk, &proof)?);
+                println!(
+                    "Lossless proof verified (Nova::verify + native-primary Spartan); cons={} padded={} vars={}",
+                    spk.num_constraints, spk.num_constraints_padded, spk.num_vars
+                );
+                println!("No DeciderEthCircuit / Groth16 / non-native CycleFold.");
+                return Ok(());
+            }
+            #[cfg(not(feature = "spartan"))]
+            {
+                return Err("rebuild with `--features spartan`".into());
+            }
+        }
+
         let vk = Projective2::generator() * sk;
         let (px, py) = {
             let p = vk.into_affine();
@@ -279,7 +307,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             end_timer!(start);
             println!("Lossless encoding proof verified (Nova + Groth16 decider).");
         }
-        other => return Err(format!("unknown DECIDER={other} (use groth16 or spartan)").into()),
+        other => return Err(format!("unknown DECIDER={other} (use groth16, spartan, or offline)").into()),
     }
 
     println!("h1 (recorder binding) is signed via decider; h2 matches hash_verifier_lossless.");

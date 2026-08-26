@@ -1,21 +1,27 @@
 # WASM prove plan
 
-Status: **Spike A + Phase 1 (cached PK) complete; Track 1 still-image native path done.**
+Status: **Editor WASM uses Nova IVC + offline wrap** (`NativePrimaryCircuit`), not Groth16. Spike A (cached Groth16 PK) remains a native-only historical path.
 
 Related:
-- [`docs/SPIKE_A.md`](docs/SPIKE_A.md) — wasm prove spike
+- [`docs/SPIKE_A.md`](docs/SPIKE_A.md) — Groth16 PK OOM in wasm (historical)
+- [`docs/offline-decider-and-wasm-spartan.md`](docs/offline-decider-and-wasm-spartan.md) — current in-tab wrap
 - [`docs/TRACK1_STILL_IMAGES.md`](docs/TRACK1_STILL_IMAGES.md) — still-image EditOnly (native)
 - [`WASM_PROVE_AGENT_BRIEF.md`](./WASM_PROVE_AGENT_BRIEF.md)
 
-## How prove works today
+## How prove works today (fightfake.ai `/editor`)
 
 ```
-pixels (macroblocks)
-    → video::EditOnlyCircuit<Fr, Brightness|RedactRect|…>
-    → folding-schemes::Nova::{preprocess, init, prove_step×N}
-    → video::decider::Decider::prove          # Groth16 decider
-    → FFPB proof.bin  (fightfake-core::proof_bundle)
+pixels (RGBA → YUV macroblocks)
+    → video::EditOnlyCircuit<Fr, Brightness|RedactRect>
+    → folding-schemes::Nova::{preprocess, init, prove_step×N}   # wasm worker
+    → Nova::verify                                             # native CycleFold
+    → SpartanDecider::prove(NativePrimaryCircuit)              # primary R1CS only
+    → JSON  { proof_system: "nova-offline-spartan", h1, h2, … }
 ```
+
+No `DeciderEthCircuit`, no Groth16 PK, no EVM packing. `wasm-prove-spike` wasm32 does not compile `eth_spike` (Spike A Groth16).
+
+Native lossless example still has `DECIDER=groth16|spartan|offline`.
 
 Toolkit glue: `fightfake-cli` with `--features eva-backend` (`workflow.rs`).
 
@@ -94,4 +100,4 @@ A developer can build a WASM package, call prove on the toy input (browser or No
 
 ## Next step
 
-Confirm whether to proceed with **Phase 1** (cached Groth16 params, wasm prove-only retry, `fightfake-wasm` glue).
+Editor in-tab prove no longer uses Groth16. See [`docs/offline-decider-and-wasm-spartan.md`](docs/offline-decider-and-wasm-spartan.md).

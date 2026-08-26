@@ -2,7 +2,7 @@
 name = "wasm-prove-spike"
 version = "0.1.0"
 edition = "2021"
-description = "Spike A: tiny EditOnly brightness prove for wasm32 feasibility (see docs/SPIKE_A.md)"
+description = "Editor WASM: Nova IVC + offline NativePrimaryCircuit wrap (see docs/offline-decider-and-wasm-spartan.md)"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -18,12 +18,16 @@ path = "src/bin/setup.rs"
 required-features = ["native-bin"]
 
 [[bin]]
-name = "spike-a-prove"
+name = "export-offline-vk"
+path = "src/bin/export_offline_vk.rs"
+
+[[bin]]
+name = "prove"
 path = "src/bin/prove.rs"
 required-features = ["native-bin"]
 
 [dependencies]
-video = { path = "../video", default-features = false, features = ["cpu"] }
+video = { path = "../video", default-features = false, features = ["cpu", "spartan"] }
 folding-schemes = { path = "../folding-schemes", default-features = false, features = ["cpu"] }
 fightfake-core = { path = "../../fightfake-toolkit/fightfake-core", default-features = false, features = ["crypto-verify"], optional = true }
 

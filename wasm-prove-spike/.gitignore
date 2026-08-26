@@ -2,3 +2,4 @@ spike-proof.bin
 spike-params.bin
 pkg/*
 !pkg/run-spike.js
+pkg-node/

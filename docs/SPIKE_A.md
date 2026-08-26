@@ -192,6 +192,7 @@ Groth16 **setup** OOM in wasm is avoided by caching, but the **proving key itsel
 
 ## Related docs
 
+- [`offline-decider-and-wasm-spartan.md`](./offline-decider-and-wasm-spartan.md) — editor wrap is **not** Groth16/`DeciderEthCircuit`; `Nova::verify` + Spartan on `NativePrimaryCircuit`
 - [`WASM_PROVE_AGENT_BRIEF.md`](../WASM_PROVE_AGENT_BRIEF.md) — original brief
 - [`WASM_PROVE_PLAN.md`](../WASM_PROVE_PLAN.md) — Phase 0 plan (updated)
 - [`wasm-prove-spike/README.md`](../wasm-prove-spike/README.md) — quick commands

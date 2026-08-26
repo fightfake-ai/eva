@@ -1,13 +1,35 @@
-//! Offline Groth16 proving-key cache for prove-only wasm runs.
+//! Offline Groth16 proving-key cache for native Spike A (`eth_spike`).
 //!
-//! Nova preprocess still runs at prove time (fast, fits in wasm memory).
-//! Groth16 trusted setup is exported here and loaded from `spike-params.bin`.
+//! Not compiled into the editor WASM (see `lib.rs` `cfg(not(target_arch = "wasm32"))`).
 
 use ark_bn254::Bn254;
 use ark_groth16::ProvingKey;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use serde::Serialize;
 
-use crate::SpikeConfig;
+pub const DEFAULT_BLOCKS_PER_STEP: usize = 4;
+pub const DEFAULT_NUM_STEPS: usize = 2;
+pub const DEFAULT_BRIGHTNESS: u16 = 416;
+pub const DEFAULT_SETUP_RNG_SEED: u64 = 0;
+
+#[derive(Clone, Debug, Serialize)]
+pub struct SpikeConfig {
+    pub blocks_per_step: usize,
+    pub num_steps: usize,
+    pub brightness_scale: u16,
+    pub rng_seed: u64,
+}
+
+impl Default for SpikeConfig {
+    fn default() -> Self {
+        Self {
+            blocks_per_step: DEFAULT_BLOCKS_PER_STEP,
+            num_steps: DEFAULT_NUM_STEPS,
+            brightness_scale: DEFAULT_BRIGHTNESS,
+            rng_seed: 42,
+        }
+    }
+}
 
 const MAGIC: [u8; 4] = *b"FFSP";
 const VERSION: u8 = 1;
