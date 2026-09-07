@@ -241,6 +241,23 @@
       border-radius: 12px;
       padding: 18px 20px;
     }
+    .pillar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+    }
+    .pillar > .cat {
+      margin: 0;
+      font: 500 .78rem/1 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .pillar .cards {
+      display: grid;
+      gap: 12px;
+    }
 
     /* image compare */
     .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
@@ -253,7 +270,182 @@
     }
     .shot.good { border-color: color-mix(in srgb, var(--success) 35%, transparent); }
     .shot.bad { border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
-    .shot img { width: 100%; display: block; background: #000; }
+    .shot img,
+    .shot video { width: 100%; display: block; background: #000; }
+    .shot video { max-height: 42vh; object-fit: cover; object-position: center; }
+    .demo-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: -6px 0 14px;
+    }
+    .demo-controls button {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color: var(--foreground);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font: 500 .82rem/1 var(--font);
+      cursor: pointer;
+    }
+    .demo-controls button:hover { border-color: var(--accent); color: var(--accent); }
+    .demo-controls input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      min-width: 0;
+    }
+    .demo-controls .time {
+      font: 500 .78rem/1 var(--mono);
+      color: var(--muted);
+      min-width: 5.5em;
+      text-align: right;
+    }
+    .mb-zoom-row {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+    .mb-zoom-row .shot img { max-height: none; image-rendering: pixelated; }
+    .yuv-matrix {
+      margin: 0;
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      font: 500 .68rem/1.45 var(--mono);
+      color: var(--muted);
+      overflow: auto;
+    }
+    .yuv-matrix b { color: var(--foreground); font-weight: 600; }
+    .yuv-matrix .zero { color: var(--gold); }
+    .callout-frame {
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+    .callout-frame img { display: block; width: 100%; }
+    .callout-frame .mb-arrow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .frame-stage {
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+    .frame-stage > img {
+      display: block;
+      width: 100%;
+    }
+    .frame-stage .mb-arrow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .loupe {
+      position: absolute;
+      right: 3%;
+      top: 4%;
+      width: 30%;
+      aspect-ratio: 1;
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.55);
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      z-index: 2;
+    }
+    .loupe.orig {
+      background-image: url("eva-orig-grid.jpg");
+      background-size: 900% 600%;
+      background-position: 17.5% 63.75%;
+    }
+    .loupe.edit {
+      background-image: url("eva-edit-grid.jpg");
+      background-size: 900% 600%;
+      background-position: 17.5% 63.75%;
+    }
+    .loupe.pred-L {
+      background-image: url("pred-frame-neighbors.jpg");
+      background-size: 900% 600%;
+      background-position: 15.83% 63.75%;
+      border-color: var(--accent);
+      width: 22%;
+      right: auto;
+      left: 3%;
+      top: 3%;
+    }
+    .loupe.pred-A {
+      background-image: url("pred-frame-neighbors.jpg");
+      background-size: 900% 600%;
+      background-position: 17.5% 61.25%;
+      border-color: var(--accent);
+      width: 22%;
+      right: 28%;
+      top: 3%;
+    }
+    .loupe.pred-X {
+      background-image: url("pred-frame-neighbors.jpg");
+      background-size: 900% 600%;
+      background-position: 17.5% 63.75%;
+      border-color: var(--gold);
+      width: 22%;
+      right: 3%;
+      top: 3%;
+    }
+    .loupe-tag {
+      position: absolute;
+      left: 6px;
+      bottom: 6px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(10,16,28,.88);
+      font: 600 .65rem/1.2 var(--mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .loupe-tag.acc { color: var(--accent); }
+    .loupe-tag.hot { color: var(--gold); }
+    .hash-strip {
+      display: grid;
+      grid-template-columns: 4.5rem 1fr auto;
+      gap: 10px 12px;
+      align-items: center;
+      margin-top: 14px;
+      font: 500 .72rem/1 var(--mono);
+      color: var(--muted);
+    }
+    .hash-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .hash-chip {
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 4px;
+      border: 1px solid var(--card-border);
+      background: color-mix(in srgb, var(--accent) 18%, var(--card));
+    }
+    .hash-chip.diff {
+      background: color-mix(in srgb, var(--gold) 35%, var(--card));
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent);
+    }
+    .hash-root {
+      color: var(--foreground);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .hash-root.diff { color: var(--gold); }
     .shot figcaption {
       display: flex;
       align-items: center;
@@ -321,6 +513,15 @@
       color: var(--accent);
     }
     .callout.neutral strong { color: var(--muted); }
+    .source-link {
+      display: inline-block;
+      margin-top: 10px;
+      font: 500 .78rem/1.4 var(--mono);
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+    .source-link:hover { border-bottom-color: var(--accent); }
 
     /* diagram */
     .diagram {
@@ -387,10 +588,8 @@
         </div>
         <div>
           <p class="muted">
-            Her stance is that big media mostly serve their governments and at
-            the same time teach local journalists what objective journalism is.
-            They fail miserably, she says, and we should be listening to local
-            journalists and local people instead.
+            Her stance is that we should be listening to local journalists and
+            local people.
           </p>
         </div>
       </div>
@@ -409,63 +608,150 @@
         </figure>
         <figure class="shot">
           <img src="sarajevo-ai-rewrite.jpg" alt="AI-generated version of the Sarajevo apartment scene" style="max-height: 32vh; object-fit: cover; object-position: center" />
+          <figcaption>
+            <span class="label">AI-modified</span>
+          </figcaption>
         </figure>
       </div>
     </section>
 
     <!-- 2 -->
-    <section class="slide" data-title="Then deepfakes">
-      <p class="eyebrow">Then generative AI arrived</p>
-      <h1>Now anyone can produce footage of something that never happened.</h1>
-      <div class="compare">
-        <figure class="shot good">
-          <img src="authentic.jpg" alt="Authentic frame of people walking across a bridge" />
-          <figcaption>
-            <span class="label">Original</span>
-            <span class="badge good">✓ Authentic</span>
-          </figcaption>
-        </figure>
-        <figure class="shot bad">
-          <img src="faceswap.jpg" alt="Same frame with one man's face swapped by AI" />
-          <figcaption>
-            <span class="label">AI face swap</span>
-            <span class="badge bad">✕ Not authentic</span>
-          </figcaption>
-        </figure>
+    <section class="slide" data-title="Videos as proofs">
+      <p class="eyebrow">Before the 2026 elections</p>
+      <h1>Slovenia: videos offered as proof of corruption</h1>
+      <div class="diagram" style="margin-top: 10px; margin-bottom: 16px; padding: 14px 16px 8px">
+        <svg viewBox="0 0 920 118" xmlns="http://www.w3.org/2000/svg" aria-label="Timeline of clips, election, and forensics">
+          <style>
+            .tl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .tn { fill: #e8edf7; font: 600 13px Geist, system-ui, sans-serif; }
+            .tb { fill: #0a101c; stroke: #1e2a45; }
+            .tb-hot { fill: #17161c; stroke: #fbbf24; }
+            .tb-acc { fill: #0d1a22; stroke: #22d3ee; }
+            .line { stroke: #1e2a45; stroke-width: 2; }
+            .dot { fill: #22d3ee; }
+            .dot-hot { fill: #fbbf24; }
+            .gap { fill: #fbbf24; font: 500 11px Geist, system-ui, sans-serif; }
+          </style>
+          <line class="line" x1="90" y1="52" x2="830" y2="52"/>
+          <circle class="dot" cx="140" cy="52" r="6"/>
+          <circle class="dot-hot" cx="450" cy="52" r="6"/>
+          <circle class="dot" cx="780" cy="52" r="6"/>
+          <text class="tl" x="140" y="24" text-anchor="middle">~10 DAYS BEFORE</text>
+          <text class="tl" x="450" y="24" text-anchor="middle">VOTE FIRST</text>
+          <text class="tl" x="780" y="24" text-anchor="middle">MONTHS LATER</text>
+          <text class="gap" x="615" y="42" text-anchor="middle">certainty gap →</text>
+          <rect class="tb" x="30" y="72" width="220" height="36" rx="6"/>
+          <text class="tn" x="140" y="95" text-anchor="middle">Secret clips drop</text>
+          <rect class="tb-hot" x="370" y="72" width="160" height="36" rx="6"/>
+          <text class="tn" x="450" y="95" text-anchor="middle">Election day</text>
+          <rect class="tb-acc" x="700" y="72" width="160" height="36" rx="6"/>
+          <text class="tn" x="780" y="95" text-anchor="middle">BKA report</text>
+        </svg>
       </div>
-      <p class="faint">Same bridge, same second, same shirt. One man got a different face.</p>
-      <p class="lead" style="margin-top:20px">
-        Looking is no longer a test. And the people who lose first are the ones
-        whose only claim was “I was there, this is what I saw.”
-      </p>
+      <div class="two cards" style="margin-bottom: 12px">
+        <div>
+          <p class="muted">
+            Days before the 2026 election, secretly recorded clips of politicians
+            and other public figures, appearing to discuss influence, lobbying and
+            the misuse of state funds, appeared on anti-corruption2026.com.
+          </p>
+        </div>
+        <div>
+          <p class="muted">
+            Every usable origin trace had been erased: when and where they were
+            made, which device recorded them, who recorded or edited them, and
+            which software was used.
+          </p>
+        </div>
+        <div>
+          <p class="muted">
+            There would be little uncertainty if every published clip had to carry
+            capture provenance: time, place, device, and an unbroken link back to
+            the original recording, plus proofs of what was done to the video
+            after capture.
+          </p>
+        </div>
+        <div>
+          <p class="muted">
+            German BKA analysts examined 27 files. None were original camera
+            recordings. All had been processed: voices distorted, segments merged,
+            origin traces wiped.
+          </p>
+          <a class="source-link" href="https://www.mladina.si/inc/flow/mladina/2026/forenz/#page=1" target="_blank" rel="noopener">
+            BKA report (Slovene PDF) →
+          </a>
+          <a class="source-link" href="https://www.politico.eu/article/black-cube-leak-tape-corruption-israel-spy-firm-slovenia-election/" target="_blank" rel="noopener" style="margin-left: 14px">
+            POLITICO (English) →
+          </a>
+        </div>
+      </div>
+      <figure class="shot" style="margin: 0">
+        <img src="slovenia-assembly.jpg" alt="National Assembly of the Republic of Slovenia in Ljubljana" style="max-height: 22vh; object-fit: cover; object-position: center" />
+        <figcaption>
+          <span class="label">National Assembly, Ljubljana</span>
+          <span class="faint">MZaplotnik / Wikimedia Commons</span>
+        </figcaption>
+      </figure>
     </section>
 
     <!-- 3 -->
-    <section class="slide hero" data-title="What we build">
-      <p class="eyebrow">What we build</p>
+    <section class="slide" data-title="Where we are">
+      <p class="eyebrow">Where the ecosystem is</p>
       <h1>
-        Trust photos and videos you see.
-        <span class="h1-muted">Prove what was edited.</span>
+        Two pieces have to exist: signing at capture, and proofs of what
+        happened after.
       </h1>
-      <p class="lead">
-        Open software so anyone can check that a video was signed inside the
-        camera, and that later edits were only the ones claimed.
-      </p>
-      <div class="steps">
-        <div class="step">
-          <span class="n">01</span>
-          <h2>Sign at capture</h2>
-          <p>Hardware binds the signature to the real pixel stream, before software can invent bytes.</p>
+      <div class="two" style="margin-top: 8px; align-items: start">
+        <div class="pillar">
+          <p class="cat">Sign at capture</p>
+          <div class="cards">
+            <div>
+              <p class="muted">
+                Some cameras are shipping with signing at capture. True hardware
+                signing (pixels sealed before any app can touch them) is rare,
+                and often unclear from the marketing.
+              </p>
+            </div>
+            <div style="padding: 0; overflow: hidden">
+              <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener">
+                <img src="c2pa-hn-screenshot.png" alt="Hacker News: C2PA Cameras Do Not Survive Contact with Reality" style="width: 100%; display: block" />
+              </a>
+            </div>
+            <div>
+              <h2>What gets signed</h2>
+              <p class="muted">
+                A hash of the pixels, or a commitment the proof system can later
+                open against. That choice shapes how expensive proving becomes,
+                and what the camera has to compute on-device.
+              </p>
+            </div>
+          </div>
         </div>
-        <div class="step">
-          <span class="n">02</span>
-          <h2>Prove what changed</h2>
-          <p>A zero knowledge proof covers the edit, so the original can stay private.</p>
-        </div>
-        <div class="step">
-          <span class="n">03</span>
-          <h2>Check for yourself</h2>
-          <p>Anyone verifies the published file against the proof, in a second or two.</p>
+        <div class="pillar">
+          <p class="cat">Prove what changed</p>
+          <div class="cards">
+            <div>
+              <p class="muted">
+                Once a file leaves the camera, ordinary edits break the
+                signature. Zero-knowledge proofs close that gap without revealing
+                the original.
+              </p>
+            </div>
+            <div>
+              <h2>Eva</h2>
+              <p class="muted">Proofs over lossy H.264.</p>
+              <a class="source-link" href="https://eprint.iacr.org/2024/1436" target="_blank" rel="noopener">
+                Eva paper →
+              </a>
+            </div>
+            <div>
+              <h2>zk-Cinema</h2>
+              <p class="muted">Proofs over lossless edits.</p>
+              <a class="source-link" href="https://eprint.iacr.org/2026/1598" target="_blank" rel="noopener">
+                zk-Cinema paper →
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -486,8 +772,13 @@
           </tr>
           <tr>
             <td>You keep</td>
-            <td>The published video, ~30&nbsp;MB</td>
-            <td>A lossless master, <span class="hot">~2&nbsp;GB</span> per 2&nbsp;min</td>
+            <td>The published video</td>
+            <td>The published video <em>and</em> a lossless master, <span class="hot">~2&nbsp;GB</span> per 2&nbsp;min</td>
+          </tr>
+          <tr>
+            <td>Proof</td>
+            <td>~448&nbsp;B</td>
+            <td>~0.7–1.8&nbsp;MB</td>
           </tr>
           <tr>
             <td>Viewer gets</td>
@@ -497,9 +788,8 @@
         </tbody>
       </table>
       <div class="callout">
-        <strong>The one difference that matters</strong>
         Eva proves the compressed file the viewer actually receives. zk-Cinema
-        proves a lossless master, so         publishing means hosting a second copy
+        proves a lossless master, so publishing means hosting a second copy
         that outweighs the published file by <span class="hot">~70×</span>, and
         trusting someone who eyeballed both.
       </div>
@@ -553,11 +843,6 @@
           <text class="note" x="336" y="198">someone must download the master and compare the two by eye</text>
         </svg>
       </div>
-      <p class="faint">
-        One clip throughout: the paper’s own benchmark, 2 min of 720p at 30 fps.
-        Raw ~5&nbsp;GB · lossless ~2&nbsp;GB · stream ~30&nbsp;MB. Sizes derived from clip
-        dimensions; the paper does not state them.
-      </p>
       <div class="two cards" style="margin-top:22px">
         <div>
           <h2>Why Eva pays for it</h2>
@@ -577,60 +862,802 @@
     </section>
 
     <!-- 6 -->
-    <section class="slide" data-title="The editor">
-      <p class="eyebrow">Shipped today</p>
-      <h1>One person redacted, everything else provably untouched.</h1>
-      <div class="compare">
-        <figure class="shot">
-          <img src="orig-2.5s.jpg" alt="Original frame from the demo clip" />
-          <figcaption><span class="label">Original · stays private</span></figcaption>
-        </figure>
-        <figure class="shot">
-          <img src="redact-2.5s.jpg" alt="Same frame with a black rectangle over one person" />
+    <section class="slide" data-title="How Eva works">
+      <p class="eyebrow">How Eva works</p>
+      <h1>Macroblock after macroblock, each hash chained to the last.</h1>
+      <p class="lead" style="margin-bottom: 12px; max-width: none">
+        The frame is a grid of 16×16 macroblocks. Eva walks them in order:
+        hash this block together with the running state from the previous ones.
+        At the end of the original video that chain is <b style="color: var(--foreground); font-weight: 600">h1</b>;
+        after the edit, the same walk yields <b style="color: var(--foreground); font-weight: 600">h2</b>.
+      </p>
+      <div class="compare" style="margin-bottom: 0">
+        <figure class="shot" style="margin: 0">
+          <div class="frame-stage">
+            <img src="eva-orig-grid.jpg" alt="Original frame with macroblock grid" />
+            <div class="loupe orig" title="Zoomed macroblock" aria-hidden="true"></div>
+            <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
+              <defs>
+                <marker id="loupeArr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#fbbf24"/>
+                </marker>
+              </defs>
+              <line x1="165" y1="382" x2="620" y2="120" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#loupeArr)"/>
+            </svg>
+          </div>
           <figcaption>
-            <span class="label">Published</span>
-            <span class="badge good">✓ Carries a proof</span>
+            <span class="label">Original</span>
+            <span class="faint">one macroblock zoomed</span>
           </figcaption>
         </figure>
-      </div>
-      <div class="stats">
-        <span>Proving <b>~1 hour</b> for a 4K clip</span>
-        <span>Checking <b>1 to 2 seconds</b></span>
-        <span>Only edited frames enter the SNARK</span>
+        <figure class="shot" style="margin: 0">
+          <div class="frame-stage">
+            <img src="eva-edit-grid.jpg" alt="Edited frame with redacted macroblocks" />
+            <div class="loupe edit" title="Zoomed redacted macroblock" aria-hidden="true"></div>
+            <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
+              <defs>
+                <marker id="loupeArr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#fbbf24"/>
+                </marker>
+              </defs>
+              <line x1="165" y1="382" x2="620" y2="120" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#loupeArr2)"/>
+            </svg>
+          </div>
+          <figcaption>
+            <span class="label">Edited · redact</span>
+            <span class="badge good">same block, now black</span>
+          </figcaption>
+        </figure>
       </div>
     </section>
 
     <!-- 7 -->
-    <section class="slide" data-title="Where we could go">
-      <p class="eyebrow">Improvements</p>
-      <h1>Keep the bet that the published file is the proved file. Borrow the rest.</h1>
-      <div class="steps">
-        <div class="step">
-          <span class="n">01</span>
-          <h2>Sign a commitment</h2>
-          <p>Both 2026 papers stop hashing at capture and sign a polynomial commitment instead. Far cheaper to prove, <span class="hot">47s down to 2s</span> on a full HD photo, and a weak camera can outsource it.</p>
-        </div>
-        <div class="step">
-          <span class="n">02</span>
-          <h2>Prove less of the clip</h2>
-          <p>We already skip untouched frames. Proving only the blocks an edit can reach is the same idea taken further: worth a few times, not an order of magnitude.</p>
-        </div>
-        <div class="step">
-          <span class="n">03</span>
-          <h2>Cover real edits</h2>
-          <p>Blur, resize and sharpen are what newsrooms actually do, and zk-Cinema shows how to make them cheap.</p>
+    <section class="slide" data-title="One macroblock">
+      <p class="eyebrow">One macroblock</p>
+      <h1>Pixels here are YUV, not RGB.</h1>
+      <p class="lead" style="margin-bottom: 12px; max-width: none">
+        <b style="color: var(--foreground); font-weight: 600">Y</b> is luma (brightness).
+        <b style="color: var(--foreground); font-weight: 600">U</b> and
+        <b style="color: var(--foreground); font-weight: 600">V</b> are chroma (colour),
+        stored at half resolution in each direction (4:2:0). A 16×16 macroblock
+        holds 256 Y bytes plus 64 U and 64 V. That is what Eva hashes and edits.
+      </p>
+      <div class="two" style="gap: 16px; align-items: start; margin-top: 8px">
+        <figure class="shot" style="margin: 0">
+          <div class="callout-frame">
+            <img src="mb-grid-callout.jpg" alt="Frame with one macroblock marked" style="max-height: 32vh; object-fit: cover; width: 100%" />
+            <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
+              <defs>
+                <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#fbbf24"/>
+                </marker>
+              </defs>
+              <line x1="280" y1="320" x2="168" y2="372" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrowHead)"/>
+              <rect x="220" y="292" width="150" height="28" rx="6" fill="#0a101c" stroke="#fbbf24"/>
+              <text x="295" y="311" text-anchor="middle" fill="#fbbf24" font-family="Geist Mono, ui-monospace, monospace" font-size="13" font-weight="600">this 16×16 block</text>
+            </svg>
+          </div>
+          <figcaption><span class="label">Where we are in the frame</span></figcaption>
+        </figure>
+        <div class="mb-zoom-row" style="grid-template-columns: 1fr 1fr; margin-top: 0">
+          <figure class="shot" style="margin: 0">
+            <img src="mb-zoom.png" alt="One macroblock magnified" />
+            <figcaption><span class="label">Before</span></figcaption>
+          </figure>
+          <figure class="shot good" style="margin: 0">
+            <img src="mb-zoom-redact.png" alt="Same macroblock after redaction" />
+            <figcaption>
+              <span class="label">After redact</span>
+              <span class="badge good">Y → 0</span>
+            </figcaption>
+          </figure>
         </div>
       </div>
-      <div class="callout neutral" style="margin-top:22px">
-        <strong>Not the only ones betting this way</strong>
-        SPEG (ePrint 2026/1717) does for JPEG exactly what Eva does for H.264:
-        prove the lossy transform, leave entropy coding to the standard
-        decoder, publish one file. Stills only, but independent confirmation
-        that the split is right.
+      <pre class="yuv-matrix" style="margin-top: 14px" aria-label="YUV sample values for one macroblock">Y 16×16 · first 4 rows (real bytes from that macroblock)
+202 194 189 197 193 190 187 153  56  21  18  23  23  12  26  24
+186 209 200 193 199 194 183 168  83  24  18  20  16  24  17  15
+204 201 194 200 202 192 184 173 110  22  19  15  20  36  26  26
+ 96 162 195 196 196 183 182 204 146  43  28  16  25  26  27  25
+U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
+
+<b>Redact (fill 0)</b> → every Y in the macroblock becomes <span class="zero">0</span>. The proof attests that only those bytes changed.</pre>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" data-title="Intra prediction">
+      <p class="eyebrow">Prediction · intra</p>
+      <h1>Independent blocks are simpler to prove. Prediction makes blocks depend.</h1>
+      <p class="lead" style="margin-bottom: 12px; max-width: none">
+        Codecs do not store each block as raw pixels. They predict
+        <b style="color: var(--gold); font-weight: 600">X</b> from neighbors
+        already decoded (everything left and above), then store only the
+        <b style="color: var(--foreground); font-weight: 600">residual</b>
+        (what the prediction got wrong). A good prediction means a small residual,
+        and that shrinks the file:
+        <b style="color: var(--foreground); font-weight: 600">actual = prediction + residual</b>.
+        Edit a neighbor, and X’s prediction (and residual) can change too.
+      </p>
+      <figure class="shot" style="margin: 0">
+        <div class="frame-stage">
+          <img src="pred-frame-neighbors.jpg" alt="Full frame grid with L, A, and X highlighted" />
+          <div class="loupe pred-L"><span class="loupe-tag acc">L</span></div>
+          <div class="loupe pred-A"><span class="loupe-tag acc">A</span></div>
+          <div class="loupe pred-X"><span class="loupe-tag hot">X</span></div>
+          <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
+            <defs>
+              <marker id="arrPred" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                <path d="M0,0 L5,3.5 L0,7 Z" fill="#22d3ee"/>
+              </marker>
+              <marker id="arrPredX" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                <path d="M0,0 L5,3.5 L0,7 Z" fill="#fbbf24"/>
+              </marker>
+            </defs>
+            <!-- from L and A cells up to loupes -->
+            <line x1="142" y1="382" x2="120" y2="100" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrPred)"/>
+            <line x1="158" y1="367" x2="450" y2="100" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrPred)"/>
+            <line x1="158" y1="382" x2="780" y2="100" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrPredX)"/>
+            <!-- L → X and A → X on the grid -->
+            <line x1="150" y1="382" x2="150" y2="382" stroke="none"/>
+            <path d="M148 382 H152" stroke="#22d3ee" stroke-width="2"/>
+            <line x1="142" y1="382" x2="149" y2="382" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#arrPred)"/>
+            <line x1="158" y1="375" x2="158" y2="378" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#arrPred)"/>
+          </svg>
+        </div>
+        <figcaption>
+          <span class="label">Macroblock grid</span>
+          <span class="faint">cyan = predictors · gold = current</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" data-title="Encode witness">
+      <p class="eyebrow">Proving encode</p>
+      <h1>Predictions shrink the video. Eva does not compute them in the proof.</h1>
+      <p class="lead" style="margin-bottom: 14px; max-width: none">
+        Finding a prediction for every block is hard, and proving the prediction
+        would be worse. So the prover runs an ordinary encoder
+        <b style="color: var(--foreground); font-weight: 600">outside</b> the circuit
+        and keeps each block’s prediction and residual as a private
+        <b style="color: var(--accent); font-weight: 600">witness</b>.
+        Inside the proof, Eva checks
+        <b style="color: var(--foreground); font-weight: 600">prediction + residual = edited pixels</b>.
+      </p>
+      <div class="diagram" style="margin-top: 4px; margin-bottom: 14px; padding: 16px 16px 12px">
+        <svg viewBox="0 0 900 170" xmlns="http://www.w3.org/2000/svg" aria-label="Encode outside, check witness in the proof">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+            .box { fill: #0a101c; stroke: #1e2a45; }
+            .box-acc { fill: #0d1a22; stroke: #22d3ee; }
+            .box-hot { fill: #17161c; stroke: #fbbf24; }
+            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
+          </style>
+
+          <text class="lbl" x="0" y="16">OUTSIDE THE PROOF</text>
+          <rect class="box" x="0" y="28" width="150" height="44" rx="6"/>
+          <text class="t" x="75" y="55" text-anchor="middle">edited pixels</text>
+          <path class="arr" d="M156 50 H174 M168 45 L174 50 L168 55"/>
+          <rect class="box" x="180" y="28" width="170" height="44" rx="6"/>
+          <text class="t" x="265" y="48" text-anchor="middle">ordinary encoder</text>
+          <text class="ts" x="265" y="62" text-anchor="middle">finds predictions</text>
+          <path class="arr" d="M356 50 H374 M368 45 L374 50 L368 55"/>
+          <rect class="box-acc" x="380" y="28" width="300" height="44" rx="6"/>
+          <text class="t" x="530" y="48" text-anchor="middle">prediction and residual</text>
+          <text class="ts" x="530" y="62" text-anchor="middle">private witness</text>
+
+          <text class="lbl" x="0" y="106">INSIDE THE PROOF</text>
+          <rect class="box" x="0" y="118" width="150" height="44" rx="6"/>
+          <text class="t" x="75" y="145" text-anchor="middle">edit the pixels</text>
+          <path class="arr" d="M156 140 H174 M168 135 L174 140 L168 145"/>
+          <rect class="box-acc" x="180" y="118" width="200" height="44" rx="6"/>
+          <text class="t" x="280" y="138" text-anchor="middle">read the witness</text>
+          <text class="ts" x="280" y="152" text-anchor="middle">do not recompute predictions</text>
+          <path class="arr" d="M386 140 H404 M398 135 L404 140 L398 145"/>
+          <rect class="box-hot" x="410" y="118" width="340" height="44" rx="6"/>
+          <text class="t" x="580" y="138" text-anchor="middle">prediction + residual</text>
+          <text class="ts" x="580" y="152" text-anchor="middle">= the edited block</text>
+        </svg>
+      </div>
+      <div class="callout">
+        <strong>Private to the prover</strong>
+        Verifiers see the proof and the public hashes, not the original pixels
+        or the encoder’s prediction and residual files.
       </div>
     </section>
 
-    <p class="hint">← → or space · F fullscreen · print → PDF</p>
+    <!-- 10 -->
+    <section class="slide" data-title="Eva today">
+      <p class="eyebrow">Eva today</p>
+      <h1>Eva proves encode. fightfake.ai ships edit-only for now.</h1>
+      <p class="lead" style="margin-bottom: 12px; max-width: none">
+        The encode path uses prediction and residual witnesses inside the proof.
+        What ships on <b style="color: var(--foreground); font-weight: 600">fightfake.ai</b>
+        proves the edit on pixels only: no predictions, no encode in the SNARK.
+        Re-encode happens afterward, outside the proof.
+      </p>
+      <div class="diagram" style="margin-top: 4px; margin-bottom: 10px; padding: 14px 16px 10px">
+        <svg viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg" aria-label="Edit-only versus edit plus encode">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .lane { fill: #e8edf7; font: 600 13px Geist, system-ui, sans-serif; }
+            .t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+            .box { fill: #0a101c; stroke: #1e2a45; }
+            .box-in { fill: #0d1a22; stroke: #22d3ee; }
+            .box-out { fill: #0a101c; stroke: #8b9cb8; stroke-dasharray: 4 3; }
+            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
+            .tag { fill: #22d3ee; font: 500 9px "Geist Mono", ui-monospace, monospace; letter-spacing: .06em; }
+            .hot { fill: #fbbf24; font: 600 12px "Geist Mono", ui-monospace, monospace; }
+            .mut { fill: #8b9cb8; font: 12px "Geist Mono", ui-monospace, monospace; }
+          </style>
+
+          <text class="lbl" x="110" y="14">IN THE SNARK</text>
+          <text class="lbl" x="400" y="14">OUTSIDE</text>
+          <text class="lbl" x="620" y="14">PUBLISHED</text>
+
+          <text class="lane" x="0" y="55">Eva</text>
+          <rect class="box-in" x="110" y="30" width="88" height="40" rx="6"/>
+          <text class="t" x="154" y="55" text-anchor="middle">edit</text>
+          <path class="arr" d="M204 50 H220 M214 45 L220 50 L214 55"/>
+          <rect class="box-in" x="226" y="30" width="130" height="40" rx="6"/>
+          <text class="t" x="291" y="48" text-anchor="middle">H.264 encode</text>
+          <text class="tag" x="291" y="62" text-anchor="middle">PRED + RES</text>
+          <path class="arr" d="M362 50 H400 M394 45 L400 50 L394 55"/>
+          <text class="ts" x="470" y="55" text-anchor="middle">nothing left to trust</text>
+          <path class="arr" d="M540 50 H600 M594 45 L600 50 L594 55"/>
+          <rect class="box" x="606" y="30" width="170" height="40" rx="6"/>
+          <text class="t" x="691" y="48" text-anchor="middle">MP4 + proof</text>
+          <text class="hot" x="691" y="62" text-anchor="middle">~2.4 h · 448 B</text>
+
+          <text class="lane" x="0" y="120">Shipped</text>
+          <text class="ts" x="0" y="136">fightfake.ai</text>
+          <rect class="box-in" x="110" y="108" width="88" height="40" rx="6"/>
+          <text class="t" x="154" y="133" text-anchor="middle">edit</text>
+          <path class="arr" d="M204 128 H400 M394 123 L400 128 L394 133"/>
+          <rect class="box-out" x="406" y="108" width="130" height="40" rx="6"/>
+          <text class="t" x="471" y="126" text-anchor="middle">H.264 encode</text>
+          <text class="ts" x="471" y="140" text-anchor="middle">no predictions</text>
+          <path class="arr" d="M542 128 H600 M594 123 L600 128 L594 133"/>
+          <rect class="box" x="606" y="108" width="170" height="40" rx="6"/>
+          <text class="t" x="691" y="126" text-anchor="middle">MP4 + proof</text>
+          <text class="mut" x="691" y="140" text-anchor="middle">~few min WASM</text>
+
+          <text class="ts" x="110" y="172">Cyan = inside the SNARK. Dashed = ordinary re-encode after proving. Shipped uses no prediction witnesses.</text>
+          <text class="ts" x="110" y="190">Eva ~2.4 h: paper bench, native (i9-12900K + RTX 3080), 2 min 720p encode-in-proof. Proof 448 B.</text>
+          <text class="ts" x="110" y="208">fightfake.ai /editor: stills, full edit-only prove in WASM (~few min on a laptop). /example 4K video ~1–1.5 h native CLI. Verify ~1–2 s WASM.</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" data-title="Faster Eva">
+      <p class="eyebrow">Making Eva faster</p>
+      <h1>Most of the clip never changes. Why prove all of it?</h1>
+      <div class="compare" style="margin-bottom: 12px">
+        <figure class="shot">
+          <video id="demo-orig" src="demos1-original.mp4" playsinline preload="metadata" muted></video>
+          <figcaption><span class="label">Original · stays private</span></figcaption>
+        </figure>
+        <figure class="shot good">
+          <video id="demo-edit" src="demos1-redacted.mp4" playsinline preload="metadata" muted></video>
+          <figcaption>
+            <span class="label">Published</span>
+            <span class="badge good">redact only ~2.0s–4.5s</span>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="demo-controls">
+        <button type="button" id="demo-play">Play both</button>
+        <input type="range" id="demo-seek" min="0" max="1000" value="0" step="1" aria-label="Seek both videos" />
+        <span class="time" id="demo-time">0:00 / 0:00</span>
+      </div>
+      <p class="lead" style="margin-top: 14px; margin-bottom: 0; max-width: none">
+        Here the edit is a moving black box on a short time range and a small
+        spatial region. Eva today still folds every macroblock in the clip.
+        The next step might be
+        <b style="color: var(--foreground); font-weight: 600">touched-only</b>:
+        prove the blocks the edit can reach, and leave the rest as a signed
+        copy from the camera.
+      </p>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" data-title="Merkle for touched-only">
+      <p class="eyebrow">Touched-only · commitment</p>
+      <h1>Every block is a leaf. Skip is why the tree exists.</h1>
+      <p class="lead" style="margin-bottom: 12px; max-width: none">
+        The camera signs a Merkle root over
+        <b style="color: var(--foreground); font-weight: 600">all</b>
+        macroblocks, including the future island. Island leaves are
+        <b style="color: var(--foreground); font-weight: 600">opened into Nova</b>
+        and proved. Skip leaves stay under the same root without a Nova step.
+        A running hash cannot skip: leave one block out and the signature breaks.
+      </p>
+      <div class="diagram" style="margin: 0; padding: 12px 14px 10px">
+        <svg viewBox="0 0 920 340" xmlns="http://www.w3.org/2000/svg" aria-label="Skip blocks stay under Merkle root; island is folded in Nova">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+            .skip { fill: #0a101c; stroke: #1e2a45; stroke-width: 1; }
+            .skip-hi { fill: #0d1520; stroke: #22d3ee; stroke-width: 1.75; }
+            .halo { fill: #0d1a22; stroke: #22d3ee; stroke-width: 1.25; opacity: .85; }
+            .isl { fill: #2a2110; stroke: #fbbf24; stroke-width: 1.75; }
+            .node { fill: #0a101c; stroke: #1e2a45; stroke-width: 1.25; }
+            .node-acc { fill: #0d1a22; stroke: #22d3ee; stroke-width: 1.75; }
+            .node-hot { fill: #2a2110; stroke: #fbbf24; stroke-width: 1.5; }
+            .edge { stroke: #1e2a45; fill: none; stroke-width: 1.25; }
+            .edge-acc { stroke: #22d3ee; fill: none; stroke-width: 2; }
+            .edge-hot { stroke: #fbbf24; fill: none; stroke-width: 1.5; opacity: .75; }
+            .map { stroke: #22d3ee; fill: none; stroke-width: 1.5; stroke-dasharray: 4 3; opacity: .85; }
+            .map-hot { stroke: #fbbf24; fill: none; stroke-width: 1.25; stroke-dasharray: 3 3; opacity: .45; }
+          </style>
+
+          <!-- LEFT: frame grid -->
+          <text class="lbl" x="20" y="18">ONE FRAME · MACROBLOCK GRID</text>
+
+          <g id="mb-grid">
+            <!-- row 0: highlight some skip cells that map to tree -->
+            <rect class="skip" x="20" y="36" width="28" height="28"/><rect class="skip" x="48" y="36" width="28" height="28"/>
+            <rect class="skip" x="76" y="36" width="28" height="28"/><rect class="skip" x="104" y="36" width="28" height="28"/>
+            <rect class="skip" x="132" y="36" width="28" height="28"/><rect class="skip" x="160" y="36" width="28" height="28"/>
+            <rect class="skip" x="188" y="36" width="28" height="28"/><rect class="skip-hi" x="216" y="36" width="28" height="28"/>
+            <rect class="skip-hi" x="244" y="36" width="28" height="28"/><rect class="skip-hi" x="272" y="36" width="28" height="28"/>
+            <!-- row 1 -->
+            <rect class="skip" x="20" y="64" width="28" height="28"/><rect class="skip" x="48" y="64" width="28" height="28"/>
+            <rect class="skip" x="76" y="64" width="28" height="28"/><rect class="halo" x="104" y="64" width="28" height="28"/>
+            <rect class="halo" x="132" y="64" width="28" height="28"/><rect class="halo" x="160" y="64" width="28" height="28"/>
+            <rect class="halo" x="188" y="64" width="28" height="28"/><rect class="skip-hi" x="216" y="64" width="28" height="28"/>
+            <rect class="skip-hi" x="244" y="64" width="28" height="28"/><rect class="skip-hi" x="272" y="64" width="28" height="28"/>
+            <!-- row 2 -->
+            <rect class="skip" x="20" y="92" width="28" height="28"/><rect class="skip" x="48" y="92" width="28" height="28"/>
+            <rect class="skip" x="76" y="92" width="28" height="28"/><rect class="halo" x="104" y="92" width="28" height="28"/>
+            <rect class="isl" x="132" y="92" width="28" height="28"/><rect class="isl" x="160" y="92" width="28" height="28"/>
+            <rect class="halo" x="188" y="92" width="28" height="28"/><rect class="skip-hi" x="216" y="92" width="28" height="28"/>
+            <rect class="skip-hi" x="244" y="92" width="28" height="28"/><rect class="skip" x="272" y="92" width="28" height="28"/>
+            <!-- row 3 -->
+            <rect class="skip" x="20" y="120" width="28" height="28"/><rect class="skip" x="48" y="120" width="28" height="28"/>
+            <rect class="skip" x="76" y="120" width="28" height="28"/><rect class="halo" x="104" y="120" width="28" height="28"/>
+            <rect class="isl" x="132" y="120" width="28" height="28"/><rect class="isl" x="160" y="120" width="28" height="28"/>
+            <rect class="halo" x="188" y="120" width="28" height="28"/><rect class="skip-hi" x="216" y="120" width="28" height="28"/>
+            <rect class="skip" x="244" y="120" width="28" height="28"/><rect class="skip" x="272" y="120" width="28" height="28"/>
+            <!-- row 4 -->
+            <rect class="skip" x="20" y="148" width="28" height="28"/><rect class="skip" x="48" y="148" width="28" height="28"/>
+            <rect class="skip" x="76" y="148" width="28" height="28"/><rect class="halo" x="104" y="148" width="28" height="28"/>
+            <rect class="isl" x="132" y="148" width="28" height="28"/><rect class="isl" x="160" y="148" width="28" height="28"/>
+            <rect class="halo" x="188" y="148" width="28" height="28"/><rect class="skip" x="216" y="148" width="28" height="28"/>
+            <rect class="skip" x="244" y="148" width="28" height="28"/><rect class="skip" x="272" y="148" width="28" height="28"/>
+            <!-- row 5 -->
+            <rect class="skip" x="20" y="176" width="28" height="28"/><rect class="skip" x="48" y="176" width="28" height="28"/>
+            <rect class="skip" x="76" y="176" width="28" height="28"/><rect class="halo" x="104" y="176" width="28" height="28"/>
+            <rect class="halo" x="132" y="176" width="28" height="28"/><rect class="halo" x="160" y="176" width="28" height="28"/>
+            <rect class="halo" x="188" y="176" width="28" height="28"/><rect class="skip" x="216" y="176" width="28" height="28"/>
+            <rect class="skip" x="244" y="176" width="28" height="28"/><rect class="skip" x="272" y="176" width="28" height="28"/>
+            <!-- row 6 -->
+            <rect class="skip" x="20" y="204" width="28" height="28"/><rect class="skip" x="48" y="204" width="28" height="28"/>
+            <rect class="skip" x="76" y="204" width="28" height="28"/><rect class="skip" x="104" y="204" width="28" height="28"/>
+            <rect class="skip" x="132" y="204" width="28" height="28"/><rect class="skip" x="160" y="204" width="28" height="28"/>
+            <rect class="skip" x="188" y="204" width="28" height="28"/><rect class="skip" x="216" y="204" width="28" height="28"/>
+            <rect class="skip" x="244" y="204" width="28" height="28"/><rect class="skip" x="272" y="204" width="28" height="28"/>
+          </g>
+
+          <text class="t" x="146" y="106" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="174" y="106" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="146" y="134" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="174" y="134" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="146" y="162" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="174" y="162" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+
+          <rect class="isl" x="20" y="248" width="12" height="12" rx="2"/>
+          <text class="ts" x="38" y="258">island · leaf → Nova</text>
+          <rect class="halo" x="155" y="248" width="12" height="12" rx="2"/>
+          <text class="ts" x="173" y="258">halo · leaf → Nova</text>
+          <rect class="skip-hi" x="280" y="248" width="12" height="12" rx="2"/>
+          <text class="ts" x="298" y="258">skip · leaf, no Nova</text>
+
+          <text class="ts" x="20" y="282">Capture: every cell is a leaf under signed R.</text>
+          <text class="ts" x="20" y="300">Prove: open island leaves; leave skip under R.</text>
+
+          <!-- RIGHT: Merkle tree -->
+          <text class="lbl" x="430" y="18">MERKLE TREE · ALL LEAVES UNDER R</text>
+
+          <rect class="node-acc" x="620" y="36" width="72" height="28" rx="6"/>
+          <text class="t" x="656" y="54" text-anchor="middle">root R</text>
+          <text class="ts" x="700" y="54">signed</text>
+
+          <!-- level 1: emphasize skip side (right) -->
+          <path class="edge-hot" d="M656 64 V78 H540 V90"/>
+          <path class="edge-acc" d="M656 64 V78 H772 V90"/>
+          <rect class="node-hot" x="504" y="90" width="72" height="26" rx="5"/>
+          <text class="t" x="540" y="107" text-anchor="middle" font-size="12">H_I</text>
+          <rect class="node-acc" x="736" y="90" width="72" height="26" rx="5"/>
+          <text class="t" x="772" y="107" text-anchor="middle" font-size="12">H_S</text>
+          <text class="ts" x="540" y="128" text-anchor="middle">opened</text>
+          <text class="ts" x="772" y="128" text-anchor="middle">not folded</text>
+
+          <!-- island subtree (de-emphasized) -->
+          <path class="edge-hot" d="M540 116 V128 H480 V140"/>
+          <path class="edge-hot" d="M540 116 V128 H600 V140"/>
+          <rect class="node-hot" x="444" y="140" width="72" height="26" rx="5"/>
+          <text class="t" x="480" y="157" text-anchor="middle" font-size="12">…</text>
+          <rect class="node-hot" x="564" y="140" width="72" height="26" rx="5"/>
+          <text class="t" x="600" y="157" text-anchor="middle" font-size="12">…</text>
+
+          <path class="edge-hot" d="M480 166 V178 H430 V190"/>
+          <path class="edge-hot" d="M480 166 V178 H530 V190"/>
+          <rect class="node-hot" x="398" y="190" width="64" height="36" rx="5"/>
+          <text class="t" x="430" y="206" text-anchor="middle" font-size="11">leaf</text>
+          <text class="t" x="430" y="220" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">open</text>
+          <rect class="node-hot" x="498" y="190" width="64" height="36" rx="5"/>
+          <text class="t" x="530" y="206" text-anchor="middle" font-size="11">leaf</text>
+          <text class="t" x="530" y="220" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">open</text>
+
+          <path class="edge-hot" d="M600 166 V178 H600 V190"/>
+          <path class="edge-hot" d="M600 166 V178 H680 V190"/>
+          <rect class="node-hot" x="568" y="190" width="64" height="36" rx="5"/>
+          <text class="t" x="600" y="206" text-anchor="middle" font-size="11">leaf</text>
+          <text class="t" x="600" y="220" text-anchor="middle" fill="#fbbf24" font-size="11">open</text>
+          <rect class="node-hot" x="648" y="190" width="64" height="36" rx="5"/>
+          <text class="t" x="680" y="206" text-anchor="middle" font-size="11">leaf</text>
+          <text class="t" x="680" y="220" text-anchor="middle" fill="#fbbf24" font-size="11">open</text>
+
+          <!-- skip subtree (emphasized) -->
+          <path class="edge-acc" d="M772 116 V150 H752 V168"/>
+          <path class="edge-acc" d="M772 116 V150 H832 V168"/>
+          <rect class="node-acc" x="720" y="168" width="64" height="44" rx="5"/>
+          <text class="t" x="752" y="186" text-anchor="middle" font-size="11">leaf</text>
+          <text class="t" x="752" y="202" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="600">skip</text>
+          <rect class="node-acc" x="800" y="168" width="64" height="44" rx="5"/>
+          <text class="t" x="832" y="186" text-anchor="middle" font-size="11">leaf</text>
+          <text class="t" x="832" y="202" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="600">skip</text>
+
+          <!-- maps: skip cells → skip leaves (primary); island faint -->
+          <path class="map" d="M286 50 C420 40, 620 80, 752 168"/>
+          <path class="map" d="M286 78 C440 70, 640 100, 832 168"/>
+          <path class="map-hot" d="M188 134 C300 150, 360 180, 430 208"/>
+
+          <text class="ts" x="430" y="248">Island leaves are in the tree too: Nova opens them, then proves the edit.</text>
+          <text class="ts" x="430" y="266">Skip leaves are why we need Merkle: stay under R with no Nova step.</text>
+          <text class="ts" x="430" y="284">A hash chain cannot omit skip blocks without breaking the signature.</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" data-title="Re-encode smear">
+      <p class="eyebrow">Touched-only · full re-encode</p>
+      <h1>Edit is local. Re-encode is not.</h1>
+      <p class="lead" style="margin-bottom: 10px; max-width: none">
+        After a redact, pixels outside the island are unchanged. Run a normal
+        encoder over the whole clip anyway, and it picks new predictions and
+        residuals almost everywhere. Then there is almost nothing left to copy
+        from the camera.
+      </p>
+      <div class="diagram" style="margin: 0; padding: 10px 12px 8px">
+        <svg viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg" aria-label="Pixel edit is local; re-encode changes syntax almost everywhere">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+            .hot { fill: #fbbf24; font: 600 18px "Geist Mono", ui-monospace, monospace; }
+            .big { fill: #f87171; font: 600 18px "Geist Mono", ui-monospace, monospace; }
+            .ok { fill: #0a101c; stroke: #1e2a45; }
+            .chg { fill: #2a1518; stroke: #f87171; stroke-width: 1; }
+            .isl { fill: #2a2110; stroke: #fbbf24; stroke-width: 1.5; }
+          </style>
+
+          <text class="lbl" x="40" y="18">PIXELS AFTER EDIT</text>
+          <text class="lbl" x="480" y="18">SYNTAX AFTER FULL RE-ENCODE</text>
+
+          <!-- left grid 12x8, cell 22, origin 40,36 -->
+          <g transform="translate(40,36)">
+            <!-- mostly ok, island at cols 5-6 rows 3-4 -->
+            <g fill="#0a101c" stroke="#1e2a45" stroke-width="1">
+              <rect width="22" height="22"/><rect x="22" width="22" height="22"/><rect x="44" width="22" height="22"/><rect x="66" width="22" height="22"/><rect x="88" width="22" height="22"/><rect x="110" width="22" height="22"/><rect x="132" width="22" height="22"/><rect x="154" width="22" height="22"/><rect x="176" width="22" height="22"/><rect x="198" width="22" height="22"/><rect x="220" width="22" height="22"/><rect x="242" width="22" height="22"/>
+              <rect y="22" width="22" height="22"/><rect x="22" y="22" width="22" height="22"/><rect x="44" y="22" width="22" height="22"/><rect x="66" y="22" width="22" height="22"/><rect x="88" y="22" width="22" height="22"/><rect x="110" y="22" width="22" height="22"/><rect x="132" y="22" width="22" height="22"/><rect x="154" y="22" width="22" height="22"/><rect x="176" y="22" width="22" height="22"/><rect x="198" y="22" width="22" height="22"/><rect x="220" y="22" width="22" height="22"/><rect x="242" y="22" width="22" height="22"/>
+              <rect y="44" width="22" height="22"/><rect x="22" y="44" width="22" height="22"/><rect x="44" y="44" width="22" height="22"/><rect x="66" y="44" width="22" height="22"/><rect x="88" y="44" width="22" height="22"/><rect x="110" y="44" width="22" height="22"/><rect x="132" y="44" width="22" height="22"/><rect x="154" y="44" width="22" height="22"/><rect x="176" y="44" width="22" height="22"/><rect x="198" y="44" width="22" height="22"/><rect x="220" y="44" width="22" height="22"/><rect x="242" y="44" width="22" height="22"/>
+              <rect y="66" width="22" height="22"/><rect x="22" y="66" width="22" height="22"/><rect x="44" y="66" width="22" height="22"/><rect x="66" y="66" width="22" height="22"/><rect x="88" y="66" width="22" height="22"/>
+              <rect class="isl" x="110" y="66" width="22" height="22"/><rect class="isl" x="132" y="66" width="22" height="22"/>
+              <rect x="154" y="66" width="22" height="22"/><rect x="176" y="66" width="22" height="22"/><rect x="198" y="66" width="22" height="22"/><rect x="220" y="66" width="22" height="22"/><rect x="242" y="66" width="22" height="22"/>
+              <rect y="88" width="22" height="22"/><rect x="22" y="88" width="22" height="22"/><rect x="44" y="88" width="22" height="22"/><rect x="66" y="88" width="22" height="22"/><rect x="88" y="88" width="22" height="22"/>
+              <rect class="isl" x="110" y="88" width="22" height="22"/><rect class="isl" x="132" y="88" width="22" height="22"/>
+              <rect x="154" y="88" width="22" height="22"/><rect x="176" y="88" width="22" height="22"/><rect x="198" y="88" width="22" height="22"/><rect x="220" y="88" width="22" height="22"/><rect x="242" y="88" width="22" height="22"/>
+              <rect y="110" width="22" height="22"/><rect x="22" y="110" width="22" height="22"/><rect x="44" y="110" width="22" height="22"/><rect x="66" y="110" width="22" height="22"/><rect x="88" y="110" width="22" height="22"/><rect x="110" y="110" width="22" height="22"/><rect x="132" y="110" width="22" height="22"/><rect x="154" y="110" width="22" height="22"/><rect x="176" y="110" width="22" height="22"/><rect x="198" y="110" width="22" height="22"/><rect x="220" y="110" width="22" height="22"/><rect x="242" y="110" width="22" height="22"/>
+              <rect y="132" width="22" height="22"/><rect x="22" y="132" width="22" height="22"/><rect x="44" y="132" width="22" height="22"/><rect x="66" y="132" width="22" height="22"/><rect x="88" y="132" width="22" height="22"/><rect x="110" y="132" width="22" height="22"/><rect x="132" y="132" width="22" height="22"/><rect x="154" y="132" width="22" height="22"/><rect x="176" y="132" width="22" height="22"/><rect x="198" y="132" width="22" height="22"/><rect x="220" y="132" width="22" height="22"/><rect x="242" y="132" width="22" height="22"/>
+              <rect y="154" width="22" height="22"/><rect x="22" y="154" width="22" height="22"/><rect x="44" y="154" width="22" height="22"/><rect x="66" y="154" width="22" height="22"/><rect x="88" y="154" width="22" height="22"/><rect x="110" y="154" width="22" height="22"/><rect x="132" y="154" width="22" height="22"/><rect x="154" y="154" width="22" height="22"/><rect x="176" y="154" width="22" height="22"/><rect x="198" y="154" width="22" height="22"/><rect x="220" y="154" width="22" height="22"/><rect x="242" y="154" width="22" height="22"/>
+            </g>
+            <text x="121" y="84" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
+            <text x="143" y="84" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
+            <text x="121" y="106" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
+            <text x="143" y="106" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
+          </g>
+
+          <!-- right grid: mostly changed (toy pattern ~70% red) -->
+          <g transform="translate(480,36)">
+            <g stroke-width="1">
+              <!-- row 0 -->
+              <rect class="chg" width="22" height="22"/><rect class="ok" x="22" width="22" height="22"/><rect class="chg" x="44" width="22" height="22"/><rect class="chg" x="66" width="22" height="22"/><rect class="ok" x="88" width="22" height="22"/><rect class="chg" x="110" width="22" height="22"/><rect class="chg" x="132" width="22" height="22"/><rect class="chg" x="154" width="22" height="22"/><rect class="ok" x="176" width="22" height="22"/><rect class="chg" x="198" width="22" height="22"/><rect class="chg" x="220" width="22" height="22"/><rect class="chg" x="242" width="22" height="22"/>
+              <rect class="chg" y="22" width="22" height="22"/><rect class="chg" x="22" y="22" width="22" height="22"/><rect class="ok" x="44" y="22" width="22" height="22"/><rect class="chg" x="66" y="22" width="22" height="22"/><rect class="chg" x="88" y="22" width="22" height="22"/><rect class="chg" x="110" y="22" width="22" height="22"/><rect class="chg" x="132" y="22" width="22" height="22"/><rect class="ok" x="154" y="22" width="22" height="22"/><rect class="chg" x="176" y="22" width="22" height="22"/><rect class="chg" x="198" y="22" width="22" height="22"/><rect class="chg" x="220" y="22" width="22" height="22"/><rect class="ok" x="242" y="22" width="22" height="22"/>
+              <rect class="ok" y="44" width="22" height="22"/><rect class="chg" x="22" y="44" width="22" height="22"/><rect class="chg" x="44" y="44" width="22" height="22"/><rect class="chg" x="66" y="44" width="22" height="22"/><rect class="chg" x="88" y="44" width="22" height="22"/><rect class="chg" x="110" y="44" width="22" height="22"/><rect class="chg" x="132" y="44" width="22" height="22"/><rect class="chg" x="154" y="44" width="22" height="22"/><rect class="chg" x="176" y="44" width="22" height="22"/><rect class="ok" x="198" y="44" width="22" height="22"/><rect class="chg" x="220" y="44" width="22" height="22"/><rect class="chg" x="242" y="44" width="22" height="22"/>
+              <rect class="chg" y="66" width="22" height="22"/><rect class="chg" x="22" y="66" width="22" height="22"/><rect class="chg" x="44" y="66" width="22" height="22"/><rect class="chg" x="66" y="66" width="22" height="22"/><rect class="chg" x="88" y="66" width="22" height="22"/>
+              <rect class="isl" x="110" y="66" width="22" height="22"/><rect class="isl" x="132" y="66" width="22" height="22"/>
+              <rect class="chg" x="154" y="66" width="22" height="22"/><rect class="chg" x="176" y="66" width="22" height="22"/><rect class="chg" x="198" y="66" width="22" height="22"/><rect class="chg" x="220" y="66" width="22" height="22"/><rect class="chg" x="242" y="66" width="22" height="22"/>
+              <rect class="chg" y="88" width="22" height="22"/><rect class="ok" x="22" y="88" width="22" height="22"/><rect class="chg" x="44" y="88" width="22" height="22"/><rect class="chg" x="66" y="88" width="22" height="22"/><rect class="chg" x="88" y="88" width="22" height="22"/>
+              <rect class="isl" x="110" y="88" width="22" height="22"/><rect class="isl" x="132" y="88" width="22" height="22"/>
+              <rect class="chg" x="154" y="88" width="22" height="22"/><rect class="chg" x="176" y="88" width="22" height="22"/><rect class="ok" x="198" y="88" width="22" height="22"/><rect class="chg" x="220" y="88" width="22" height="22"/><rect class="chg" x="242" y="88" width="22" height="22"/>
+              <rect class="chg" y="110" width="22" height="22"/><rect class="chg" x="22" y="110" width="22" height="22"/><rect class="chg" x="44" y="110" width="22" height="22"/><rect class="ok" x="66" y="110" width="22" height="22"/><rect class="chg" x="88" y="110" width="22" height="22"/><rect class="chg" x="110" y="110" width="22" height="22"/><rect class="chg" x="132" y="110" width="22" height="22"/><rect class="chg" x="154" y="110" width="22" height="22"/><rect class="chg" x="176" y="110" width="22" height="22"/><rect class="chg" x="198" y="110" width="22" height="22"/><rect class="ok" x="220" y="110" width="22" height="22"/><rect class="chg" x="242" y="110" width="22" height="22"/>
+              <rect class="ok" y="132" width="22" height="22"/><rect class="chg" x="22" y="132" width="22" height="22"/><rect class="chg" x="44" y="132" width="22" height="22"/><rect class="chg" x="66" y="132" width="22" height="22"/><rect class="chg" x="88" y="132" width="22" height="22"/><rect class="chg" x="110" y="132" width="22" height="22"/><rect class="ok" x="132" y="132" width="22" height="22"/><rect class="chg" x="154" y="132" width="22" height="22"/><rect class="chg" x="176" y="132" width="22" height="22"/><rect class="chg" x="198" y="132" width="22" height="22"/><rect class="chg" x="220" y="132" width="22" height="22"/><rect class="chg" x="242" y="132" width="22" height="22"/>
+              <rect class="chg" y="154" width="22" height="22"/><rect class="chg" x="22" y="154" width="22" height="22"/><rect class="ok" x="44" y="154" width="22" height="22"/><rect class="chg" x="66" y="154" width="22" height="22"/><rect class="chg" x="88" y="154" width="22" height="22"/><rect class="chg" x="110" y="154" width="22" height="22"/><rect class="chg" x="132" y="154" width="22" height="22"/><rect class="chg" x="154" y="154" width="22" height="22"/><rect class="ok" x="176" y="154" width="22" height="22"/><rect class="chg" x="198" y="154" width="22" height="22"/><rect class="chg" x="220" y="154" width="22" height="22"/><rect class="ok" x="242" y="154" width="22" height="22"/>
+            </g>
+          </g>
+
+          <text class="hot" x="172" y="230" text-anchor="middle">0</text>
+          <text class="ts" x="172" y="248" text-anchor="middle">slots outside I with new pixels</text>
+
+          <text class="big" x="612" y="230" text-anchor="middle">~63k–80k</text>
+          <text class="ts" x="612" y="248" text-anchor="middle">slots outside I with new syntax</text>
+
+          <text class="ts" x="40" y="278">720p fixture · 108,000 macroblock slots · centered redact on 2 frames. Measured JM syntax sweep.</text>
+          <text class="ts" x="40" y="296">Red = prediction / residual / mode changed even though pixels matched the camera.</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" data-title="Cannot just merge">
+      <p class="eyebrow">Touched-only · island-only encode</p>
+      <h1>You cannot paste a separately encoded island into the camera stream.</h1>
+      <p class="lead" style="margin-bottom: 10px; max-width: none">
+        Touched-only
+        <b style="color: var(--foreground); font-weight: 600">is</b>
+        keep camera bytes on skip and only redo the island. The merge can assemble
+        and even play. The picture still drifts if the island was encoded on its
+        own: those residuals were fitted to the wrong reconstruction.
+      </p>
+      <div class="diagram" style="margin: 0; padding: 10px 12px 8px">
+        <svg viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg" aria-label="Merge of camera skip tiles and island tiles breaks prediction">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+            .cam { fill: #0d1a22; stroke: #22d3ee; stroke-width: 1.25; }
+            .isl { fill: #2a2110; stroke: #fbbf24; stroke-width: 1.5; }
+            .box { fill: #0a101c; stroke: #1e2a45; }
+            .bad { fill: #2a1518; stroke: #f87171; stroke-width: 1.5; }
+            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.5; }
+            .arr-bad { stroke: #f87171; fill: none; stroke-width: 2; }
+          </style>
+
+          <text class="lbl" x="20" y="18">IF THE ISLAND COMES FROM A SEPARATE ENCODE</text>
+
+          <!-- camera plane -->
+          <rect class="box" x="20" y="32" width="200" height="120" rx="8"/>
+          <text class="ts" x="120" y="52" text-anchor="middle">camera encode</text>
+          <rect class="cam" x="40" y="64" width="28" height="28"/><rect class="cam" x="68" y="64" width="28" height="28"/><rect class="cam" x="96" y="64" width="28" height="28"/><rect class="cam" x="124" y="64" width="28" height="28"/><rect class="cam" x="152" y="64" width="28" height="28"/>
+          <rect class="cam" x="40" y="92" width="28" height="28"/><rect class="cam" x="68" y="92" width="28" height="28"/><rect class="cam" x="96" y="92" width="28" height="28"/><rect class="cam" x="124" y="92" width="28" height="28"/><rect class="cam" x="152" y="92" width="28" height="28"/>
+          <text class="ts" x="120" y="140" text-anchor="middle">skip tiles (cyan)</text>
+
+          <text class="t" x="250" y="95" text-anchor="middle">+</text>
+
+          <!-- edited island encode -->
+          <rect class="box" x="280" y="32" width="200" height="120" rx="8"/>
+          <text class="ts" x="380" y="52" text-anchor="middle">separate edited encode</text>
+          <rect class="cam" x="300" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="328" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="356" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="384" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="64" width="28" height="28" opacity=".25"/>
+          <rect class="cam" x="300" y="92" width="28" height="28" opacity=".25"/><rect class="isl" x="328" y="92" width="28" height="28"/><rect class="isl" x="356" y="92" width="28" height="28"/><rect class="cam" x="384" y="92" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="92" width="28" height="28" opacity=".25"/>
+          <text class="t" x="342" y="111" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="370" y="111" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="ts" x="380" y="140" text-anchor="middle">island tiles only</text>
+
+          <path class="arr" d="M500 92 H530 M522 87 L530 92 L522 97"/>
+
+          <!-- merged mosaic -->
+          <rect class="box" x="540" y="32" width="200" height="120" rx="8"/>
+          <text class="ts" x="640" y="52" text-anchor="middle">merged frame plane</text>
+          <rect class="cam" x="560" y="64" width="28" height="28"/><rect class="cam" x="588" y="64" width="28" height="28"/><rect class="cam" x="616" y="64" width="28" height="28"/><rect class="cam" x="644" y="64" width="28" height="28"/><rect class="cam" x="672" y="64" width="28" height="28"/>
+          <rect class="cam" x="560" y="92" width="28" height="28"/><rect class="isl" x="588" y="92" width="28" height="28"/><rect class="isl" x="616" y="92" width="28" height="28"/><rect class="cam" x="644" y="92" width="28" height="28"/><rect class="cam" x="672" y="92" width="28" height="28"/>
+          <text class="ts" x="640" y="140" text-anchor="middle">looks like a mosaic</text>
+
+          <path class="arr-bad" d="M760 92 H790 M782 87 L790 92 L782 97"/>
+
+          <!-- result broken -->
+          <rect class="bad" x="800" y="48" width="100" height="88" rx="8"/>
+          <text class="t" x="850" y="88" text-anchor="middle" fill="#f87171">drifts</text>
+          <text class="ts" x="850" y="108" text-anchor="middle">after edit</text>
+
+          <!-- bottom explanation -->
+          <text class="lbl" x="20" y="180">WHY A PLANE MERGE IS NOT ENOUGH</text>
+
+          <rect class="box" x="20" y="192" width="280" height="88" rx="8"/>
+          <text class="t" x="36" y="218">1. Bitstream is a line, not a plane</text>
+          <text class="ts" x="36" y="240">CABAC packs tiles in order. You cannot</text>
+          <text class="ts" x="36" y="258">memcpy island bytes into the .264 file.</text>
+
+          <rect class="box" x="320" y="192" width="280" height="88" rx="8"/>
+          <text class="t" x="336" y="218">2. Residual ≠ this predictor</text>
+          <text class="ts" x="336" y="240">Island residual was fitted to encode B.</text>
+          <text class="ts" x="336" y="258">Decoder rebuilds prediction from merge A.</text>
+
+          <rect class="box" x="620" y="192" width="280" height="88" rx="8"/>
+          <text class="t" x="636" y="218">3. Neighbors read across the cut</text>
+          <text class="ts" x="636" y="240">Skip tiles predict from island pixels</text>
+          <text class="ts" x="636" y="258">(and the other way). Errors spread.</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" data-title="Proofs vs hardware">
+      <p class="eyebrow">Where the hard part sits</p>
+      <h1>ZK proofs will get cheap. Capture hardware will not, by itself.</h1>
+      <div class="two" style="gap: 18px; align-items: start; margin-top: 10px">
+        <div class="cards" style="display: grid; gap: 12px">
+          <div>
+            <h2>Proving is a research curve</h2>
+            <p class="muted">
+              Folding, lookups, better circuits, less of the clip to prove:
+              that stack moves every year. Imagine a slice of the blockchain
+              ZKP community pointed at provenance instead of rollups. Touched-only,
+              faster folds, and browser verify are solvable on a human timeline.
+            </p>
+          </div>
+          <div>
+            <h2>The binding still needs a sealed root</h2>
+            <p class="muted">
+              A fast proof only attests what was signed at capture. If phones
+              can mint “camera” signatures for arbitrary bytes, cheaper proving
+              just accelerates a weak story.
+            </p>
+          </div>
+        </div>
+        <div class="callout" style="max-width: none">
+          <strong>So the real problem next</strong>
+          Silicon that hashes on the pixel bus and signs only that digest, before
+          the OS can substitute bytes. The next slides are about why today’s
+          phone C2PA is not that, and what fightfake wants instead.
+        </div>
+      </div>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide" data-title="Capture hardware">
+      <p class="eyebrow">Capture · hardware</p>
+      <h1>Phone “camera signing” is not a sealed sensor.</h1>
+      <p class="lead" style="margin-bottom: 14px; max-width: none">
+        Eva (and C2PA) still need a trustworthy signature at capture. On Android,
+        that trust sits on Key Attestation / Play Integrity around a camera
+        <b style="color: var(--foreground); font-weight: 600">app</b>,
+        not on pixels sealed before software can touch them.
+      </p>
+      <div class="diagram" style="margin-bottom: 14px; padding: 14px 16px 10px">
+        <svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg" aria-label="Claimed capture path versus what root can do">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+            .box { fill: #0a101c; stroke: #1e2a45; }
+            .box-acc { fill: #0d1a22; stroke: #22d3ee; }
+            .box-bad { fill: #2a1518; stroke: #f87171; }
+            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
+          </style>
+          <text class="lbl" x="0" y="16">CLAIMED PATH</text>
+          <rect class="box-acc" x="0" y="28" width="100" height="40" rx="6"/>
+          <text class="t" x="50" y="53" text-anchor="middle">sensor</text>
+          <path class="arr" d="M106 48 H122 M114 43 L122 48 L114 53"/>
+          <rect class="box" x="128" y="28" width="110" height="40" rx="6"/>
+          <text class="t" x="183" y="53" text-anchor="middle">camera app</text>
+          <path class="arr" d="M244 48 H260 M252 43 L260 48 L252 53"/>
+          <rect class="box-acc" x="266" y="28" width="130" height="40" rx="6"/>
+          <text class="t" x="331" y="46" text-anchor="middle">StrongBox sign</text>
+          <text class="ts" x="331" y="60" text-anchor="middle">attested device</text>
+          <path class="arr" d="M402 48 H418 M410 43 L418 48 L410 53"/>
+          <rect class="box" x="424" y="28" width="150" height="40" rx="6"/>
+          <text class="t" x="499" y="53" text-anchor="middle">“captured” C2PA</text>
+
+          <text class="lbl" x="0" y="96">WITH ROOT (SOFTWARE OR HARDWARE)</text>
+          <rect class="box-bad" x="0" y="108" width="160" height="40" rx="6"/>
+          <text class="t" x="80" y="133" text-anchor="middle">any bytes you choose</text>
+          <path class="arr" d="M166 128 H182 M174 123 L182 128 L174 133"/>
+          <rect class="box-bad" x="188" y="108" width="200" height="40" rx="6"/>
+          <text class="t" x="288" y="126" text-anchor="middle">ask StrongBox to sign</text>
+          <text class="ts" x="288" y="140" text-anchor="middle">keys never leave the chip</text>
+          <path class="arr" d="M394 128 H410 M402 123 L410 128 L402 133"/>
+          <rect class="box-bad" x="416" y="108" width="200" height="40" rx="6"/>
+          <text class="t" x="516" y="133" text-anchor="middle">same C2PA trust story</text>
+        </svg>
+      </div>
+      <div class="two cards" style="gap: 12px">
+        <div>
+          <h2>Attestation does not see exploit root</h2>
+          <p class="muted">
+            Locked bootloader, vendor AVB keys, “up to date” still look fine.
+            Google will provision keys to a compromised device. Pixel Camera had
+            Assurance Level 2, the strongest Android C2PA rating.
+          </p>
+        </div>
+        <div>
+          <h2>Keys stay “hardware-backed”</h2>
+          <p class="muted">
+            Root does not need to extract the private key. It only needs to call
+            the KeyStore as the camera app and sign arbitrary media.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide" data-title="Sealed capture">
+      <p class="eyebrow">Capture · fightfake hardware</p>
+      <h1>That break is about app signing. The capture we want is different.</h1>
+      <p class="lead" style="margin-bottom: 12px; max-width: none">
+        Buchanan’s attack fits Android camera apps: root asks StrongBox to sign
+        an arbitrary digest. fightfake’s sketch hashes on the pixel bus and lets
+        the secure element sign
+        <b style="color: var(--foreground); font-weight: 600">only</b>
+        those locked registers, never a digest from the OS.
+      </p>
+      <div class="diagram" style="margin-bottom: 12px; padding: 12px 14px 8px">
+        <svg viewBox="0 0 900 118" xmlns="http://www.w3.org/2000/svg" aria-label="fightfake sealed capture path">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+            .box { fill: #0a101c; stroke: #1e2a45; }
+            .box-acc { fill: #0d1a22; stroke: #22d3ee; }
+            .box-hot { fill: #17161c; stroke: #fbbf24; }
+            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
+          </style>
+          <text class="lbl" x="0" y="14">FIGHTFAKE TARGET PATH</text>
+          <rect class="box-acc" x="0" y="28" width="90" height="40" rx="6"/>
+          <text class="t" x="45" y="53" text-anchor="middle">sensor</text>
+          <path class="arr" d="M96 48 H112 M104 43 L112 48 L104 53"/>
+          <rect class="box-hot" x="118" y="28" width="160" height="40" rx="6"/>
+          <text class="t" x="198" y="46" text-anchor="middle">hash on pixel bus</text>
+          <text class="ts" x="198" y="60" text-anchor="middle">before OS RAM</text>
+          <path class="arr" d="M284 48 H300 M292 43 L300 48 L292 53"/>
+          <rect class="box-hot" x="306" y="28" width="170" height="40" rx="6"/>
+          <text class="t" x="391" y="46" text-anchor="middle">locked registers B</text>
+          <text class="ts" x="391" y="60" text-anchor="middle">OS cannot write</text>
+          <path class="arr" d="M482 48 H498 M490 43 L498 48 L490 53"/>
+          <rect class="box-acc" x="504" y="28" width="180" height="40" rx="6"/>
+          <text class="t" x="594" y="46" text-anchor="middle">SE reads B → signs</text>
+          <text class="ts" x="594" y="60" text-anchor="middle">no sign(digest_from_os)</text>
+          <path class="arr" d="M690 48 H706 M698 43 L706 48 L698 53"/>
+          <rect class="box" x="712" y="28" width="160" height="40" rx="6"/>
+          <text class="t" x="792" y="53" text-anchor="middle">σ over capture</text>
+          <text class="ts" x="0" y="92">Root on the application processor should not be able to feed a fake digest into the signer.</text>
+          <text class="ts" x="0" y="110">That is the gap Buchanan exploits on phone C2PA, and the gap this path is meant to close.</text>
+        </svg>
+      </div>
+      <div class="two cards" style="gap: 12px; margin-bottom: 12px">
+        <div>
+          <h2>What this answers</h2>
+          <p class="muted">
+            App + attestation “hardware-backed” signing. Pixel Assurance Level 2
+            can still mint “captured” C2PA for arbitrary bytes after root. A bus
+            hash with SE-only register signing is aimed at that failure.
+          </p>
+        </div>
+        <div>
+          <h2>What still remains</h2>
+          <p class="muted">
+            Fake feed before the hash tap. Attacks on the SE or FPGA itself.
+            Optical re-capture (photo of a screen). Manufacturer key compromise.
+            Implement it wrong (hash in OS RAM, or SE accepts OS digests) and
+            Buchanan applies again.
+          </p>
+        </div>
+      </div>
+      <p class="faint" style="margin: 0">
+        Buchanan:
+        <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener" style="color: var(--accent)">android-c2pa</a>
+        · fightfake capture sketch:
+        <a href="https://fightfake.ai/hardware" target="_blank" rel="noopener" style="color: var(--accent)">fightfake.ai/hardware</a>
+      </p>
+    </section>
+
+    <p class="hint">← → or space · P play demo · F fullscreen · print → PDF</p>
   </div>
 
   <script>
@@ -640,6 +1667,67 @@
     const prev = document.getElementById("prev");
     const next = document.getElementById("next");
     let i = Math.min(Math.max(parseInt(location.hash.slice(1), 10) || 0, 0), slides.length - 1);
+
+    const demoOrig = document.getElementById("demo-orig");
+    const demoEdit = document.getElementById("demo-edit");
+    const demoPlay = document.getElementById("demo-play");
+    const demoSeek = document.getElementById("demo-seek");
+    const demoTime = document.getElementById("demo-time");
+    const demoSlide = slides.findIndex((s) => s.dataset.title === "Faster Eva");
+    let seeking = false;
+
+    function fmt(t) {
+      if (!Number.isFinite(t)) return "0:00";
+      const m = Math.floor(t / 60);
+      const s = Math.floor(t % 60);
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
+
+    function syncTime() {
+      const d = demoOrig.duration || demoEdit.duration || 0;
+      const t = demoOrig.currentTime || 0;
+      if (!seeking && d) demoSeek.value = String(Math.round((t / d) * 1000));
+      demoTime.textContent = `${fmt(t)} / ${fmt(d)}`;
+    }
+
+    function pauseDemo() {
+      demoOrig.pause();
+      demoEdit.pause();
+      demoPlay.textContent = "Play both";
+    }
+
+    function playDemo() {
+      const p1 = demoOrig.play();
+      const p2 = demoEdit.play();
+      Promise.all([p1, p2]).catch(() => pauseDemo());
+      demoPlay.textContent = "Pause";
+    }
+
+    demoPlay.addEventListener("click", () => {
+      if (demoOrig.paused) playDemo();
+      else pauseDemo();
+    });
+
+    demoSeek.addEventListener("pointerdown", () => { seeking = true; });
+    demoSeek.addEventListener("pointerup", () => { seeking = false; });
+    demoSeek.addEventListener("input", () => {
+      const d = demoOrig.duration || demoEdit.duration || 0;
+      if (!d) return;
+      const t = (Number(demoSeek.value) / 1000) * d;
+      demoOrig.currentTime = t;
+      demoEdit.currentTime = t;
+      syncTime();
+    });
+
+    demoOrig.addEventListener("timeupdate", () => {
+      if (Math.abs(demoOrig.currentTime - demoEdit.currentTime) > 0.08) {
+        demoEdit.currentTime = demoOrig.currentTime;
+      }
+      syncTime();
+    });
+    demoOrig.addEventListener("ended", pauseDemo);
+    demoOrig.addEventListener("loadedmetadata", syncTime);
+    demoEdit.addEventListener("loadedmetadata", syncTime);
 
     slides.forEach((s, idx) => {
       const b = document.createElement("button");
@@ -658,6 +1746,7 @@
       prev.disabled = i === 0;
       next.disabled = i === slides.length - 1;
       history.replaceState(null, "", `#${i}`);
+      if (i !== demoSlide) pauseDemo();
     }
 
     prev.addEventListener("click", () => go(i - 1));
@@ -668,6 +1757,11 @@
       if (e.key === "f" || e.key === "F") {
         if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
         else document.exitFullscreen?.();
+      }
+      if ((e.key === "p" || e.key === "P") && i === demoSlide) {
+        e.preventDefault();
+        if (demoOrig.paused) playDemo();
+        else pauseDemo();
       }
     });
     go(i);
