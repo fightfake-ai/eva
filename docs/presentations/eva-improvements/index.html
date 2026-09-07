@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eva: signed vs stored</title>
+  <style>
+    @font-face {
+      font-family: Geist;
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-latin-ext.woff2") format("woff2");
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: Geist;
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-latin.woff2") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: "Geist Fallback";
+      src: local(Arial);
+      ascent-override: 95.94%;
+      descent-override: 28.16%;
+      line-gap-override: 0.0%;
+      size-adjust: 104.76%;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-mono-latin-ext.woff2") format("woff2");
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-mono-latin.woff2") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: "Geist Mono Fallback";
+      src: local(Arial);
+      ascent-override: 74.67%;
+      descent-override: 21.92%;
+      line-gap-override: 0.0%;
+      size-adjust: 134.59%;
+    }
+
+    :root {
+      --background: #070b14;
+      --foreground: #e8edf7;
+      --muted: #8b9cb8;
+      --card: #0f1629;
+      --card-border: #1e2a45;
+      --accent: #22d3ee;
+      --accent-dim: #0891b2;
+      --gold: #fbbf24;
+      --danger: #f87171;
+      --success: #34d399;
+      --font: Geist, "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+      --mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--background);
+      color: var(--foreground);
+      font: 17px/1.5 var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(color-mix(in srgb, var(--card-border) 40%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--card-border) 40%, transparent) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 15%, #000 20%, transparent 75%);
+      z-index: 0;
+    }
+
+    .deck {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      min-height: 100%;
+      padding: 24px 32px 72px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* nav */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: nowrap;
+      margin-bottom: 40px;
+    }
+    .navside { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      height: 30px;
+      padding: 0 9px;
+      border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      font: 600 13px/30px var(--font);
+      letter-spacing: -0.02em;
+    }
+    .brand-word { font: 600 15px/1 var(--font); letter-spacing: -0.02em; }
+    .brand-word .name, .brand-badge .name { color: var(--foreground); }
+    .brand-word .ai, .brand-badge .ai { color: var(--accent); }
+    .brand-badge .ai { font-size: 0.65em; font-weight: 600; }
+    .pills { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; min-width: 0; flex: 1 1 auto; }
+    .pill, .nav-btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: color-mix(in srgb, var(--card) 80%, transparent);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 11px;
+      font: 500 11.5px/1 var(--font);
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .pill:hover, .nav-btn:hover:not(:disabled) {
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+      color: var(--foreground);
+    }
+    .pill.active {
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      color: var(--accent);
+    }
+    .nav-btn:disabled { opacity: .3; cursor: default; }
+    .count { font: 12px/1 var(--mono); color: var(--muted); }
+
+    /* slides */
+    .slide { display: none; flex: 1; }
+    .slide.active { display: block; animation: in .28s ease-out; }
+    .slide.hero.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-bottom: 6vh;
+    }
+    @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      font: 500 11px/1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    h1 {
+      font-size: clamp(1.9rem, 3.6vw, 2.7rem);
+      font-weight: 600;
+      margin: 0 0 16px;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      max-width: 24em;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); max-width: 20em; }
+    .h1-muted { color: var(--muted); }
+    .lead {
+      color: var(--muted);
+      margin: 0 0 34px;
+      max-width: 34em;
+      font-size: 1.1rem;
+      line-height: 1.55;
+    }
+    h2 {
+      font-size: .95rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+      letter-spacing: -0.01em;
+    }
+    .muted { color: var(--muted); font-size: .93rem; margin: 0; line-height: 1.55; }
+    .faint {
+      color: color-mix(in srgb, var(--muted) 75%, transparent);
+      font: .78rem/1.5 var(--mono);
+      margin: 0;
+    }
+
+    /* pull quote */
+    .quote {
+      margin: 0 0 12px;
+      padding-left: 26px;
+      border-left: 2px solid var(--accent);
+      font-size: clamp(1.15rem, 2.1vw, 1.5rem);
+      line-height: 1.45;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      max-width: 32em;
+    }
+    .quote em { color: var(--accent); font-style: normal; }
+    .attrib {
+      margin: 0 0 30px 28px;
+      font: 400 .92rem/1.55 var(--font);
+      color: var(--muted);
+      max-width: 33em;
+    }
+    .attrib b { color: var(--foreground); font-weight: 600; }
+
+    /* steps */
+    .steps { display: grid; gap: 1px; background: var(--card-border); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
+    .step { display: grid; grid-template-columns: 3.2rem 12rem 1fr; gap: 18px; align-items: baseline; background: var(--card); padding: 18px 22px; }
+    .step .n { font: 500 .78rem/1.6 var(--mono); color: var(--accent); }
+    .step h2 { margin: 0; }
+    .step p { margin: 0; color: var(--muted); font-size: .93rem; }
+
+    /* grids */
+    .two, .three { display: grid; gap: 16px; }
+    .two { grid-template-columns: 1fr 1fr; }
+    .three { grid-template-columns: repeat(3, 1fr); }
+    .cards > div {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    /* image compare */
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+    .shot {
+      margin: 0;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .shot.good { border-color: color-mix(in srgb, var(--success) 35%, transparent); }
+    .shot.bad { border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
+    .shot img { width: 100%; display: block; background: #000; }
+    .shot figcaption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+    }
+    .shot .label { font: 500 .74rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .shot.good .label { color: var(--success); }
+    .shot.bad .label { color: var(--danger); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font: 500 .72rem/1 var(--font);
+      border: 1px solid;
+    }
+    .badge.good { color: var(--success); border-color: color-mix(in srgb, var(--success) 40%, transparent); background: color-mix(in srgb, var(--success) 10%, transparent); }
+    .badge.bad { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+
+    /* table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      margin-bottom: 22px;
+      font-size: .93rem;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { border-bottom: 1px solid var(--card-border); padding: 15px 18px; text-align: left; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    th {
+      background: color-mix(in srgb, var(--card) 55%, #000);
+      font: 500 .74rem/1 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    th:nth-child(2) { color: var(--accent); }
+    th:nth-child(3) { color: var(--gold); }
+    td:first-child { width: 9.5em; color: var(--muted); font: 500 .8rem/1.5 var(--mono); }
+
+    /* callout */
+    .callout {
+      border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+      background: color-mix(in srgb, var(--accent) 7%, var(--card));
+      padding: 18px 20px;
+      border-radius: 12px;
+      font-size: .95rem;
+      line-height: 1.55;
+      max-width: 52em;
+    }
+    .callout.neutral { background: var(--card); border-color: var(--card-border); }
+    .hot { color: var(--gold); font-weight: 600; }
+    .callout strong {
+      display: block;
+      margin-bottom: 8px;
+      font: 500 .7rem/1 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .callout.neutral strong { color: var(--muted); }
+
+    /* diagram */
+    .diagram {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 14px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px 10px 10px;
+    }
+    .diagram svg { display: block; min-width: 720px; width: 100%; height: auto; }
+
+    .stats { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 22px; font-size: .93rem; color: var(--muted); }
+    .stats b { color: var(--foreground); font-weight: 600; }
+
+    .hint {
+      margin-top: auto;
+      padding-top: 32px;
+      font: 11px/1.4 var(--mono);
+      color: color-mix(in srgb, var(--muted) 60%, transparent);
+      letter-spacing: .02em;
+    }
+
+    @media (max-width: 820px) {
+      .two, .three, .compare { grid-template-columns: 1fr; }
+      .step { grid-template-columns: 2.4rem 1fr; }
+      .step p { grid-column: 2; }
+    }
+    @media print {
+      .slide { display: block !important; page-break-after: always; padding-top: 20px; }
+      nav, .hint, body::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <nav>
+      <div class="pills" id="pills">
+        <span class="brand" aria-label="fightfake.ai">
+          <span class="brand-badge"><span class="name">ff</span><span class="ai">.ai</span></span>
+          <span class="brand-word"><span class="name">fightfake</span><span class="ai">.ai</span></span>
+        </span>
+      </div>
+      <div class="navside">
+        <button class="nav-btn" id="prev" type="button">←</button>
+        <span class="count" id="count"></span>
+        <button class="nav-btn" id="next" type="button">→</button>
+      </div>
+    </nav>
+
+    <!-- 1 -->
+    <section class="slide" data-title="Citizen journalism">
+      <h1>Citizen journalism</h1>
+      <div class="two cards" style="margin-top: 18px">
+        <div>
+          <p class="muted">
+            In one of the interviews, Nidžara Ahmetašević, a Bosnian journalist,
+            emphasized the importance of citizen journalism. She started her
+            career as a journalist during the siege of Sarajevo when she was
+            seventeen. She was hungry and in constant danger, while journalists
+            from big media stayed in safe hotels with plenty of whisky and meat.
+          </p>
+        </div>
+        <div>
+          <p class="muted">
+            Her stance is that big media mostly serve their governments and at
+            the same time teach local journalists what objective journalism is.
+            They fail miserably, she says, and we should be listening to local
+            journalists and local people instead.
+          </p>
+        </div>
+      </div>
+      <p class="lead" style="margin: 18px 0 0; max-width: 46em">
+        I cannot judge that opinion. But I agree citizen journalism is
+        important and will become even more so. However, how do we trust it, if
+        anyone can generate whatever photo or video they want?
+      </p>
+      <div class="compare" style="margin-top: 16px; margin-bottom: 0">
+        <figure class="shot">
+          <img src="sarajevo-apartments-1996.jpg" alt="Shelled apartment blocks in Sarajevo, 1996" style="max-height: 32vh; object-fit: cover; object-position: center" />
+          <figcaption>
+            <span class="label">Sarajevo, 1996</span>
+            <span class="faint">SSGT Louis Briscese, USAF / public domain</span>
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="sarajevo-ai-rewrite.jpg" alt="AI-generated version of the Sarajevo apartment scene" style="max-height: 32vh; object-fit: cover; object-position: center" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-title="Then deepfakes">
+      <p class="eyebrow">Then generative AI arrived</p>
+      <h1>Now anyone can produce footage of something that never happened.</h1>
+      <div class="compare">
+        <figure class="shot good">
+          <img src="authentic.jpg" alt="Authentic frame of people walking across a bridge" />
+          <figcaption>
+            <span class="label">Original</span>
+            <span class="badge good">✓ Authentic</span>
+          </figcaption>
+        </figure>
+        <figure class="shot bad">
+          <img src="faceswap.jpg" alt="Same frame with one man's face swapped by AI" />
+          <figcaption>
+            <span class="label">AI face swap</span>
+            <span class="badge bad">✕ Not authentic</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="faint">Same bridge, same second, same shirt. One man got a different face.</p>
+      <p class="lead" style="margin-top:20px">
+        Looking is no longer a test. And the people who lose first are the ones
+        whose only claim was “I was there, this is what I saw.”
+      </p>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide hero" data-title="What we build">
+      <p class="eyebrow">What we build</p>
+      <h1>
+        Trust photos and videos you see.
+        <span class="h1-muted">Prove what was edited.</span>
+      </h1>
+      <p class="lead">
+        Open software so anyone can check that a video was signed inside the
+        camera, and that later edits were only the ones claimed.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <span class="n">01</span>
+          <h2>Sign at capture</h2>
+          <p>Hardware binds the signature to the real pixel stream, before software can invent bytes.</p>
+        </div>
+        <div class="step">
+          <span class="n">02</span>
+          <h2>Prove what changed</h2>
+          <p>A zero knowledge proof covers the edit, so the original can stay private.</p>
+        </div>
+        <div class="step">
+          <span class="n">03</span>
+          <h2>Check for yourself</h2>
+          <p>Anyone verifies the published file against the proof, in a second or two.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-title="Signed vs stored">
+      <p class="eyebrow">Eva vs zk-Cinema</p>
+      <h1>What does the camera sign, and what do you have to keep around to publish?</h1>
+      <table>
+        <thead>
+          <tr><th></th><th>Eva</th><th>zk-Cinema</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Camera signs</td>
+            <td>Hash of the pixels</td>
+            <td>Commitment to the video</td>
+          </tr>
+          <tr>
+            <td>You keep</td>
+            <td>The published video, ~30&nbsp;MB</td>
+            <td>A lossless master, <span class="hot">~2&nbsp;GB</span> per 2&nbsp;min</td>
+          </tr>
+          <tr>
+            <td>Viewer gets</td>
+            <td>Video + proof</td>
+            <td>Video + proof</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>The one difference that matters</strong>
+        Eva proves the compressed file the viewer actually receives. zk-Cinema
+        proves a lossless master, so         publishing means hosting a second copy
+        that outweighs the published file by <span class="hot">~70×</span>, and
+        trusting someone who eyeballed both.
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-title="Distribution">
+      <p class="eyebrow">Distribution</p>
+      <h1>What has to travel with a video</h1>
+      <div class="diagram">
+        <svg viewBox="0 0 820 212" xmlns="http://www.w3.org/2000/svg" aria-label="Distribution diagram">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .lane { fill: #e8edf7; font: 600 13px Geist, system-ui, sans-serif; }
+            .box { fill: #0a101c; stroke: #1e2a45; }
+            .box-acc { fill: #17161c; stroke: #fbbf24; }
+            .t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
+            .sz { fill: #8b9cb8; font: 12px "Geist Mono", ui-monospace, monospace; }
+            .sz-acc { fill: #fbbf24; font: 600 12px "Geist Mono", ui-monospace, monospace; }
+            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
+            .gap { stroke: #fbbf24; fill: none; stroke-width: 1.25; stroke-dasharray: 4 3; }
+            .note { fill: #fbbf24; font: 11px Geist, system-ui, sans-serif; }
+          </style>
+          <text class="lbl" x="86" y="14">SIGNED AT CAPTURE</text>
+          <text class="lbl" x="336" y="14">KEPT TO PUBLISH</text>
+
+          <text class="lane" x="0" y="55">Eva</text>
+          <rect class="box" x="86" y="30" width="210" height="40" rx="6"/>
+          <text class="t" x="191" y="55" text-anchor="middle">hash of captured pixels</text>
+          <path class="arr" d="M302 50 H328 M322 45 L328 50 L322 55"/>
+          <rect class="box" x="336" y="30" width="300" height="40" rx="6"/>
+          <text class="t" x="350" y="55">the published video + proof</text>
+          <text class="sz" x="622" y="55" text-anchor="end">~30 MB</text>
+
+          <text class="lane" x="0" y="140">zk-Cinema</text>
+          <rect class="box" x="86" y="115" width="210" height="40" rx="6"/>
+          <text class="t" x="191" y="140" text-anchor="middle">commitment to the video</text>
+          <path class="arr" d="M302 135 H328 M322 130 L328 135 L322 140"/>
+
+          <rect class="box" x="336" y="96" width="300" height="37" rx="6"/>
+          <text class="t" x="350" y="119">the video people watch</text>
+          <text class="sz" x="622" y="119" text-anchor="end">~30 MB</text>
+
+          <rect class="box-acc" x="336" y="139" width="300" height="37" rx="6"/>
+          <text class="t" x="350" y="162">+ a lossless master, on a log</text>
+          <text class="sz-acc" x="622" y="162" text-anchor="end">~2 GB</text>
+
+          <path class="gap" d="M646 114 H660 M646 158 H660 M660 114 V158"/>
+          <text class="note" x="668" y="130">no proof</text>
+          <text class="note" x="668" y="144">covers this gap</text>
+          <text class="note" x="336" y="198">someone must download the master and compare the two by eye</text>
+        </svg>
+      </div>
+      <p class="faint">
+        One clip throughout: the paper’s own benchmark, 2 min of 720p at 30 fps.
+        Raw ~5&nbsp;GB · lossless ~2&nbsp;GB · stream ~30&nbsp;MB. Sizes derived from clip
+        dimensions; the paper does not state them.
+      </p>
+      <div class="two cards" style="margin-top:22px">
+        <div>
+          <h2>Why Eva pays for it</h2>
+          <p class="muted">
+            The codec is inside the proof. That is the expensive part, and also
+            the reason nothing extra has to be stored or trusted.
+          </p>
+        </div>
+        <div>
+          <h2>Why zk-Cinema skips it</h2>
+          <p class="muted">
+            Proving compression is slow, so it proves the edit on lossless
+            video instead and moves the compression gap to a human.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-title="The editor">
+      <p class="eyebrow">Shipped today</p>
+      <h1>One person redacted, everything else provably untouched.</h1>
+      <div class="compare">
+        <figure class="shot">
+          <img src="orig-2.5s.jpg" alt="Original frame from the demo clip" />
+          <figcaption><span class="label">Original · stays private</span></figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="redact-2.5s.jpg" alt="Same frame with a black rectangle over one person" />
+          <figcaption>
+            <span class="label">Published</span>
+            <span class="badge good">✓ Carries a proof</span>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="stats">
+        <span>Proving <b>~1 hour</b> for a 4K clip</span>
+        <span>Checking <b>1 to 2 seconds</b></span>
+        <span>Only edited frames enter the SNARK</span>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" data-title="Where we could go">
+      <p class="eyebrow">Improvements</p>
+      <h1>Keep the bet that the published file is the proved file. Borrow the rest.</h1>
+      <div class="steps">
+        <div class="step">
+          <span class="n">01</span>
+          <h2>Sign a commitment</h2>
+          <p>Both 2026 papers stop hashing at capture and sign a polynomial commitment instead. Far cheaper to prove, <span class="hot">47s down to 2s</span> on a full HD photo, and a weak camera can outsource it.</p>
+        </div>
+        <div class="step">
+          <span class="n">02</span>
+          <h2>Prove less of the clip</h2>
+          <p>We already skip untouched frames. Proving only the blocks an edit can reach is the same idea taken further: worth a few times, not an order of magnitude.</p>
+        </div>
+        <div class="step">
+          <span class="n">03</span>
+          <h2>Cover real edits</h2>
+          <p>Blur, resize and sharpen are what newsrooms actually do, and zk-Cinema shows how to make them cheap.</p>
+        </div>
+      </div>
+      <div class="callout neutral" style="margin-top:22px">
+        <strong>Not the only ones betting this way</strong>
+        SPEG (ePrint 2026/1717) does for JPEG exactly what Eva does for H.264:
+        prove the lossy transform, leave entropy coding to the standard
+        decoder, publish one file. Stills only, but independent confirmation
+        that the split is right.
+      </div>
+    </section>
+
+    <p class="hint">← → or space · F fullscreen · print → PDF</p>
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const pills = document.getElementById("pills");
+    const count = document.getElementById("count");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    let i = Math.min(Math.max(parseInt(location.hash.slice(1), 10) || 0, 0), slides.length - 1);
+
+    slides.forEach((s, idx) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pill";
+      b.textContent = s.dataset.title;
+      b.addEventListener("click", () => go(idx));
+      pills.appendChild(b);
+    });
+
+    function go(n) {
+      i = Math.min(Math.max(n, 0), slides.length - 1);
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      [...pills.querySelectorAll(".pill")].forEach((b, idx) => b.classList.toggle("active", idx === i));
+      count.textContent = `${i + 1} / ${slides.length}`;
+      prev.disabled = i === 0;
+      next.disabled = i === slides.length - 1;
+      history.replaceState(null, "", `#${i}`);
+    }
+
+    prev.addEventListener("click", () => go(i - 1));
+    next.addEventListener("click", () => go(i + 1));
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); go(i + 1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(i - 1); }
+      if (e.key === "f" || e.key === "F") {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+    });
+    go(i);
+  </script>
+</body>
+</html>
