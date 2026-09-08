@@ -62,7 +62,7 @@
       --card-border: #1e2a45;
       --accent: #22d3ee;
       --accent-dim: #0891b2;
-      --gold: #fbbf24;
+      --amber: #fbbf24;
       --danger: #f87171;
       --success: #34d399;
       --font: Geist, "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
@@ -191,6 +191,17 @@
       font-size: 1.1rem;
       line-height: 1.55;
     }
+    .points {
+      margin: 0 0 12px;
+      padding: 0 0 0 1.2em;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.4;
+      max-width: none;
+    }
+    .points li { margin: 0 0 5px; }
+    .points li:last-child { margin-bottom: 0; }
+    .points b { color: var(--foreground); font-weight: 600; }
     h2 {
       font-size: .95rem;
       font-weight: 600;
@@ -320,7 +331,7 @@
       overflow: auto;
     }
     .yuv-matrix b { color: var(--foreground); font-weight: 600; }
-    .yuv-matrix .zero { color: var(--gold); }
+    .yuv-matrix .zero { color: var(--amber); }
     .callout-frame {
       position: relative;
       overflow: hidden;
@@ -356,7 +367,7 @@
       top: 4%;
       width: 30%;
       aspect-ratio: 1;
-      border: 2px solid var(--gold);
+      border: 2px solid var(--amber);
       border-radius: 10px;
       box-shadow: 0 8px 28px rgba(0,0,0,.55);
       background-repeat: no-repeat;
@@ -396,7 +407,7 @@
       background-image: url("pred-frame-neighbors.jpg");
       background-size: 900% 600%;
       background-position: 17.5% 63.75%;
-      border-color: var(--gold);
+      border-color: var(--amber);
       width: 22%;
       right: 3%;
       top: 3%;
@@ -413,7 +424,7 @@
       text-transform: uppercase;
     }
     .loupe-tag.acc { color: var(--accent); }
-    .loupe-tag.hot { color: var(--gold); }
+    .loupe-tag.hot { color: var(--amber); }
     .hash-strip {
       display: grid;
       grid-template-columns: 4.5rem 1fr auto;
@@ -436,16 +447,16 @@
       background: color-mix(in srgb, var(--accent) 18%, var(--card));
     }
     .hash-chip.diff {
-      background: color-mix(in srgb, var(--gold) 35%, var(--card));
-      border-color: var(--gold);
-      box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent);
+      background: color-mix(in srgb, var(--amber) 35%, var(--card));
+      border-color: var(--amber);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--amber) 40%, transparent);
     }
     .hash-root {
       color: var(--foreground);
       font-weight: 600;
       letter-spacing: 0.04em;
     }
-    .hash-root.diff { color: var(--gold); }
+    .hash-root.diff { color: var(--amber); }
     .shot figcaption {
       display: flex;
       align-items: center;
@@ -489,7 +500,7 @@
       color: var(--muted);
     }
     th:nth-child(2) { color: var(--accent); }
-    th:nth-child(3) { color: var(--gold); }
+    th:nth-child(3) { color: var(--amber); }
     td:first-child { width: 9.5em; color: var(--muted); font: 500 .8rem/1.5 var(--mono); }
 
     /* callout */
@@ -503,7 +514,7 @@
       max-width: 52em;
     }
     .callout.neutral { background: var(--card); border-color: var(--card-border); }
-    .hot { color: var(--gold); font-weight: 600; }
+    .hot { color: var(--amber); font-weight: 600; }
     .callout strong {
       display: block;
       margin-bottom: 8px;
@@ -969,7 +980,7 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
       <h1>Independent blocks are simpler to prove. Prediction makes blocks depend.</h1>
       <p class="lead" style="margin-bottom: 12px; max-width: none">
         Codecs do not store each block as raw pixels. They predict
-        <b style="color: var(--gold); font-weight: 600">X</b> from neighbors
+        <b style="color: var(--amber); font-weight: 600">X</b> from neighbors
         already decoded (everything left and above), then store only the
         <b style="color: var(--foreground); font-weight: 600">residual</b>
         (what the prediction got wrong). A good prediction means a small residual,
@@ -1005,7 +1016,7 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
         </div>
         <figcaption>
           <span class="label">Macroblock grid</span>
-          <span class="faint">cyan = predictors · gold = current</span>
+          <span class="faint">cyan = predictors · amber = current</span>
         </figcaption>
       </figure>
     </section>
@@ -1089,44 +1100,41 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
             .box-out { fill: #0a101c; stroke: #8b9cb8; stroke-dasharray: 4 3; }
             .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
             .tag { fill: #22d3ee; font: 500 9px "Geist Mono", ui-monospace, monospace; letter-spacing: .06em; }
-            .hot { fill: #fbbf24; font: 600 12px "Geist Mono", ui-monospace, monospace; }
-            .mut { fill: #8b9cb8; font: 12px "Geist Mono", ui-monospace, monospace; }
+            .mut { fill: #8b9cb8; font: 9.5px "Geist Mono", ui-monospace, monospace; }
           </style>
 
           <text class="lbl" x="110" y="14">IN THE SNARK</text>
           <text class="lbl" x="400" y="14">OUTSIDE</text>
           <text class="lbl" x="620" y="14">PUBLISHED</text>
 
-          <text class="lane" x="0" y="55">Eva</text>
-          <rect class="box-in" x="110" y="30" width="88" height="40" rx="6"/>
-          <text class="t" x="154" y="55" text-anchor="middle">edit</text>
-          <path class="arr" d="M204 50 H220 M214 45 L220 50 L214 55"/>
-          <rect class="box-in" x="226" y="30" width="130" height="40" rx="6"/>
-          <text class="t" x="291" y="48" text-anchor="middle">H.264 encode</text>
-          <text class="tag" x="291" y="62" text-anchor="middle">PRED + RES</text>
-          <path class="arr" d="M362 50 H400 M394 45 L400 50 L394 55"/>
-          <text class="ts" x="470" y="55" text-anchor="middle">nothing left to trust</text>
-          <path class="arr" d="M540 50 H600 M594 45 L600 50 L594 55"/>
-          <rect class="box" x="606" y="30" width="170" height="40" rx="6"/>
-          <text class="t" x="691" y="48" text-anchor="middle">MP4 + proof</text>
-          <text class="hot" x="691" y="62" text-anchor="middle">~2.4 h · 448 B</text>
+          <text class="lane" x="0" y="58">Eva</text>
+          <rect class="box-in" x="110" y="28" width="88" height="48" rx="6"/>
+          <text class="t" x="154" y="57" text-anchor="middle">edit</text>
+          <path class="arr" d="M204 52 H220 M214 47 L220 52 L214 57"/>
+          <rect class="box-in" x="226" y="28" width="130" height="48" rx="6"/>
+          <text class="t" x="291" y="50" text-anchor="middle">H.264 encode</text>
+          <text class="tag" x="291" y="64" text-anchor="middle">PRED + RES</text>
+          <path class="arr" d="M362 52 H400 M394 47 L400 52 L394 57"/>
+          <text class="ts" x="470" y="57" text-anchor="middle">nothing left to trust</text>
+          <path class="arr" d="M540 52 H600 M594 47 L600 52 L594 57"/>
+          <rect class="box" x="606" y="28" width="170" height="48" rx="6"/>
+          <text class="t" x="691" y="50" text-anchor="middle">MP4 + proof</text>
+          <text class="mut" x="691" y="66" text-anchor="middle">~2.4 h · 448 B</text>
 
-          <text class="lane" x="0" y="120">Shipped</text>
-          <text class="ts" x="0" y="136">fightfake.ai</text>
-          <rect class="box-in" x="110" y="108" width="88" height="40" rx="6"/>
-          <text class="t" x="154" y="133" text-anchor="middle">edit</text>
-          <path class="arr" d="M204 128 H400 M394 123 L400 128 L394 133"/>
-          <rect class="box-out" x="406" y="108" width="130" height="40" rx="6"/>
-          <text class="t" x="471" y="126" text-anchor="middle">H.264 encode</text>
-          <text class="ts" x="471" y="140" text-anchor="middle">no predictions</text>
-          <path class="arr" d="M542 128 H600 M594 123 L600 128 L594 133"/>
-          <rect class="box" x="606" y="108" width="170" height="40" rx="6"/>
-          <text class="t" x="691" y="126" text-anchor="middle">MP4 + proof</text>
-          <text class="mut" x="691" y="140" text-anchor="middle">~few min WASM</text>
+          <text class="lane" x="0" y="128">Shipped</text>
+          <text class="ts" x="0" y="144">fightfake.ai</text>
+          <rect class="box-in" x="110" y="112" width="88" height="48" rx="6"/>
+          <text class="t" x="154" y="141" text-anchor="middle">edit</text>
+          <path class="arr" d="M204 136 H400 M394 131 L400 136 L394 141"/>
+          <rect class="box-out" x="406" y="112" width="130" height="48" rx="6"/>
+          <text class="t" x="471" y="134" text-anchor="middle">H.264 encode</text>
+          <text class="ts" x="471" y="148" text-anchor="middle">no predictions</text>
+          <path class="arr" d="M542 136 H600 M594 131 L600 136 L594 141"/>
+          <rect class="box" x="606" y="112" width="170" height="48" rx="6"/>
+          <text class="t" x="691" y="134" text-anchor="middle">MP4 + proof</text>
+          <text class="mut" x="691" y="148" text-anchor="middle">~1+ h WASM</text>
 
-          <text class="ts" x="110" y="172">Cyan = inside the SNARK. Dashed = ordinary re-encode after proving. Shipped uses no prediction witnesses.</text>
-          <text class="ts" x="110" y="190">Eva ~2.4 h: paper bench, native (i9-12900K + RTX 3080), 2 min 720p encode-in-proof. Proof 448 B.</text>
-          <text class="ts" x="110" y="208">fightfake.ai /editor: stills, full edit-only prove in WASM (~few min on a laptop). /example 4K video ~1–1.5 h native CLI. Verify ~1–2 s WASM.</text>
+          <text class="ts" x="110" y="186">Cyan = inside the SNARK. Dashed = ordinary re-encode after proving. Shipped uses no prediction witnesses.</text>
         </svg>
       </div>
     </section>
@@ -1155,7 +1163,7 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
       </div>
       <p class="lead" style="margin-top: 14px; margin-bottom: 0; max-width: none">
         Here the edit is a moving black box on a short time range and a small
-        spatial region. Eva today still folds every macroblock in the clip.
+        spatial region. Eva today folds every macroblock in the clip.
         The next step might be
         <b style="color: var(--foreground); font-weight: 600">touched-only</b>:
         prove the blocks the edit can reach, and leave the rest as a signed
@@ -1166,17 +1174,15 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
     <!-- 12 -->
     <section class="slide" data-title="Merkle for touched-only">
       <p class="eyebrow">Touched-only · commitment</p>
-      <h1>Every block is a leaf. Skip is why the tree exists.</h1>
-      <p class="lead" style="margin-bottom: 12px; max-width: none">
-        The camera signs a Merkle root over
-        <b style="color: var(--foreground); font-weight: 600">all</b>
-        macroblocks, including the future island. Island leaves are
-        <b style="color: var(--foreground); font-weight: 600">opened into Nova</b>
-        and proved. Skip leaves stay under the same root without a Nova step.
-        A running hash cannot skip: leave one block out and the signature breaks.
-      </p>
+      <h1>At capture every block is a leaf. Prove the island; open the rest.</h1>
+      <ul class="points">
+        <li>Capture: hash each macroblock into the Merkle tree; the camera signs the root.</li>
+        <li>Island: the blocks that are edited.</li>
+        <li>The edit proof runs only over the island.</li>
+        <li>Outside the island: open each leaf against the root and check it stayed the same.</li>
+      </ul>
       <div class="diagram" style="margin: 0; padding: 12px 14px 10px">
-        <svg viewBox="0 0 920 340" xmlns="http://www.w3.org/2000/svg" aria-label="Skip blocks stay under Merkle root; island is folded in Nova">
+        <svg viewBox="0 0 920 270" xmlns="http://www.w3.org/2000/svg" aria-label="Capture hashes every macroblock into a Merkle tree; edit proof covers the island; skip leaves are opened to check unchanged">
           <style>
             .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
             .t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
@@ -1251,33 +1257,31 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
           <text class="t" x="174" y="162" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
 
           <rect class="isl" x="20" y="248" width="12" height="12" rx="2"/>
-          <text class="ts" x="38" y="258">island · leaf → Nova</text>
-          <rect class="halo" x="155" y="248" width="12" height="12" rx="2"/>
-          <text class="ts" x="173" y="258">halo · leaf → Nova</text>
-          <rect class="skip-hi" x="280" y="248" width="12" height="12" rx="2"/>
-          <text class="ts" x="298" y="258">skip · leaf, no Nova</text>
-
-          <text class="ts" x="20" y="282">Capture: every cell is a leaf under signed R.</text>
-          <text class="ts" x="20" y="300">Prove: open island leaves; leave skip under R.</text>
+          <text class="ts" x="38" y="258">island · edited · proved</text>
+          <rect class="halo" x="175" y="248" width="12" height="12" rx="2"/>
+          <text class="ts" x="193" y="258">halo · neighbors</text>
+          <rect class="skip-hi" x="310" y="248" width="12" height="12" rx="2"/>
+          <text class="ts" x="328" y="258">skip · open leaf · unchanged</text>
+          <text class="ts" x="530" y="258">A hash chain cannot omit skip blocks.</text>
 
           <!-- RIGHT: Merkle tree -->
-          <text class="lbl" x="430" y="18">MERKLE TREE · ALL LEAVES UNDER R</text>
+          <text class="lbl" x="430" y="18">MERKLE TREE · EACH LEAF = HASH OF A BLOCK</text>
 
           <rect class="node-acc" x="620" y="36" width="72" height="28" rx="6"/>
           <text class="t" x="656" y="54" text-anchor="middle">root R</text>
           <text class="ts" x="700" y="54">signed</text>
 
-          <!-- level 1: emphasize skip side (right) -->
+          <!-- level 1 -->
           <path class="edge-hot" d="M656 64 V78 H540 V90"/>
           <path class="edge-acc" d="M656 64 V78 H772 V90"/>
           <rect class="node-hot" x="504" y="90" width="72" height="26" rx="5"/>
           <text class="t" x="540" y="107" text-anchor="middle" font-size="12">H_I</text>
           <rect class="node-acc" x="736" y="90" width="72" height="26" rx="5"/>
           <text class="t" x="772" y="107" text-anchor="middle" font-size="12">H_S</text>
-          <text class="ts" x="540" y="128" text-anchor="middle">opened</text>
-          <text class="ts" x="772" y="128" text-anchor="middle">not folded</text>
+          <text class="ts" x="540" y="128" text-anchor="middle">island</text>
+          <text class="ts" x="772" y="128" text-anchor="middle">skip</text>
 
-          <!-- island subtree (de-emphasized) -->
+          <!-- island subtree -->
           <path class="edge-hot" d="M540 116 V128 H480 V140"/>
           <path class="edge-hot" d="M540 116 V128 H600 V140"/>
           <rect class="node-hot" x="444" y="140" width="72" height="26" rx="5"/>
@@ -1287,40 +1291,30 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
 
           <path class="edge-hot" d="M480 166 V178 H430 V190"/>
           <path class="edge-hot" d="M480 166 V178 H530 V190"/>
-          <rect class="node-hot" x="398" y="190" width="64" height="36" rx="5"/>
-          <text class="t" x="430" y="206" text-anchor="middle" font-size="11">leaf</text>
-          <text class="t" x="430" y="220" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">open</text>
-          <rect class="node-hot" x="498" y="190" width="64" height="36" rx="5"/>
-          <text class="t" x="530" y="206" text-anchor="middle" font-size="11">leaf</text>
-          <text class="t" x="530" y="220" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">open</text>
+          <rect class="node-hot" x="398" y="190" width="64" height="28" rx="5"/>
+          <text class="t" x="430" y="208" text-anchor="middle" font-size="11">hash</text>
+          <rect class="node-hot" x="498" y="190" width="64" height="28" rx="5"/>
+          <text class="t" x="530" y="208" text-anchor="middle" font-size="11">hash</text>
 
           <path class="edge-hot" d="M600 166 V178 H600 V190"/>
           <path class="edge-hot" d="M600 166 V178 H680 V190"/>
-          <rect class="node-hot" x="568" y="190" width="64" height="36" rx="5"/>
-          <text class="t" x="600" y="206" text-anchor="middle" font-size="11">leaf</text>
-          <text class="t" x="600" y="220" text-anchor="middle" fill="#fbbf24" font-size="11">open</text>
-          <rect class="node-hot" x="648" y="190" width="64" height="36" rx="5"/>
-          <text class="t" x="680" y="206" text-anchor="middle" font-size="11">leaf</text>
-          <text class="t" x="680" y="220" text-anchor="middle" fill="#fbbf24" font-size="11">open</text>
+          <rect class="node-hot" x="568" y="190" width="64" height="28" rx="5"/>
+          <text class="t" x="600" y="208" text-anchor="middle" font-size="11">hash</text>
+          <rect class="node-hot" x="648" y="190" width="64" height="28" rx="5"/>
+          <text class="t" x="680" y="208" text-anchor="middle" font-size="11">hash</text>
 
-          <!-- skip subtree (emphasized) -->
+          <!-- skip subtree -->
           <path class="edge-acc" d="M772 116 V150 H752 V168"/>
           <path class="edge-acc" d="M772 116 V150 H832 V168"/>
-          <rect class="node-acc" x="720" y="168" width="64" height="44" rx="5"/>
-          <text class="t" x="752" y="186" text-anchor="middle" font-size="11">leaf</text>
-          <text class="t" x="752" y="202" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="600">skip</text>
-          <rect class="node-acc" x="800" y="168" width="64" height="44" rx="5"/>
-          <text class="t" x="832" y="186" text-anchor="middle" font-size="11">leaf</text>
-          <text class="t" x="832" y="202" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="600">skip</text>
+          <rect class="node-acc" x="720" y="168" width="64" height="28" rx="5"/>
+          <text class="t" x="752" y="186" text-anchor="middle" font-size="11">hash</text>
+          <rect class="node-acc" x="800" y="168" width="64" height="28" rx="5"/>
+          <text class="t" x="832" y="186" text-anchor="middle" font-size="11">hash</text>
 
           <!-- maps: skip cells → skip leaves (primary); island faint -->
           <path class="map" d="M286 50 C420 40, 620 80, 752 168"/>
           <path class="map" d="M286 78 C440 70, 640 100, 832 168"/>
-          <path class="map-hot" d="M188 134 C300 150, 360 180, 430 208"/>
-
-          <text class="ts" x="430" y="248">Island leaves are in the tree too: Nova opens them, then proves the edit.</text>
-          <text class="ts" x="430" y="266">Skip leaves are why we need Merkle: stay under R with no Nova step.</text>
-          <text class="ts" x="430" y="284">A hash chain cannot omit skip blocks without breaking the signature.</text>
+          <path class="map-hot" d="M188 134 C300 150, 360 180, 430 204"/>
         </svg>
       </div>
     </section>
@@ -1328,79 +1322,74 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
     <!-- 13 -->
     <section class="slide" data-title="Re-encode smear">
       <p class="eyebrow">Touched-only · full re-encode</p>
-      <h1>Edit is local. Re-encode is not.</h1>
-      <p class="lead" style="margin-bottom: 10px; max-width: none">
-        After a redact, pixels outside the island are unchanged. Run a normal
-        encoder over the whole clip anyway, and it picks new predictions and
-        residuals almost everywhere. Then there is almost nothing left to copy
-        from the camera.
-      </p>
+      <h1>Touching ~2% of blocks looks like a ~50× proving win until full re-encode rewrites almost everything.</h1>
+      <ul class="points">
+        <li>The edit itself touches only about 2% of macroblocks, so you might expect proving to get ~50× cheaper.</li>
+        <li>After a redact, pixels outside the island are unchanged.</li>
+        <li>However, the predictions and residuals change almost everywhere if you re-encode the whole clip, so almost nothing is left to copy from the camera.</li>
+      </ul>
       <div class="diagram" style="margin: 0; padding: 10px 12px 8px">
-        <svg viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg" aria-label="Pixel edit is local; re-encode changes syntax almost everywhere">
+        <svg viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg" aria-label="Pixel edit is local; re-encode changes predictions and residuals almost everywhere">
           <style>
             .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
             .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
             .ts { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
-            .hot { fill: #fbbf24; font: 600 18px "Geist Mono", ui-monospace, monospace; }
-            .big { fill: #f87171; font: 600 18px "Geist Mono", ui-monospace, monospace; }
+            .num { fill: #fbbf24; font: 600 16px "Geist Mono", ui-monospace, monospace; }
+            .num-bad { fill: #f87171; font: 600 16px "Geist Mono", ui-monospace, monospace; }
+            .num-tot { fill: #e8edf7; font: 600 16px "Geist Mono", ui-monospace, monospace; }
             .ok { fill: #0a101c; stroke: #1e2a45; }
+            .halo { fill: #0d1a22; stroke: #22d3ee; stroke-width: 1.25; opacity: .85; }
             .chg { fill: #2a1518; stroke: #f87171; stroke-width: 1; }
             .isl { fill: #2a2110; stroke: #fbbf24; stroke-width: 1.5; }
           </style>
 
           <text class="lbl" x="40" y="18">PIXELS AFTER EDIT</text>
-          <text class="lbl" x="480" y="18">SYNTAX AFTER FULL RE-ENCODE</text>
+          <text class="lbl" x="520" y="18">SYNTAX AFTER FULL RE-ENCODE</text>
+          <text class="lbl" x="460" y="18" text-anchor="middle">108,000 SLOTS</text>
 
-          <!-- left grid 12x8, cell 22, origin 40,36 -->
+          <!-- left: same island + halo as Merkle slide (10×7) -->
           <g transform="translate(40,36)">
-            <!-- mostly ok, island at cols 5-6 rows 3-4 -->
-            <g fill="#0a101c" stroke="#1e2a45" stroke-width="1">
-              <rect width="22" height="22"/><rect x="22" width="22" height="22"/><rect x="44" width="22" height="22"/><rect x="66" width="22" height="22"/><rect x="88" width="22" height="22"/><rect x="110" width="22" height="22"/><rect x="132" width="22" height="22"/><rect x="154" width="22" height="22"/><rect x="176" width="22" height="22"/><rect x="198" width="22" height="22"/><rect x="220" width="22" height="22"/><rect x="242" width="22" height="22"/>
-              <rect y="22" width="22" height="22"/><rect x="22" y="22" width="22" height="22"/><rect x="44" y="22" width="22" height="22"/><rect x="66" y="22" width="22" height="22"/><rect x="88" y="22" width="22" height="22"/><rect x="110" y="22" width="22" height="22"/><rect x="132" y="22" width="22" height="22"/><rect x="154" y="22" width="22" height="22"/><rect x="176" y="22" width="22" height="22"/><rect x="198" y="22" width="22" height="22"/><rect x="220" y="22" width="22" height="22"/><rect x="242" y="22" width="22" height="22"/>
-              <rect y="44" width="22" height="22"/><rect x="22" y="44" width="22" height="22"/><rect x="44" y="44" width="22" height="22"/><rect x="66" y="44" width="22" height="22"/><rect x="88" y="44" width="22" height="22"/><rect x="110" y="44" width="22" height="22"/><rect x="132" y="44" width="22" height="22"/><rect x="154" y="44" width="22" height="22"/><rect x="176" y="44" width="22" height="22"/><rect x="198" y="44" width="22" height="22"/><rect x="220" y="44" width="22" height="22"/><rect x="242" y="44" width="22" height="22"/>
-              <rect y="66" width="22" height="22"/><rect x="22" y="66" width="22" height="22"/><rect x="44" y="66" width="22" height="22"/><rect x="66" y="66" width="22" height="22"/><rect x="88" y="66" width="22" height="22"/>
-              <rect class="isl" x="110" y="66" width="22" height="22"/><rect class="isl" x="132" y="66" width="22" height="22"/>
-              <rect x="154" y="66" width="22" height="22"/><rect x="176" y="66" width="22" height="22"/><rect x="198" y="66" width="22" height="22"/><rect x="220" y="66" width="22" height="22"/><rect x="242" y="66" width="22" height="22"/>
-              <rect y="88" width="22" height="22"/><rect x="22" y="88" width="22" height="22"/><rect x="44" y="88" width="22" height="22"/><rect x="66" y="88" width="22" height="22"/><rect x="88" y="88" width="22" height="22"/>
-              <rect class="isl" x="110" y="88" width="22" height="22"/><rect class="isl" x="132" y="88" width="22" height="22"/>
-              <rect x="154" y="88" width="22" height="22"/><rect x="176" y="88" width="22" height="22"/><rect x="198" y="88" width="22" height="22"/><rect x="220" y="88" width="22" height="22"/><rect x="242" y="88" width="22" height="22"/>
-              <rect y="110" width="22" height="22"/><rect x="22" y="110" width="22" height="22"/><rect x="44" y="110" width="22" height="22"/><rect x="66" y="110" width="22" height="22"/><rect x="88" y="110" width="22" height="22"/><rect x="110" y="110" width="22" height="22"/><rect x="132" y="110" width="22" height="22"/><rect x="154" y="110" width="22" height="22"/><rect x="176" y="110" width="22" height="22"/><rect x="198" y="110" width="22" height="22"/><rect x="220" y="110" width="22" height="22"/><rect x="242" y="110" width="22" height="22"/>
-              <rect y="132" width="22" height="22"/><rect x="22" y="132" width="22" height="22"/><rect x="44" y="132" width="22" height="22"/><rect x="66" y="132" width="22" height="22"/><rect x="88" y="132" width="22" height="22"/><rect x="110" y="132" width="22" height="22"/><rect x="132" y="132" width="22" height="22"/><rect x="154" y="132" width="22" height="22"/><rect x="176" y="132" width="22" height="22"/><rect x="198" y="132" width="22" height="22"/><rect x="220" y="132" width="22" height="22"/><rect x="242" y="132" width="22" height="22"/>
-              <rect y="154" width="22" height="22"/><rect x="22" y="154" width="22" height="22"/><rect x="44" y="154" width="22" height="22"/><rect x="66" y="154" width="22" height="22"/><rect x="88" y="154" width="22" height="22"/><rect x="110" y="154" width="22" height="22"/><rect x="132" y="154" width="22" height="22"/><rect x="154" y="154" width="22" height="22"/><rect x="176" y="154" width="22" height="22"/><rect x="198" y="154" width="22" height="22"/><rect x="220" y="154" width="22" height="22"/><rect x="242" y="154" width="22" height="22"/>
-            </g>
-            <text x="121" y="84" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
-            <text x="143" y="84" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
-            <text x="121" y="106" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
-            <text x="143" y="106" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">I</text>
+            <rect class="ok" width="28" height="28"/><rect class="ok" x="28" width="28" height="28"/><rect class="ok" x="56" width="28" height="28"/><rect class="ok" x="84" width="28" height="28"/><rect class="ok" x="112" width="28" height="28"/><rect class="ok" x="140" width="28" height="28"/><rect class="ok" x="168" width="28" height="28"/><rect class="ok" x="196" width="28" height="28"/><rect class="ok" x="224" width="28" height="28"/><rect class="ok" x="252" width="28" height="28"/>
+            <rect class="ok" y="28" width="28" height="28"/><rect class="ok" x="28" y="28" width="28" height="28"/><rect class="ok" x="56" y="28" width="28" height="28"/><rect class="halo" x="84" y="28" width="28" height="28"/><rect class="halo" x="112" y="28" width="28" height="28"/><rect class="halo" x="140" y="28" width="28" height="28"/><rect class="halo" x="168" y="28" width="28" height="28"/><rect class="ok" x="196" y="28" width="28" height="28"/><rect class="ok" x="224" y="28" width="28" height="28"/><rect class="ok" x="252" y="28" width="28" height="28"/>
+            <rect class="ok" y="56" width="28" height="28"/><rect class="ok" x="28" y="56" width="28" height="28"/><rect class="ok" x="56" y="56" width="28" height="28"/><rect class="halo" x="84" y="56" width="28" height="28"/><rect class="isl" x="112" y="56" width="28" height="28"/><rect class="isl" x="140" y="56" width="28" height="28"/><rect class="halo" x="168" y="56" width="28" height="28"/><rect class="ok" x="196" y="56" width="28" height="28"/><rect class="ok" x="224" y="56" width="28" height="28"/><rect class="ok" x="252" y="56" width="28" height="28"/>
+            <rect class="ok" y="84" width="28" height="28"/><rect class="ok" x="28" y="84" width="28" height="28"/><rect class="ok" x="56" y="84" width="28" height="28"/><rect class="halo" x="84" y="84" width="28" height="28"/><rect class="isl" x="112" y="84" width="28" height="28"/><rect class="isl" x="140" y="84" width="28" height="28"/><rect class="halo" x="168" y="84" width="28" height="28"/><rect class="ok" x="196" y="84" width="28" height="28"/><rect class="ok" x="224" y="84" width="28" height="28"/><rect class="ok" x="252" y="84" width="28" height="28"/>
+            <rect class="ok" y="112" width="28" height="28"/><rect class="ok" x="28" y="112" width="28" height="28"/><rect class="ok" x="56" y="112" width="28" height="28"/><rect class="halo" x="84" y="112" width="28" height="28"/><rect class="isl" x="112" y="112" width="28" height="28"/><rect class="isl" x="140" y="112" width="28" height="28"/><rect class="halo" x="168" y="112" width="28" height="28"/><rect class="ok" x="196" y="112" width="28" height="28"/><rect class="ok" x="224" y="112" width="28" height="28"/><rect class="ok" x="252" y="112" width="28" height="28"/>
+            <rect class="ok" y="140" width="28" height="28"/><rect class="ok" x="28" y="140" width="28" height="28"/><rect class="ok" x="56" y="140" width="28" height="28"/><rect class="halo" x="84" y="140" width="28" height="28"/><rect class="halo" x="112" y="140" width="28" height="28"/><rect class="halo" x="140" y="140" width="28" height="28"/><rect class="halo" x="168" y="140" width="28" height="28"/><rect class="ok" x="196" y="140" width="28" height="28"/><rect class="ok" x="224" y="140" width="28" height="28"/><rect class="ok" x="252" y="140" width="28" height="28"/>
+            <rect class="ok" y="168" width="28" height="28"/><rect class="ok" x="28" y="168" width="28" height="28"/><rect class="ok" x="56" y="168" width="28" height="28"/><rect class="ok" x="84" y="168" width="28" height="28"/><rect class="ok" x="112" y="168" width="28" height="28"/><rect class="ok" x="140" y="168" width="28" height="28"/><rect class="ok" x="168" y="168" width="28" height="28"/><rect class="ok" x="196" y="168" width="28" height="28"/><rect class="ok" x="224" y="168" width="28" height="28"/><rect class="ok" x="252" y="168" width="28" height="28"/>
+            <text x="126" y="74" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="154" y="74" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="126" y="102" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="154" y="102" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="126" y="130" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="154" y="130" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
           </g>
 
-          <!-- right grid: mostly changed (toy pattern ~70% red) -->
-          <g transform="translate(480,36)">
-            <g stroke-width="1">
-              <!-- row 0 -->
-              <rect class="chg" width="22" height="22"/><rect class="ok" x="22" width="22" height="22"/><rect class="chg" x="44" width="22" height="22"/><rect class="chg" x="66" width="22" height="22"/><rect class="ok" x="88" width="22" height="22"/><rect class="chg" x="110" width="22" height="22"/><rect class="chg" x="132" width="22" height="22"/><rect class="chg" x="154" width="22" height="22"/><rect class="ok" x="176" width="22" height="22"/><rect class="chg" x="198" width="22" height="22"/><rect class="chg" x="220" width="22" height="22"/><rect class="chg" x="242" width="22" height="22"/>
-              <rect class="chg" y="22" width="22" height="22"/><rect class="chg" x="22" y="22" width="22" height="22"/><rect class="ok" x="44" y="22" width="22" height="22"/><rect class="chg" x="66" y="22" width="22" height="22"/><rect class="chg" x="88" y="22" width="22" height="22"/><rect class="chg" x="110" y="22" width="22" height="22"/><rect class="chg" x="132" y="22" width="22" height="22"/><rect class="ok" x="154" y="22" width="22" height="22"/><rect class="chg" x="176" y="22" width="22" height="22"/><rect class="chg" x="198" y="22" width="22" height="22"/><rect class="chg" x="220" y="22" width="22" height="22"/><rect class="ok" x="242" y="22" width="22" height="22"/>
-              <rect class="ok" y="44" width="22" height="22"/><rect class="chg" x="22" y="44" width="22" height="22"/><rect class="chg" x="44" y="44" width="22" height="22"/><rect class="chg" x="66" y="44" width="22" height="22"/><rect class="chg" x="88" y="44" width="22" height="22"/><rect class="chg" x="110" y="44" width="22" height="22"/><rect class="chg" x="132" y="44" width="22" height="22"/><rect class="chg" x="154" y="44" width="22" height="22"/><rect class="chg" x="176" y="44" width="22" height="22"/><rect class="ok" x="198" y="44" width="22" height="22"/><rect class="chg" x="220" y="44" width="22" height="22"/><rect class="chg" x="242" y="44" width="22" height="22"/>
-              <rect class="chg" y="66" width="22" height="22"/><rect class="chg" x="22" y="66" width="22" height="22"/><rect class="chg" x="44" y="66" width="22" height="22"/><rect class="chg" x="66" y="66" width="22" height="22"/><rect class="chg" x="88" y="66" width="22" height="22"/>
-              <rect class="isl" x="110" y="66" width="22" height="22"/><rect class="isl" x="132" y="66" width="22" height="22"/>
-              <rect class="chg" x="154" y="66" width="22" height="22"/><rect class="chg" x="176" y="66" width="22" height="22"/><rect class="chg" x="198" y="66" width="22" height="22"/><rect class="chg" x="220" y="66" width="22" height="22"/><rect class="chg" x="242" y="66" width="22" height="22"/>
-              <rect class="chg" y="88" width="22" height="22"/><rect class="ok" x="22" y="88" width="22" height="22"/><rect class="chg" x="44" y="88" width="22" height="22"/><rect class="chg" x="66" y="88" width="22" height="22"/><rect class="chg" x="88" y="88" width="22" height="22"/>
-              <rect class="isl" x="110" y="88" width="22" height="22"/><rect class="isl" x="132" y="88" width="22" height="22"/>
-              <rect class="chg" x="154" y="88" width="22" height="22"/><rect class="chg" x="176" y="88" width="22" height="22"/><rect class="ok" x="198" y="88" width="22" height="22"/><rect class="chg" x="220" y="88" width="22" height="22"/><rect class="chg" x="242" y="88" width="22" height="22"/>
-              <rect class="chg" y="110" width="22" height="22"/><rect class="chg" x="22" y="110" width="22" height="22"/><rect class="chg" x="44" y="110" width="22" height="22"/><rect class="ok" x="66" y="110" width="22" height="22"/><rect class="chg" x="88" y="110" width="22" height="22"/><rect class="chg" x="110" y="110" width="22" height="22"/><rect class="chg" x="132" y="110" width="22" height="22"/><rect class="chg" x="154" y="110" width="22" height="22"/><rect class="chg" x="176" y="110" width="22" height="22"/><rect class="chg" x="198" y="110" width="22" height="22"/><rect class="ok" x="220" y="110" width="22" height="22"/><rect class="chg" x="242" y="110" width="22" height="22"/>
-              <rect class="ok" y="132" width="22" height="22"/><rect class="chg" x="22" y="132" width="22" height="22"/><rect class="chg" x="44" y="132" width="22" height="22"/><rect class="chg" x="66" y="132" width="22" height="22"/><rect class="chg" x="88" y="132" width="22" height="22"/><rect class="chg" x="110" y="132" width="22" height="22"/><rect class="ok" x="132" y="132" width="22" height="22"/><rect class="chg" x="154" y="132" width="22" height="22"/><rect class="chg" x="176" y="132" width="22" height="22"/><rect class="chg" x="198" y="132" width="22" height="22"/><rect class="chg" x="220" y="132" width="22" height="22"/><rect class="chg" x="242" y="132" width="22" height="22"/>
-              <rect class="chg" y="154" width="22" height="22"/><rect class="chg" x="22" y="154" width="22" height="22"/><rect class="ok" x="44" y="154" width="22" height="22"/><rect class="chg" x="66" y="154" width="22" height="22"/><rect class="chg" x="88" y="154" width="22" height="22"/><rect class="chg" x="110" y="154" width="22" height="22"/><rect class="chg" x="132" y="154" width="22" height="22"/><rect class="chg" x="154" y="154" width="22" height="22"/><rect class="ok" x="176" y="154" width="22" height="22"/><rect class="chg" x="198" y="154" width="22" height="22"/><rect class="chg" x="220" y="154" width="22" height="22"/><rect class="ok" x="242" y="154" width="22" height="22"/>
-            </g>
+          <!-- right: same island; almost all other cells new syntax -->
+          <g transform="translate(520,36)">
+            <rect class="chg" width="28" height="28"/><rect class="ok" x="28" width="28" height="28"/><rect class="chg" x="56" width="28" height="28"/><rect class="chg" x="84" width="28" height="28"/><rect class="chg" x="112" width="28" height="28"/><rect class="chg" x="140" width="28" height="28"/><rect class="ok" x="168" width="28" height="28"/><rect class="chg" x="196" width="28" height="28"/><rect class="chg" x="224" width="28" height="28"/><rect class="chg" x="252" width="28" height="28"/>
+            <rect class="chg" y="28" width="28" height="28"/><rect class="chg" x="28" y="28" width="28" height="28"/><rect class="chg" x="56" y="28" width="28" height="28"/><rect class="chg" x="84" y="28" width="28" height="28"/><rect class="chg" x="112" y="28" width="28" height="28"/><rect class="chg" x="140" y="28" width="28" height="28"/><rect class="chg" x="168" y="28" width="28" height="28"/><rect class="ok" x="196" y="28" width="28" height="28"/><rect class="chg" x="224" y="28" width="28" height="28"/><rect class="chg" x="252" y="28" width="28" height="28"/>
+            <rect class="ok" y="56" width="28" height="28"/><rect class="chg" x="28" y="56" width="28" height="28"/><rect class="chg" x="56" y="56" width="28" height="28"/><rect class="chg" x="84" y="56" width="28" height="28"/><rect class="isl" x="112" y="56" width="28" height="28"/><rect class="isl" x="140" y="56" width="28" height="28"/><rect class="chg" x="168" y="56" width="28" height="28"/><rect class="chg" x="196" y="56" width="28" height="28"/><rect class="chg" x="224" y="56" width="28" height="28"/><rect class="ok" x="252" y="56" width="28" height="28"/>
+            <rect class="chg" y="84" width="28" height="28"/><rect class="chg" x="28" y="84" width="28" height="28"/><rect class="chg" x="56" y="84" width="28" height="28"/><rect class="chg" x="84" y="84" width="28" height="28"/><rect class="isl" x="112" y="84" width="28" height="28"/><rect class="isl" x="140" y="84" width="28" height="28"/><rect class="chg" x="168" y="84" width="28" height="28"/><rect class="chg" x="196" y="84" width="28" height="28"/><rect class="chg" x="224" y="84" width="28" height="28"/><rect class="chg" x="252" y="84" width="28" height="28"/>
+            <rect class="chg" y="112" width="28" height="28"/><rect class="ok" x="28" y="112" width="28" height="28"/><rect class="chg" x="56" y="112" width="28" height="28"/><rect class="chg" x="84" y="112" width="28" height="28"/><rect class="isl" x="112" y="112" width="28" height="28"/><rect class="isl" x="140" y="112" width="28" height="28"/><rect class="chg" x="168" y="112" width="28" height="28"/><rect class="chg" x="196" y="112" width="28" height="28"/><rect class="ok" x="224" y="112" width="28" height="28"/><rect class="chg" x="252" y="112" width="28" height="28"/>
+            <rect class="chg" y="140" width="28" height="28"/><rect class="chg" x="28" y="140" width="28" height="28"/><rect class="chg" x="56" y="140" width="28" height="28"/><rect class="chg" x="84" y="140" width="28" height="28"/><rect class="chg" x="112" y="140" width="28" height="28"/><rect class="chg" x="140" y="140" width="28" height="28"/><rect class="chg" x="168" y="140" width="28" height="28"/><rect class="chg" x="196" y="140" width="28" height="28"/><rect class="chg" x="224" y="140" width="28" height="28"/><rect class="ok" x="252" y="140" width="28" height="28"/>
+            <rect class="chg" y="168" width="28" height="28"/><rect class="chg" x="28" y="168" width="28" height="28"/><rect class="ok" x="56" y="168" width="28" height="28"/><rect class="chg" x="84" y="168" width="28" height="28"/><rect class="chg" x="112" y="168" width="28" height="28"/><rect class="chg" x="140" y="168" width="28" height="28"/><rect class="chg" x="168" y="168" width="28" height="28"/><rect class="ok" x="196" y="168" width="28" height="28"/><rect class="chg" x="224" y="168" width="28" height="28"/><rect class="chg" x="252" y="168" width="28" height="28"/>
+            <text x="126" y="74" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="154" y="74" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="126" y="102" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="154" y="102" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="126" y="130" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            <text x="154" y="130" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
           </g>
 
-          <text class="hot" x="172" y="230" text-anchor="middle">0</text>
-          <text class="ts" x="172" y="248" text-anchor="middle">slots outside I with new pixels</text>
+          <text class="num" x="180" y="236" text-anchor="middle">0</text>
+          <text class="ts" x="180" y="252" text-anchor="middle">outside I · new pixels</text>
+          <text class="num-tot" x="180" y="272" text-anchor="middle">/ 108,000</text>
 
-          <text class="big" x="612" y="230" text-anchor="middle">~63k–80k</text>
-          <text class="ts" x="612" y="248" text-anchor="middle">slots outside I with new syntax</text>
+          <text class="num-bad" x="660" y="236" text-anchor="middle">~63k–80k</text>
+          <text class="ts" x="660" y="252" text-anchor="middle">outside I · new syntax</text>
+          <text class="num-tot" x="660" y="272" text-anchor="middle">/ 108,000</text>
 
-          <text class="ts" x="40" y="278">720p fixture · 108,000 macroblock slots · centered redact on 2 frames. Measured JM syntax sweep.</text>
-          <text class="ts" x="40" y="296">Red = prediction / residual / mode changed even though pixels matched the camera.</text>
+          <text class="ts" x="40" y="294">720p fixture · centered redact on 2 frames. Red = prediction / residual / mode changed.</text>
         </svg>
       </div>
     </section>
@@ -1409,13 +1398,11 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
     <section class="slide" data-title="Cannot just merge">
       <p class="eyebrow">Touched-only · island-only encode</p>
       <h1>You cannot paste a separately encoded island into the camera stream.</h1>
-      <p class="lead" style="margin-bottom: 10px; max-width: none">
-        Touched-only
-        <b style="color: var(--foreground); font-weight: 600">is</b>
-        keep camera bytes on skip and only redo the island. The merge can assemble
-        and even play. The picture still drifts if the island was encoded on its
-        own: those residuals were fitted to the wrong reconstruction.
-      </p>
+      <ul class="points">
+        <li>Touched-only is: keep camera bytes on skip and only redo the island.</li>
+        <li>The merge can assemble and even play.</li>
+        <li>If the island was encoded alone, its residuals were fitted to the wrong neighbors, so decoded pixels go wrong and the error spreads through prediction.</li>
+      </ul>
       <div class="diagram" style="margin: 0; padding: 10px 12px 8px">
         <svg viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg" aria-label="Merge of camera skip tiles and island tiles breaks prediction">
           <style>
@@ -1433,56 +1420,70 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
           <text class="lbl" x="20" y="18">IF THE ISLAND COMES FROM A SEPARATE ENCODE</text>
 
           <!-- camera plane -->
-          <rect class="box" x="20" y="32" width="200" height="120" rx="8"/>
-          <text class="ts" x="120" y="52" text-anchor="middle">camera encode</text>
-          <rect class="cam" x="40" y="64" width="28" height="28"/><rect class="cam" x="68" y="64" width="28" height="28"/><rect class="cam" x="96" y="64" width="28" height="28"/><rect class="cam" x="124" y="64" width="28" height="28"/><rect class="cam" x="152" y="64" width="28" height="28"/>
-          <rect class="cam" x="40" y="92" width="28" height="28"/><rect class="cam" x="68" y="92" width="28" height="28"/><rect class="cam" x="96" y="92" width="28" height="28"/><rect class="cam" x="124" y="92" width="28" height="28"/><rect class="cam" x="152" y="92" width="28" height="28"/>
-          <text class="ts" x="120" y="140" text-anchor="middle">skip tiles (cyan)</text>
+          <rect class="box" x="20" y="28" width="200" height="168" rx="8"/>
+          <text class="ts" x="120" y="48" text-anchor="middle">camera encode</text>
+          <rect class="cam" x="40" y="58" width="28" height="28"/><rect class="cam" x="68" y="58" width="28" height="28"/><rect class="cam" x="96" y="58" width="28" height="28"/><rect class="cam" x="124" y="58" width="28" height="28"/><rect class="cam" x="152" y="58" width="28" height="28"/>
+          <rect class="cam" x="40" y="86" width="28" height="28"/><rect class="cam" x="68" y="86" width="28" height="28"/><rect class="cam" x="96" y="86" width="28" height="28"/><rect class="cam" x="124" y="86" width="28" height="28"/><rect class="cam" x="152" y="86" width="28" height="28"/>
+          <rect class="cam" x="40" y="114" width="28" height="28"/><rect class="cam" x="68" y="114" width="28" height="28"/><rect class="cam" x="96" y="114" width="28" height="28"/><rect class="cam" x="124" y="114" width="28" height="28"/><rect class="cam" x="152" y="114" width="28" height="28"/>
+          <rect class="cam" x="40" y="142" width="28" height="28"/><rect class="cam" x="68" y="142" width="28" height="28"/><rect class="cam" x="96" y="142" width="28" height="28"/><rect class="cam" x="124" y="142" width="28" height="28"/><rect class="cam" x="152" y="142" width="28" height="28"/>
+          <text class="ts" x="120" y="186" text-anchor="middle">skip tiles (cyan)</text>
 
-          <text class="t" x="250" y="95" text-anchor="middle">+</text>
+          <text class="t" x="250" y="120" text-anchor="middle">+</text>
 
           <!-- edited island encode -->
-          <rect class="box" x="280" y="32" width="200" height="120" rx="8"/>
-          <text class="ts" x="380" y="52" text-anchor="middle">separate edited encode</text>
-          <rect class="cam" x="300" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="328" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="356" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="384" y="64" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="64" width="28" height="28" opacity=".25"/>
-          <rect class="cam" x="300" y="92" width="28" height="28" opacity=".25"/><rect class="isl" x="328" y="92" width="28" height="28"/><rect class="isl" x="356" y="92" width="28" height="28"/><rect class="cam" x="384" y="92" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="92" width="28" height="28" opacity=".25"/>
-          <text class="t" x="342" y="111" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
-          <text class="t" x="370" y="111" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
-          <text class="ts" x="380" y="140" text-anchor="middle">island tiles only</text>
+          <rect class="box" x="280" y="28" width="200" height="168" rx="8"/>
+          <text class="ts" x="380" y="48" text-anchor="middle">separate edited encode</text>
+          <rect class="cam" x="300" y="58" width="28" height="28" opacity=".25"/><rect class="cam" x="328" y="58" width="28" height="28" opacity=".25"/><rect class="cam" x="356" y="58" width="28" height="28" opacity=".25"/><rect class="cam" x="384" y="58" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="58" width="28" height="28" opacity=".25"/>
+          <rect class="cam" x="300" y="86" width="28" height="28" opacity=".25"/><rect class="isl" x="328" y="86" width="28" height="28"/><rect class="isl" x="356" y="86" width="28" height="28"/><rect class="cam" x="384" y="86" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="86" width="28" height="28" opacity=".25"/>
+          <rect class="cam" x="300" y="114" width="28" height="28" opacity=".25"/><rect class="isl" x="328" y="114" width="28" height="28"/><rect class="isl" x="356" y="114" width="28" height="28"/><rect class="cam" x="384" y="114" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="114" width="28" height="28" opacity=".25"/>
+          <rect class="cam" x="300" y="142" width="28" height="28" opacity=".25"/><rect class="isl" x="328" y="142" width="28" height="28"/><rect class="isl" x="356" y="142" width="28" height="28"/><rect class="cam" x="384" y="142" width="28" height="28" opacity=".25"/><rect class="cam" x="412" y="142" width="28" height="28" opacity=".25"/>
+          <text class="t" x="342" y="105" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="370" y="105" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="342" y="133" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="370" y="133" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="342" y="161" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="370" y="161" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="ts" x="380" y="186" text-anchor="middle">island tiles only</text>
 
-          <path class="arr" d="M500 92 H530 M522 87 L530 92 L522 97"/>
+          <path class="arr" d="M500 116 H530 M522 111 L530 116 L522 121"/>
 
           <!-- merged mosaic -->
-          <rect class="box" x="540" y="32" width="200" height="120" rx="8"/>
-          <text class="ts" x="640" y="52" text-anchor="middle">merged frame plane</text>
-          <rect class="cam" x="560" y="64" width="28" height="28"/><rect class="cam" x="588" y="64" width="28" height="28"/><rect class="cam" x="616" y="64" width="28" height="28"/><rect class="cam" x="644" y="64" width="28" height="28"/><rect class="cam" x="672" y="64" width="28" height="28"/>
-          <rect class="cam" x="560" y="92" width="28" height="28"/><rect class="isl" x="588" y="92" width="28" height="28"/><rect class="isl" x="616" y="92" width="28" height="28"/><rect class="cam" x="644" y="92" width="28" height="28"/><rect class="cam" x="672" y="92" width="28" height="28"/>
-          <text class="ts" x="640" y="140" text-anchor="middle">looks like a mosaic</text>
+          <rect class="box" x="540" y="28" width="200" height="168" rx="8"/>
+          <text class="ts" x="640" y="48" text-anchor="middle">merged frame plane</text>
+          <rect class="cam" x="560" y="58" width="28" height="28"/><rect class="cam" x="588" y="58" width="28" height="28"/><rect class="cam" x="616" y="58" width="28" height="28"/><rect class="cam" x="644" y="58" width="28" height="28"/><rect class="cam" x="672" y="58" width="28" height="28"/>
+          <rect class="cam" x="560" y="86" width="28" height="28"/><rect class="isl" x="588" y="86" width="28" height="28"/><rect class="isl" x="616" y="86" width="28" height="28"/><rect class="cam" x="644" y="86" width="28" height="28"/><rect class="cam" x="672" y="86" width="28" height="28"/>
+          <rect class="cam" x="560" y="114" width="28" height="28"/><rect class="isl" x="588" y="114" width="28" height="28"/><rect class="isl" x="616" y="114" width="28" height="28"/><rect class="cam" x="644" y="114" width="28" height="28"/><rect class="cam" x="672" y="114" width="28" height="28"/>
+          <rect class="cam" x="560" y="142" width="28" height="28"/><rect class="isl" x="588" y="142" width="28" height="28"/><rect class="isl" x="616" y="142" width="28" height="28"/><rect class="cam" x="644" y="142" width="28" height="28"/><rect class="cam" x="672" y="142" width="28" height="28"/>
+          <text class="t" x="602" y="105" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="630" y="105" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="602" y="133" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="630" y="133" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="602" y="161" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="t" x="630" y="161" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+          <text class="ts" x="640" y="186" text-anchor="middle">looks like a mosaic</text>
 
-          <path class="arr-bad" d="M760 92 H790 M782 87 L790 92 L782 97"/>
+          <path class="arr-bad" d="M760 116 H790 M782 111 L790 116 L782 121"/>
 
           <!-- result broken -->
-          <rect class="bad" x="800" y="48" width="100" height="88" rx="8"/>
-          <text class="t" x="850" y="88" text-anchor="middle" fill="#f87171">drifts</text>
-          <text class="ts" x="850" y="108" text-anchor="middle">after edit</text>
+          <rect class="bad" x="800" y="72" width="100" height="88" rx="8"/>
+          <text class="t" x="850" y="108" text-anchor="middle" fill="#f87171">wrong</text>
+          <text class="t" x="850" y="126" text-anchor="middle" fill="#f87171">pixels</text>
+          <text class="ts" x="850" y="148" text-anchor="middle">errors spread</text>
 
           <!-- bottom explanation -->
-          <text class="lbl" x="20" y="180">WHY A PLANE MERGE IS NOT ENOUGH</text>
+          <text class="lbl" x="20" y="220">WHY A PLANE MERGE IS NOT ENOUGH</text>
 
-          <rect class="box" x="20" y="192" width="280" height="88" rx="8"/>
-          <text class="t" x="36" y="218">1. Bitstream is a line, not a plane</text>
-          <text class="ts" x="36" y="240">CABAC packs tiles in order. You cannot</text>
-          <text class="ts" x="36" y="258">memcpy island bytes into the .264 file.</text>
+          <rect class="box" x="20" y="232" width="280" height="58" rx="8"/>
+          <text class="t" x="36" y="254">1. Bitstream is a line, not a plane</text>
+          <text class="ts" x="36" y="274">CABAC packs tiles in order; no memcpy of island bytes.</text>
 
-          <rect class="box" x="320" y="192" width="280" height="88" rx="8"/>
-          <text class="t" x="336" y="218">2. Residual ≠ this predictor</text>
-          <text class="ts" x="336" y="240">Island residual was fitted to encode B.</text>
-          <text class="ts" x="336" y="258">Decoder rebuilds prediction from merge A.</text>
+          <rect class="box" x="320" y="232" width="280" height="58" rx="8"/>
+          <text class="t" x="336" y="254">2. Residual ≠ this predictor</text>
+          <text class="ts" x="336" y="274">Fitted to encode B; decoder predicts from merge A.</text>
 
-          <rect class="box" x="620" y="192" width="280" height="88" rx="8"/>
-          <text class="t" x="636" y="218">3. Neighbors read across the cut</text>
-          <text class="ts" x="636" y="240">Skip tiles predict from island pixels</text>
-          <text class="ts" x="636" y="258">(and the other way). Errors spread.</text>
+          <rect class="box" x="620" y="232" width="280" height="58" rx="8"/>
+          <text class="t" x="636" y="254">3. Neighbors read across the cut</text>
+          <text class="ts" x="636" y="274">Skip ↔ island prediction spreads errors.</text>
         </svg>
       </div>
     </section>
