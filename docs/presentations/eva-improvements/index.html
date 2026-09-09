@@ -566,8 +566,8 @@
           <li style="display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline">
             <span style="font: 500 .8rem/1.5 var(--mono); color: var(--accent)">01</span>
             <span>
-              <b style="display: block; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em">Why fightfake.ai</b>
-              <span class="muted" style="font-size: .86rem">What made me start working on this.</span>
+              <b style="display: block; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em">Why I started</b>
+              <span class="muted" style="font-size: .86rem">What pushed me into this work.</span>
             </span>
           </li>
           <li style="display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline">
@@ -602,7 +602,7 @@
         <figure class="shot" style="margin: 0">
           <img src="editor-crop.jpg" alt="The fightfake.ai editor, where an edit is made and a proof is built" width="840" height="352" style="width: 100%; height: auto; display: block" />
           <figcaption>
-            <span class="label">fightfake.ai</span>
+            <span class="label" style="text-transform: none; letter-spacing: .02em">fightfake.ai</span>
             <span class="faint">edit a photo, then build the proof</span>
           </figcaption>
         </figure>
@@ -634,8 +634,8 @@
         </div>
       </div>
       <p class="lead" style="margin: 18px 0 0; max-width: 46em">
-        I agree, and it will only matter more. But how do we trust it, if anyone
-        can generate whatever photo or video they want?
+        I agree, and citizen journalism will only matter more. But how do we
+        trust it, if anyone can generate whatever photo or video they want?
       </p>
       <div class="compare" style="margin-top: 16px; margin-bottom: 0">
         <figure class="shot">
@@ -670,7 +670,7 @@
           <ul class="points" style="margin: 0">
             <li>Days before the 2026 election, secretly recorded clips of politicians appeared on anti-corruption2026.com.</li>
             <li>Every origin trace had been erased: when and where they were made, which device recorded them, who edited them.</li>
-            <li>German BKA analysts examined 27 files. None were original camera recordings.</li>
+            <li>Germany’s Federal Criminal Police (BKA) examined 27 files. None were original camera recordings, and none were AI-generated either: they had been processed, with origin traces wiped.</li>
             <li>With capture provenance and a proof of every edit, none of this would have been in doubt.</li>
           </ul>
           <p style="margin: 14px 0 0">
@@ -718,7 +718,7 @@
       </div>
     </section>
 
-    <!-- 3 -->
+    <!-- 4 -->
     <section class="slide" data-title="Where we are">
       <p class="eyebrow">Where the ecosystem is</p>
       <h1>
@@ -731,10 +731,29 @@
           <div class="cards">
             <div>
               <p class="muted">
-                Some cameras are shipping with signing at capture. True hardware
-                signing (pixels sealed before any app can touch them) is rare,
-                and often unclear from the marketing.
+                Some cameras already sign at capture. True hardware signing,
+                with pixels sealed before any app can touch them, is rare.
               </p>
+            </div>
+            <div>
+              <p class="muted">
+                A recent Hacker News post showed how far short current phone
+                cameras still fall of that target. We come back to it at the end.
+              </p>
+              <a
+                href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html"
+                target="_blank"
+                rel="noopener"
+                style="display: block; margin-top: 12px; border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden"
+              >
+                <img
+                  src="c2pa-hn-screenshot.png"
+                  alt="Hacker News: C2PA Cameras Do Not Survive Contact with Reality"
+                  width="978"
+                  height="136"
+                  style="width: 100%; height: auto; display: block"
+                />
+              </a>
             </div>
             <div style="padding: 12px 12px 8px; overflow: hidden">
               <p style="margin: 0 0 8px; font: 500 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent)">
@@ -823,23 +842,27 @@
           <div class="cards">
             <div>
               <p class="muted">
-                Once a file leaves the camera, ordinary edits break the
-                signature. Zero-knowledge proofs close that gap without revealing
-                the original.
+                Any edit breaks the signature. Zero-knowledge proofs close that
+                gap without revealing the original.
               </p>
             </div>
             <div>
               <h2>Eva</h2>
-              <p class="muted">Proofs over lossy H.264.</p>
+              <p class="muted">
+                Efficient Privacy-Preserving Proof of Authenticity for Lossily
+                Encoded Videos.
+              </p>
               <a class="source-link" href="https://eprint.iacr.org/2024/1436" target="_blank" rel="noopener">
-                Eva paper →
+                eprint 2024/1436 →
               </a>
             </div>
             <div>
               <h2>zk-Cinema</h2>
-              <p class="muted">Proofs over lossless edits.</p>
+              <p class="muted">
+                Proving Video Provenance in Zero Knowledge.
+              </p>
               <a class="source-link" href="https://eprint.iacr.org/2026/1598" target="_blank" rel="noopener">
-                zk-Cinema paper →
+                eprint 2026/1598 →
               </a>
             </div>
           </div>
@@ -847,7 +870,7 @@
       </div>
     </section>
 
-    <!-- 4 -->
+    <!-- 5 -->
     <section class="slide" data-title="Signed vs stored">
       <p class="eyebrow">Eva vs zk-Cinema</p>
       <h1>What does the camera sign, and what do you have to keep around to publish?</h1>
@@ -864,7 +887,22 @@
           <tr>
             <td>You keep</td>
             <td>The published video</td>
-            <td>The published video <em>and</em> a lossless master, <span class="hot">~2&nbsp;GB</span> per 2&nbsp;min</td>
+            <td>The published video <em>and</em> the lossless video, <span class="hot">~2&nbsp;GB</span> per 2&nbsp;min</td>
+          </tr>
+          <tr>
+            <td>Prove (2&nbsp;min 720p)</td>
+            <td>~2.4&nbsp;h · GPU · includes H.264</td>
+            <td>~1.25 to 3.2&nbsp;h · CPU · lossless only</td>
+          </tr>
+          <tr>
+            <td>Prove / pixel</td>
+            <td>~2.6&nbsp;µs</td>
+            <td>~3.4&nbsp;µs</td>
+          </tr>
+          <tr>
+            <td>Verify</td>
+            <td>~4&nbsp;min</td>
+            <td>~8 to 26&nbsp;s</td>
           </tr>
           <tr>
             <td>Proof</td>
@@ -878,15 +916,9 @@
           </tr>
         </tbody>
       </table>
-      <div class="callout">
-        Eva proves the compressed file the viewer actually receives. zk-Cinema
-        proves a lossless master, so publishing means hosting a second copy
-        that outweighs the published file by <span class="hot">~70×</span>, and
-        trusting someone who eyeballed both.
-      </div>
     </section>
 
-    <!-- 5 -->
+    <!-- 6 -->
     <section class="slide" data-title="Distribution">
       <p class="eyebrow">Distribution</p>
       <h1>What has to travel with a video</h1>
@@ -925,13 +957,13 @@
           <text class="sz" x="622" y="119" text-anchor="end">~30 MB</text>
 
           <rect class="box-amber" x="336" y="139" width="300" height="37" rx="6"/>
-          <text class="t" x="350" y="162">+ a lossless master, on a log</text>
+          <text class="t" x="350" y="162">+ the lossless video, on a log</text>
           <text class="sz-acc" x="622" y="162" text-anchor="end">~2 GB</text>
 
           <path class="gap" d="M646 114 H660 M646 158 H660 M660 114 V158"/>
           <text class="note" x="668" y="130">no proof</text>
           <text class="note" x="668" y="144">covers this gap</text>
-          <text class="note" x="336" y="198">someone must download the master and compare the two by eye</text>
+          <text class="note" x="336" y="198">someone must download the lossless video and compare the two by eye</text>
         </svg>
       </div>
       <div class="two cards" style="margin-top:22px">
@@ -952,7 +984,7 @@
       </div>
     </section>
 
-    <!-- 6 -->
+    <!-- 7 -->
     <section class="slide" data-title="How Eva works">
       <p class="eyebrow">How Eva works</p>
       <h1>Macroblock after macroblock, each hash chained to the last.</h1>
@@ -1002,7 +1034,7 @@
       </div>
     </section>
 
-    <!-- 7 -->
+    <!-- 8 -->
     <section class="slide" data-title="One macroblock">
       <p class="eyebrow">One macroblock</p>
       <h1>Pixels here are YUV, not RGB.</h1>
@@ -1014,22 +1046,10 @@
         holds 256 Y bytes plus 64 U and 64 V. That is what Eva hashes and edits.
       </p>
       <div class="two" style="gap: 16px; align-items: start; margin-top: 8px">
-        <figure class="shot" style="margin: 0">
-          <div class="callout-frame">
-            <img src="mb-grid-callout.jpg" alt="Frame with one macroblock marked" style="max-height: 32vh; object-fit: cover; width: 100%" />
-            <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
-              <defs>
-                <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 Z" fill="#fbbf24"/>
-                </marker>
-              </defs>
-              <line x1="280" y1="320" x2="168" y2="372" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrowHead)"/>
-              <rect x="220" y="292" width="150" height="28" rx="6" fill="#0a101c" stroke="#fbbf24"/>
-              <text x="295" y="311" text-anchor="middle" fill="#fbbf24" font-family="Geist Mono, ui-monospace, monospace" font-size="13" font-weight="600">this 16×16 block</text>
-            </svg>
-          </div>
-          <figcaption><span class="label">Where we are in the frame</span></figcaption>
-        </figure>
+          <figure class="shot" style="margin: 0">
+            <img src="mb-grid-callout-labeled.jpg" alt="Frame with one macroblock marked" width="900" height="600" style="width: 100%; height: auto; max-height: 32vh; display: block; object-fit: contain" />
+            <figcaption><span class="label">Where we are in the frame</span></figcaption>
+          </figure>
         <div class="mb-zoom-row" style="grid-template-columns: 1fr 1fr; margin-top: 0">
           <figure class="shot" style="margin: 0">
             <img src="mb-zoom.png" alt="One macroblock magnified" />
@@ -1054,10 +1074,10 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
 <b>Redact (fill 0)</b> → every Y in the macroblock becomes <span class="zero">0</span>. The proof attests that only those bytes changed.</pre>
     </section>
 
-    <!-- 8 -->
+    <!-- 9 -->
     <section class="slide" data-title="Intra prediction">
       <p class="eyebrow">Prediction · intra</p>
-      <h1>Independent blocks are simpler to prove. Prediction makes blocks depend.</h1>
+      <h1>Each block is predicted from its neighbors.</h1>
       <ul class="points">
         <li>Codecs do not store each block as raw pixels.</li>
         <li>They predict <b style="color: var(--amber); font-weight: 600">X</b> from neighbors already decoded (everything left and above), then store only the residual (what the prediction got wrong).</li>
@@ -1124,59 +1144,6 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
       </div>
     </section>
 
-    <!-- 9 -->
-    <section class="slide" data-title="Encode witness">
-      <p class="eyebrow">Proving encode</p>
-      <h1>Predictions shrink the video. Eva does not compute them in the proof.</h1>
-      <ul class="points">
-        <li>Finding a prediction for every block is hard, and proving the prediction would be worse.</li>
-        <li>So the prover runs an ordinary encoder <b style="color: var(--foreground); font-weight: 600">outside</b> the circuit and keeps each block’s prediction and residual as a private <b style="color: var(--accent); font-weight: 600">witness</b>.</li>
-        <li>Inside the proof, Eva checks <b style="color: var(--foreground); font-weight: 600">prediction + residual = edited pixels</b>.</li>
-      </ul>
-      <div class="diagram" style="margin-top: 4px; margin-bottom: 14px; padding: 16px 16px 12px">
-        <svg viewBox="0 0 900 170" xmlns="http://www.w3.org/2000/svg" aria-label="Encode outside, check witness in the proof">
-          <style>
-            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
-            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
-            .ts { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
-            .box { fill: #0a101c; stroke: #1e2a45; }
-            .box-acc { fill: #0d1a22; stroke: #22d3ee; }
-            .box-hot { fill: #17161c; stroke: #fbbf24; }
-            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
-          </style>
-
-          <text class="lbl" x="0" y="16">OUTSIDE THE PROOF</text>
-          <rect class="box" x="0" y="28" width="150" height="44" rx="6"/>
-          <text class="t" x="75" y="55" text-anchor="middle">edited pixels</text>
-          <path class="arr" d="M156 50 H174 M168 45 L174 50 L168 55"/>
-          <rect class="box" x="180" y="28" width="170" height="44" rx="6"/>
-          <text class="t" x="265" y="48" text-anchor="middle">ordinary encoder</text>
-          <text class="ts" x="265" y="62" text-anchor="middle">finds predictions</text>
-          <path class="arr" d="M356 50 H374 M368 45 L374 50 L368 55"/>
-          <rect class="box-acc" x="380" y="28" width="300" height="44" rx="6"/>
-          <text class="t" x="530" y="48" text-anchor="middle">prediction and residual</text>
-          <text class="ts" x="530" y="62" text-anchor="middle">private witness</text>
-
-          <text class="lbl" x="0" y="106">INSIDE THE PROOF</text>
-          <rect class="box" x="0" y="118" width="150" height="44" rx="6"/>
-          <text class="t" x="75" y="145" text-anchor="middle">edit the pixels</text>
-          <path class="arr" d="M156 140 H174 M168 135 L174 140 L168 145"/>
-          <rect class="box-acc" x="180" y="118" width="200" height="44" rx="6"/>
-          <text class="t" x="280" y="138" text-anchor="middle">read the witness</text>
-          <text class="ts" x="280" y="152" text-anchor="middle">do not recompute predictions</text>
-          <path class="arr" d="M386 140 H404 M398 135 L404 140 L398 145"/>
-          <rect class="box-hot" x="410" y="118" width="340" height="44" rx="6"/>
-          <text class="t" x="580" y="138" text-anchor="middle">prediction + residual</text>
-          <text class="ts" x="580" y="152" text-anchor="middle">= the edited block</text>
-        </svg>
-      </div>
-      <div class="callout">
-        <strong>Private to the prover</strong>
-        Verifiers see the proof and the public hashes, not the original pixels
-        or the encoder’s prediction and residual files.
-      </div>
-    </section>
-
     <!-- 10 -->
     <section class="slide" data-title="Eva today">
       <p class="eyebrow">Eva today</p>
@@ -1240,7 +1207,7 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
     <!-- 11 -->
     <section class="slide" data-title="Faster Eva">
       <p class="eyebrow">Making Eva faster</p>
-      <h1>Most of the clip never changes. Why prove all of it?</h1>
+      <h1>The edit touches a few seconds. Eva still folds every block.</h1>
       <div class="compare" style="margin-bottom: 12px">
         <figure class="shot">
           <video id="demo-orig" src="demos1-original.mp4" playsinline preload="metadata" muted></video>
@@ -1553,14 +1520,18 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
             <circle class="dot-zk" cx="116" cy="55" r="3.5"/>
             <circle class="dot-zk" cx="371" cy="178" r="3.5"/>
             <text class="ts" x="116" y="220" text-anchor="middle">~2016</text>
-            <text class="ts" x="201" y="220" text-anchor="middle">~2019</text>
+            <text class="ts" x="201" y="220" text-anchor="middle">~2018</text>
             <text class="ts" x="286" y="220" text-anchor="middle">~2022</text>
             <text class="ts" x="371" y="220" text-anchor="middle">~2024</text>
-            <text class="t" x="116" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">early</text>
-            <text class="t" x="201" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">deployed</text>
-            <text class="t" x="286" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">recursion</text>
-            <text class="t" x="371" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">folding</text>
-            <text class="ts" x="60" y="268">Orders of magnitude faster in under a decade.</text>
+            <text class="t" x="116" y="238" text-anchor="middle" fill="#22d3ee" font-size="11">Zcash Sprout</text>
+            <text class="t" x="201" y="238" text-anchor="middle" fill="#22d3ee" font-size="11">Sapling</text>
+            <text class="t" x="286" y="238" text-anchor="middle" fill="#22d3ee" font-size="11">Halo2 · Plonky2</text>
+            <text class="t" x="371" y="238" text-anchor="middle" fill="#22d3ee" font-size="11">Nova</text>
+            <text class="ts" x="116" y="252" text-anchor="middle" font-size="10">~40s per tx</text>
+            <text class="ts" x="201" y="252" text-anchor="middle" font-size="10">~2s per tx</text>
+            <text class="ts" x="286" y="252" text-anchor="middle" font-size="10">recursion</text>
+            <text class="ts" x="371" y="252" text-anchor="middle" font-size="10">folding</text>
+            <text class="ts" x="60" y="274">Same statement, ~20× faster in two years, then recursion and folding.</text>
           </svg>
         </div>
         <div class="cards" style="display: grid; gap: 14px; align-content: start">
@@ -1591,81 +1562,35 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
           <img src="c2pa-hn-screenshot.png" alt="Hacker News: C2PA Cameras Do Not Survive Contact with Reality" width="978" height="136" style="width: 100%; height: auto; display: block" />
         </a>
       </figure>
-      <ul class="points">
-        <li>David Buchanan took the phones that already ship C2PA “signed at capture” and asked what the signature actually covers.</li>
-        <li>He got root on the device, handed the camera key a picture the camera never took, and got back a valid capture signature for it.</li>
-        <li>Root is not exotic here. A one click software exploit worked on fully patched Pixels, and hardware fault injection works whatever the patch level, so it cannot be fixed on phones already sold.</li>
-        <li>Nothing was broken cryptographically. The key stayed in the secure hardware; only the <b style="color: var(--foreground); font-weight: 600">input</b> to signing was attacker-chosen.</li>
-        <li>A verifier sees a genuine hardware-backed signature from a genuine attested phone, over fabricated pixels.</li>
-      </ul>
-      <p class="faint" style="margin: 12px 0 0">
-        <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener" style="color: var(--accent)">da.vidbuchanan.co.uk/blog/android-c2pa</a>
-      </p>
-    </section>
-
-    <!-- 17 -->
-    <section class="slide" data-title="Why it works">
-      <p class="eyebrow">Capture · why the attack works</p>
-      <h1>The secure chip signs whatever hash the app hands it.</h1>
-      <ul class="points">
-        <li>The camera app does the hashing: it reads the picture from ordinary memory and asks <b style="color: var(--foreground); font-weight: 600">StrongBox</b>, the phone’s secure chip, to sign that hash.</li>
-        <li>StrongBox cannot tell whether that hash came from the sensor or from a file the attacker wrote.</li>
-        <li>So an attacker never needs the private key. They make the same request the app makes, with a hash of their own picture.</li>
-      </ul>
-      <div class="diagram" style="margin-bottom: 14px; padding: 14px 16px 10px">
-        <svg viewBox="0 0 790 205" xmlns="http://www.w3.org/2000/svg" aria-label="The honest capture path and the attacker path differ only in the first two boxes">
-          <style>
-            .w-lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
-            .w-t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
-            .w-ts { fill: #8b9cb8; font: 10.5px Geist, system-ui, sans-serif; }
-            .w-box { fill: #0a101c; stroke: #1e2a45; }
-            .w-acc { fill: #0d1a22; stroke: #22d3ee; }
-            .w-bad { fill: #2a1518; stroke: #f87171; }
-            .w-good { fill: #0f1f19; stroke: #34d399; }
-            .w-arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
-            .w-note { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
-          </style>
-
-          <text class="w-lbl" x="0" y="14">WHAT THE SIGNATURE IS SUPPOSED TO MEAN</text>
-          <rect class="w-acc" x="0" y="26" width="150" height="44" rx="6"/>
-          <text class="w-t" x="75" y="45" text-anchor="middle">the real sensor</text>
-          <text class="w-ts" x="75" y="60" text-anchor="middle">light through the lens</text>
-          <path class="w-arr" d="M156 48 H172 M164 43 L172 48 L164 53"/>
-          <rect class="w-box" x="178" y="26" width="170" height="44" rx="6"/>
-          <text class="w-t" x="263" y="45" text-anchor="middle">camera app hashes it</text>
-          <text class="w-ts" x="263" y="60" text-anchor="middle">in ordinary memory</text>
-          <path class="w-arr" d="M354 48 H370 M362 43 L370 48 L362 53"/>
-          <rect class="w-acc" x="376" y="26" width="170" height="44" rx="6"/>
-          <text class="w-t" x="461" y="45" text-anchor="middle">StrongBox signs it</text>
-          <text class="w-ts" x="461" y="60" text-anchor="middle">key never leaves the chip</text>
-          <path class="w-arr" d="M552 48 H568 M560 43 L568 48 L560 53"/>
-          <rect class="w-good" x="574" y="26" width="190" height="44" rx="6"/>
-          <text class="w-t" x="669" y="45" text-anchor="middle">signature verifies</text>
-          <text class="w-ts" x="669" y="60" text-anchor="middle">and the pixels are real</text>
-
-          <text class="w-lbl" x="0" y="106">WHAT AN ATTACKER WITH ROOT ACTUALLY DOES</text>
-          <rect class="w-bad" x="0" y="118" width="150" height="44" rx="6"/>
-          <text class="w-t" x="75" y="137" text-anchor="middle">a picture they made</text>
-          <text class="w-ts" x="75" y="152" text-anchor="middle">no sensor involved</text>
-          <path class="w-arr" d="M156 140 H172 M164 135 L172 140 L164 145"/>
-          <rect class="w-bad" x="178" y="118" width="170" height="44" rx="6"/>
-          <text class="w-t" x="263" y="137" text-anchor="middle">root hashes it instead</text>
-          <text class="w-ts" x="263" y="152" text-anchor="middle">same ordinary memory</text>
-          <path class="w-arr" d="M354 140 H370 M362 135 L370 140 L362 145"/>
-          <rect class="w-acc" x="376" y="118" width="170" height="44" rx="6"/>
-          <text class="w-t" x="461" y="137" text-anchor="middle">StrongBox signs it</text>
-          <text class="w-ts" x="461" y="152" text-anchor="middle">unchanged, still honest</text>
-          <path class="w-arr" d="M552 140 H568 M560 135 L568 140 L560 145"/>
-          <rect class="w-bad" x="574" y="118" width="190" height="44" rx="6"/>
-          <text class="w-t" x="669" y="137" text-anchor="middle">signature verifies</text>
-          <text class="w-ts" x="669" y="152" text-anchor="middle">and the pixels are fake</text>
-
-          <text class="w-note" x="0" y="192">Only the first two boxes changed. The chip, the key and the maths are the same, so a verifier cannot tell the two rows apart.</text>
-        </svg>
+      <div class="two" style="grid-template-columns: 1fr minmax(20rem, 30rem); gap: 22px; align-items: start">
+        <ul class="points">
+          <li>David Buchanan rooted phones that ship C2PA “signed at capture” and had the camera key sign pictures the camera never took.</li>
+          <li>Root is not exotic: a one click exploit works on fully patched Pixels, and fault injection works at any patch level.</li>
+          <li>Nothing broke cryptographically. Only the <b>input</b> to signing was attacker-chosen.</li>
+          <li>So a verifier sees a genuine signature from a genuine phone, over fabricated pixels.</li>
+        </ul>
+        <figure class="shot bad" style="margin: 0">
+          <a href="https://www.youtube.com/watch?v=Uqpqw91pcac" target="_blank" rel="noopener">
+            <img
+              src="c2pa-youtube-crop.jpg"
+              alt="YouTube page for Big Buck Bunny footage, with an infobox saying the content was captured with a camera"
+              width="714"
+              height="374"
+              style="width: 100%; height: auto; display: block"
+            />
+          </a>
+          <figcaption>
+            <span class="label">YouTube infobox</span>
+            <span class="badge bad">Big Buck Bunny</span>
+          </figcaption>
+        </figure>
+        <p class="faint" style="grid-column: 1; margin: 0">
+          <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener" style="color: var(--accent)">da.vidbuchanan.co.uk/blog/android-c2pa</a>
+        </p>
       </div>
     </section>
 
-    <!-- 18 -->
+    <!-- 17 -->
     <section class="slide" data-title="Fix the attack">
       <p class="eyebrow">Capture · fix</p>
       <h1>Fix: never let software choose what gets signed.</h1>
@@ -1749,14 +1674,14 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
       </div>
     </section>
 
-    <!-- 19 -->
-    <section class="slide" data-title="What gets hashed">
-      <p class="eyebrow">Capture · what gets hashed</p>
-      <h1>A hash of what, exactly?</h1>
+    <!-- 18 -->
+    <section class="slide" data-title="What to sign">
+      <p class="eyebrow">Capture · what to sign</p>
+      <h1>What should the camera sign?</h1>
       <ul class="points">
         <li>Eva hashes <b style="color: var(--foreground); font-weight: 600">decoded YUV 4:2:0</b>, one macroblock at a time: 256 Y bytes plus 64 U and 64 V.</li>
-        <li>YUV, not RGB: it is the codec’s own representation and decoding is bit exact. RGB would pull the colour conversion into the proof, and players disagree about it.</li>
-        <li>C2PA hashes the finished file. That claims only “these exact bytes”, so a re-encode breaks it and it cannot say “only this region changed”.</li>
+        <li>zk-Cinema signs a <b style="color: var(--foreground); font-weight: 600">commitment</b> to the same frames, which is what lets it prove the edit later, and why the lossless video has to be kept.</li>
+        <li>C2PA hashes the finished file.</li>
       </ul>
       <div class="diagram" style="margin-bottom: 14px; padding: 14px 16px 10px">
         <svg viewBox="0 0 840 118" xmlns="http://www.w3.org/2000/svg" aria-label="Where in the camera pipeline the hash can be taken">
@@ -1770,8 +1695,9 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
             .p-tick { stroke-width: 1.25; stroke-dasharray: 3 3; fill: none; }
             .p-cy { fill: #22d3ee; font: 600 11px Geist, system-ui, sans-serif; }
             .p-am { fill: #fbbf24; font: 600 11px Geist, system-ui, sans-serif; }
+            .p-gr { fill: #34d399; font: 600 11px Geist, system-ui, sans-serif; }
           </style>
-          <text class="p-lbl" x="0" y="12">THE CAMERA PIPELINE, AND WHERE THE HASH COULD BE TAKEN</text>
+          <text class="p-lbl" x="0" y="12">THE CAMERA PIPELINE, AND WHERE THE SIGNING COULD HAPPEN</text>
 
           <rect class="p-box" x="0" y="24" width="130" height="40" rx="6"/>
           <text class="p-t" x="65" y="42" text-anchor="middle">sensor</text>
@@ -1795,9 +1721,12 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
           <path class="p-tick" d="M65 64 V80" stroke="#fbbf24"/>
           <text class="p-am" x="65" y="94" text-anchor="middle">out of reach</text>
           <text class="p-ts" x="65" y="108" text-anchor="middle">would have to prove the ISP</text>
-          <path class="p-tick" d="M421 64 V80" stroke="#22d3ee"/>
-          <text class="p-cy" x="421" y="94" text-anchor="middle">Eva hashes here</text>
-          <text class="p-ts" x="421" y="108" text-anchor="middle">384 B per macroblock, bit exact</text>
+          <path class="p-tick" d="M400 64 V72 H300 V80" stroke="#22d3ee"/>
+          <text class="p-cy" x="300" y="94" text-anchor="middle">Eva hashes here</text>
+          <text class="p-ts" x="300" y="108" text-anchor="middle">384 B per macroblock, bit exact</text>
+          <path class="p-tick" d="M442 64 V72 H556 V80" stroke="#34d399"/>
+          <text class="p-gr" x="556" y="94" text-anchor="middle">zk-Cinema commits here</text>
+          <text class="p-ts" x="556" y="108" text-anchor="middle">one commitment to the whole clip</text>
           <path class="p-tick" d="M767 64 V80" stroke="#fbbf24"/>
           <text class="p-am" x="767" y="94" text-anchor="middle">C2PA hashes here</text>
           <text class="p-ts" x="767" y="108" text-anchor="middle">these bytes, nothing more</text>
@@ -1805,47 +1734,7 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
       </div>
     </section>
 
-    <!-- 21 -->
-    <section class="slide" data-title="Commit for the proof">
-      <p class="eyebrow">Capture · commitment</p>
-      <h1>How you hash depends on what you plan to prove.</h1>
-      <ul class="points">
-        <li>The improvement is proving <b style="color: var(--foreground); font-weight: 600">only the edited blocks</b>. A Merkle tree is not the improvement, it is what makes that possible.</li>
-        <li>On its own the tree is worse than the chain: more than twice as many hashes at capture, and an opening to pay for inside every proof.</li>
-        <li>So it only pays if that opening is cheap, and that is decided by the hash the camera picked, years earlier, in silicon.</li>
-        <li>Still open: committing to pixels and syntax separately never proves that one is an encoding of the other.</li>
-      </ul>
-      <div class="diagram" style="margin-top: 4px; padding: 14px 16px 10px">
-        <svg viewBox="0 0 830 128" xmlns="http://www.w3.org/2000/svg" aria-label="Cost of opening one island macroblock inside the proof, compared with encoding it">
-          <style>
-            .c-lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
-            .c-row { fill: #e8edf7; font: 12px Geist, system-ui, sans-serif; }
-            .c-num { fill: #e8edf7; font: 12px "Geist Mono", ui-monospace, monospace; }
-            .c-mul { font: 600 12px "Geist Mono", ui-monospace, monospace; }
-            .c-note { fill: #8b9cb8; font: 10px Geist, system-ui, sans-serif; }
-          </style>
-          <text class="c-lbl" x="0" y="12">ONE ISLAND MACROBLOCK, COST INSIDE THE PROOF</text>
-
-          <text class="c-row" x="0" y="40">encode it</text>
-          <rect x="250" y="28" width="40" height="16" rx="3" fill="#0d1a22" stroke="#22d3ee"/>
-          <text class="c-num" x="660" y="40" text-anchor="end">5,589</text>
-
-          <text class="c-row" x="0" y="70">open it · circuit friendly hash</text>
-          <rect x="250" y="58" width="39" height="16" rx="3" fill="#0d1a22" stroke="#22d3ee"/>
-          <text class="c-num" x="660" y="70" text-anchor="end">5,508</text>
-          <text class="c-mul" x="682" y="70" fill="#22d3ee">1.0×</text>
-
-          <text class="c-row" x="0" y="100">open it · SHA3-256</text>
-          <rect x="250" y="88" width="310" height="16" rx="3" fill="#2a2110" stroke="#fbbf24"/>
-          <text class="c-num" x="660" y="100" text-anchor="end">3,104,000</text>
-          <text class="c-mul" x="682" y="100" fill="#fbbf24">555×</text>
-
-          <text class="c-note" x="0" y="122">Bars not to scale. Touched-only saves about 50×, so a SHA3 tree opened in the circuit costs more than proving the whole clip.</text>
-        </svg>
-      </div>
-    </section>
-
-    <!-- 22 -->
+    <!-- 19 -->
     <section class="slide hero" data-title="Thank you">
       <p class="eyebrow">Closing</p>
       <h1>Thank you</h1>
@@ -1855,8 +1744,6 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
       </p>
       <p class="muted" style="margin: 0; font-size: 1.05rem">
         <a href="https://fightfake.ai" target="_blank" rel="noopener" style="color: var(--accent)">fightfake.ai</a>
-        <span style="color: var(--muted)"> · </span>
-        <a href="https://fightfake.ai/contact" target="_blank" rel="noopener" style="color: var(--accent)">contact</a>
         <span style="color: var(--muted)"> · </span>
         <a href="https://github.com/miha-stopar" target="_blank" rel="noopener" style="color: var(--accent)">github.com/miha-stopar</a>
       </p>
