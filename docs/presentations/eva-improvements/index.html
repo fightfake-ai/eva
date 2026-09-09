@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eva: signed vs stored</title>
+  <title>Video provenance</title>
   <style>
     @font-face {
       font-family: Geist;
@@ -269,6 +269,7 @@
       display: grid;
       gap: 12px;
     }
+    .cards.tight > div { padding: 12px 16px; }
 
     /* image compare */
     .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
@@ -383,34 +384,6 @@
       background-image: url("eva-edit-grid.jpg");
       background-size: 900% 600%;
       background-position: 17.5% 63.75%;
-    }
-    .loupe.pred-L {
-      background-image: url("pred-frame-neighbors.jpg");
-      background-size: 900% 600%;
-      background-position: 15.83% 63.75%;
-      border-color: var(--accent);
-      width: 22%;
-      right: auto;
-      left: 3%;
-      top: 3%;
-    }
-    .loupe.pred-A {
-      background-image: url("pred-frame-neighbors.jpg");
-      background-size: 900% 600%;
-      background-position: 17.5% 61.25%;
-      border-color: var(--accent);
-      width: 22%;
-      right: 28%;
-      top: 3%;
-    }
-    .loupe.pred-X {
-      background-image: url("pred-frame-neighbors.jpg");
-      background-size: 900% 600%;
-      background-position: 17.5% 63.75%;
-      border-color: var(--amber);
-      width: 22%;
-      right: 3%;
-      top: 3%;
     }
     .loupe-tag {
       position: absolute;
@@ -585,29 +558,84 @@
     </nav>
 
     <!-- 1 -->
+    <section class="slide hero" data-title="Video provenance">
+      <p class="eyebrow">Talk</p>
+      <h1 style="margin-bottom: 26px">Video provenance</h1>
+      <div class="two" style="grid-template-columns: .82fr 1.18fr; gap: 34px; align-items: center">
+        <ol style="list-style: none; margin: 0; padding: 0; display: grid; gap: 15px">
+          <li style="display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline">
+            <span style="font: 500 .8rem/1.5 var(--mono); color: var(--accent)">01</span>
+            <span>
+              <b style="display: block; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em">Why fightfake.ai</b>
+              <span class="muted" style="font-size: .86rem">What made me start working on this.</span>
+            </span>
+          </li>
+          <li style="display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline">
+            <span style="font: 500 .8rem/1.5 var(--mono); color: var(--accent)">02</span>
+            <span>
+              <b style="display: block; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em">Why Eva</b>
+              <span class="muted" style="font-size: .86rem">What made Eva the right thing to build on.</span>
+            </span>
+          </li>
+          <li style="display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline">
+            <span style="font: 500 .8rem/1.5 var(--mono); color: var(--accent)">03</span>
+            <span>
+              <b style="display: block; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em">How Eva works</b>
+              <span class="muted" style="font-size: .86rem">Macroblocks, prediction, and what goes inside the proof.</span>
+            </span>
+          </li>
+          <li style="display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline">
+            <span style="font: 500 .8rem/1.5 var(--mono); color: var(--accent)">04</span>
+            <span>
+              <b style="display: block; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em">Improvements</b>
+              <span class="muted" style="font-size: .86rem">Prove only the blocks the edit touched, and why that is hard.</span>
+            </span>
+          </li>
+          <li style="display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline">
+            <span style="font: 500 .8rem/1.5 var(--mono); color: var(--accent)">05</span>
+            <span>
+              <b style="display: block; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em">Is that enough?</b>
+              <span class="muted" style="font-size: .86rem">Whether efficient proofs are the whole story.</span>
+            </span>
+          </li>
+        </ol>
+        <figure class="shot" style="margin: 0">
+          <img src="editor-crop.jpg" alt="The fightfake.ai editor, where an edit is made and a proof is built" width="840" height="352" style="width: 100%; height: auto; display: block" />
+          <figcaption>
+            <span class="label">fightfake.ai</span>
+            <span class="faint">edit a photo, then build the proof</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="faint" style="margin: 26px 0 0">Miha Stopar · fightfake.ai</p>
+    </section>
+
+    <!-- 2 -->
     <section class="slide" data-title="Citizen journalism">
       <h1>Citizen journalism</h1>
-      <div class="two cards" style="margin-top: 18px">
-        <div>
-          <p class="muted">
-            In one of the interviews, Nidžara Ahmetašević, a Bosnian journalist,
-            emphasized the importance of citizen journalism. She started her
-            career as a journalist during the siege of Sarajevo when she was
-            seventeen. She was hungry and in constant danger, while journalists
-            from big media stayed in safe hotels with plenty of whisky and meat.
-          </p>
+      <div class="two" style="margin-top: 18px; align-items: start">
+        <div class="cards">
+          <div>
+            <p class="muted">
+              Nidžara Ahmetašević started reporting during the siege of Sarajevo,
+              at seventeen. She was hungry and in constant danger, while
+              journalists from big media stayed in safe hotels with plenty of
+              whisky and meat.
+            </p>
+          </div>
         </div>
         <div>
-          <p class="muted">
-            Her stance is that we should be listening to local journalists and
-            local people.
+          <p class="quote" style="font-size: clamp(1.05rem, 1.8vw, 1.3rem); max-width: none">
+            We should be listening to local journalists and local people.
+          </p>
+          <p class="attrib" style="margin: 12px 0 0 28px">
+            <b>Nidžara Ahmetašević</b>
           </p>
         </div>
       </div>
       <p class="lead" style="margin: 18px 0 0; max-width: 46em">
-        I cannot judge that opinion. But I agree citizen journalism is
-        important and will become even more so. However, how do we trust it, if
-        anyone can generate whatever photo or video they want?
+        I agree, and it will only matter more. But how do we trust it, if anyone
+        can generate whatever photo or video they want?
       </p>
       <div class="compare" style="margin-top: 16px; margin-bottom: 0">
         <figure class="shot">
@@ -626,52 +654,33 @@
       </div>
     </section>
 
-    <!-- 2 -->
+    <!-- 3 -->
     <section class="slide" data-title="Videos as proofs">
       <p class="eyebrow">Before the 2026 elections</p>
       <h1>Slovenia: videos offered as proof of corruption</h1>
-      <figure class="shot" style="margin: 10px 0 14px">
-        <img src="slovenia-assembly.jpg" alt="National Assembly of the Republic of Slovenia in Ljubljana" style="max-height: 22vh; object-fit: cover; object-position: center" />
-        <figcaption>
-          <span class="label">National Assembly, Ljubljana</span>
-          <span class="faint">MZaplotnik / Wikimedia Commons</span>
-        </figcaption>
-      </figure>
-      <div class="two cards" style="margin-bottom: 12px">
+      <div class="two" style="grid-template-columns: .78fr 1.22fr; gap: 26px; align-items: start; margin: 8px 0 12px">
+        <figure class="shot" style="margin: 0">
+          <img src="slovenia-assembly.jpg" alt="Slovenian and EU flags beside the national anthem verse in the National Assembly, Ljubljana" width="1920" height="1440" style="width: 100%; height: auto; display: block" />
+          <figcaption>
+            <span class="label">National Assembly, Ljubljana</span>
+            <span class="faint">Wikimedia Commons</span>
+          </figcaption>
+        </figure>
         <div>
-          <p class="muted">
-            Days before the 2026 election, secretly recorded clips of politicians
-            and other public figures, appearing to discuss influence, lobbying and
-            the misuse of state funds, appeared on anti-corruption2026.com.
+          <ul class="points" style="margin: 0">
+            <li>Days before the 2026 election, secretly recorded clips of politicians appeared on anti-corruption2026.com.</li>
+            <li>Every origin trace had been erased: when and where they were made, which device recorded them, who edited them.</li>
+            <li>German BKA analysts examined 27 files. None were original camera recordings.</li>
+            <li>With capture provenance and a proof of every edit, none of this would have been in doubt.</li>
+          </ul>
+          <p style="margin: 14px 0 0">
+            <a class="source-link" href="https://www.mladina.si/inc/flow/mladina/2026/forenz/#page=1" target="_blank" rel="noopener">
+              BKA report (Slovene PDF) →
+            </a>
+            <a class="source-link" href="https://www.politico.eu/article/black-cube-leak-tape-corruption-israel-spy-firm-slovenia-election/" target="_blank" rel="noopener" style="margin-left: 14px">
+              POLITICO (English) →
+            </a>
           </p>
-        </div>
-        <div>
-          <p class="muted">
-            Every usable origin trace had been erased: when and where they were
-            made, which device recorded them, who recorded or edited them, and
-            which software was used.
-          </p>
-        </div>
-        <div>
-          <p class="muted">
-            There would be little uncertainty if every published clip had to carry
-            capture provenance: time, place, device, and an unbroken link back to
-            the original recording, plus proofs of what was done to the video
-            after capture.
-          </p>
-        </div>
-        <div>
-          <p class="muted">
-            German BKA analysts examined 27 files. None were original camera
-            recordings. All had been processed: voices distorted, segments merged,
-            origin traces wiped.
-          </p>
-          <a class="source-link" href="https://www.mladina.si/inc/flow/mladina/2026/forenz/#page=1" target="_blank" rel="noopener">
-            BKA report (Slovene PDF) →
-          </a>
-          <a class="source-link" href="https://www.politico.eu/article/black-cube-leak-tape-corruption-israel-spy-firm-slovenia-election/" target="_blank" rel="noopener" style="margin-left: 14px">
-            POLITICO (English) →
-          </a>
         </div>
       </div>
       <div class="diagram" style="margin: 0; padding: 14px 16px 8px">
@@ -685,16 +694,20 @@
             .line { stroke: #1e2a45; stroke-width: 2; }
             .dot { fill: #22d3ee; }
             .dot-hot { fill: #fbbf24; }
-            .gap { fill: #fbbf24; font: 500 11px Geist, system-ui, sans-serif; }
+            .tgap { fill: #fbbf24; font: 500 14px Geist, system-ui, sans-serif; }
+            .tgap-line { stroke: #fbbf24; stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .75; }
           </style>
           <line class="line" x1="90" y1="52" x2="830" y2="52"/>
           <circle class="dot" cx="140" cy="52" r="6"/>
           <circle class="dot-hot" cx="450" cy="52" r="6"/>
           <circle class="dot" cx="780" cy="52" r="6"/>
           <text class="tl" x="140" y="24" text-anchor="middle">~10 DAYS BEFORE</text>
-          <text class="tl" x="450" y="24" text-anchor="middle">VOTE FIRST</text>
+          <text class="tl" x="450" y="24" text-anchor="middle">THE VOTE</text>
           <text class="tl" x="780" y="24" text-anchor="middle">MONTHS LATER</text>
-          <text class="gap" x="615" y="42" text-anchor="middle">certainty gap →</text>
+          <line class="tgap-line" x1="450" y1="40" x2="780" y2="40"/>
+          <line class="tgap-line" x1="450" y1="34" x2="450" y2="46"/>
+          <line class="tgap-line" x1="780" y1="34" x2="780" y2="46"/>
+          <text class="tgap" x="615" y="30" text-anchor="middle">authenticity unknown</text>
           <rect class="tb" x="30" y="72" width="220" height="36" rx="6"/>
           <text class="tn" x="140" y="95" text-anchor="middle">Secret clips drop</text>
           <rect class="tb-hot" x="370" y="72" width="160" height="36" rx="6"/>
@@ -722,11 +735,6 @@
                 signing (pixels sealed before any app can touch them) is rare,
                 and often unclear from the marketing.
               </p>
-            </div>
-            <div style="padding: 0; overflow: hidden">
-              <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener">
-                <img src="c2pa-hn-screenshot.png" alt="Hacker News: C2PA Cameras Do Not Survive Contact with Reality" style="width: 100%; display: block" />
-              </a>
             </div>
             <div style="padding: 12px 12px 8px; overflow: hidden">
               <p style="margin: 0 0 8px; font: 500 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent)">
@@ -861,7 +869,7 @@
           <tr>
             <td>Proof</td>
             <td>~448&nbsp;B</td>
-            <td>~0.7–1.8&nbsp;MB</td>
+            <td>~0.7 to 1.8&nbsp;MB</td>
           </tr>
           <tr>
             <td>Viewer gets</td>
@@ -888,7 +896,7 @@
             .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
             .lane { fill: #e8edf7; font: 600 13px Geist, system-ui, sans-serif; }
             .box { fill: #0a101c; stroke: #1e2a45; }
-            .box-acc { fill: #17161c; stroke: #fbbf24; }
+            .box-amber { fill: #17161c; stroke: #fbbf24; }
             .t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
             .sz { fill: #8b9cb8; font: 12px "Geist Mono", ui-monospace, monospace; }
             .sz-acc { fill: #fbbf24; font: 600 12px "Geist Mono", ui-monospace, monospace; }
@@ -916,7 +924,7 @@
           <text class="t" x="350" y="119">the video people watch</text>
           <text class="sz" x="622" y="119" text-anchor="end">~30 MB</text>
 
-          <rect class="box-acc" x="336" y="139" width="300" height="37" rx="6"/>
+          <rect class="box-amber" x="336" y="139" width="300" height="37" rx="6"/>
           <text class="t" x="350" y="162">+ a lossless master, on a log</text>
           <text class="sz-acc" x="622" y="162" text-anchor="end">~2 GB</text>
 
@@ -1053,39 +1061,67 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
       <ul class="points">
         <li>Codecs do not store each block as raw pixels.</li>
         <li>They predict <b style="color: var(--amber); font-weight: 600">X</b> from neighbors already decoded (everything left and above), then store only the residual (what the prediction got wrong).</li>
-        <li>A good prediction means a small residual, and that shrinks the file: <b style="color: var(--foreground); font-weight: 600">actual = prediction + residual</b>.</li>
-        <li>Edit a neighbor, and X’s prediction (and residual) can change too.</li>
+        <li>A good prediction means a small residual, and that is what shrinks the file.</li>
       </ul>
-      <figure class="shot" style="margin: 0; max-width: 52rem">
-        <div class="frame-stage" style="max-height: 28vh">
-          <img src="pred-frame-neighbors.jpg" alt="Full frame grid with L, A, and X highlighted" style="max-height: 28vh; width: 100%; object-fit: cover; object-position: center" />
-          <div class="loupe pred-L"><span class="loupe-tag acc">L</span></div>
-          <div class="loupe pred-A"><span class="loupe-tag acc">A</span></div>
-          <div class="loupe pred-X"><span class="loupe-tag hot">X</span></div>
-          <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
+      <div style="display: grid; grid-template-columns: min(58%, 42rem, 57vh) 1fr; gap: 22px; align-items: start">
+      <figure class="shot" style="margin: 0">
+        <div class="frame-stage" style="line-height: 0">
+          <img src="pred-neighbors-closeup.jpg" alt="Close-up of the macroblock grid with the current block X and its left and above neighbors" width="960" height="640" style="width: 100%; height: auto; display: block" />
+          <svg class="mb-arrow" viewBox="0 0 960 640" aria-hidden="true">
             <defs>
-              <marker id="arrPred" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-                <path d="M0,0 L5,3.5 L0,7 Z" fill="#22d3ee"/>
-              </marker>
-              <marker id="arrPredX" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-                <path d="M0,0 L5,3.5 L0,7 Z" fill="#fbbf24"/>
+              <marker id="arrPred" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                <path d="M0,0 L6,3.5 L0,7 Z" fill="#22d3ee"/>
               </marker>
             </defs>
-            <!-- from L and A cells up to loupes -->
-            <line x1="142" y1="382" x2="120" y2="100" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrPred)"/>
-            <line x1="158" y1="367" x2="450" y2="100" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrPred)"/>
-            <line x1="158" y1="382" x2="780" y2="100" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrPredX)"/>
-            <!-- L → X and A → X on the grid -->
-            <path d="M148 382 H152" stroke="#22d3ee" stroke-width="2"/>
-            <line x1="142" y1="382" x2="149" y2="382" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#arrPred)"/>
-            <line x1="158" y1="375" x2="158" y2="378" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#arrPred)"/>
+            <g stroke="#22d3ee" stroke-width="1" opacity=".35">
+              <path d="M80 0V640M160 0V640M240 0V640M320 0V640M400 0V640M480 0V640M560 0V640M640 0V640M720 0V640M800 0V640M880 0V640"/>
+              <path d="M0 80H960M0 160H960M0 240H960M0 320H960M0 400H960M0 480H960M0 560H960"/>
+            </g>
+            <!-- A: the block above X -->
+            <rect x="480" y="240" width="80" height="80" fill="rgba(34,211,238,0.22)" stroke="#22d3ee" stroke-width="4"/>
+            <!-- L: the block left of X -->
+            <rect x="400" y="320" width="80" height="80" fill="rgba(34,211,238,0.22)" stroke="#22d3ee" stroke-width="4"/>
+            <!-- X: the block being predicted -->
+            <rect x="480" y="320" width="80" height="80" fill="rgba(251,191,36,0.18)" stroke="#fbbf24" stroke-width="5"/>
+            <!-- L → X and A → X -->
+            <line x1="450" y1="384" x2="508" y2="384" stroke="#22d3ee" stroke-width="4" marker-end="url(#arrPred)"/>
+            <line x1="540" y1="286" x2="540" y2="344" stroke="#22d3ee" stroke-width="4" marker-end="url(#arrPred)"/>
+            <!-- labels sit just outside their blocks -->
+            <rect x="494" y="182" width="52" height="44" rx="7" fill="#0a101c" fill-opacity=".92" stroke="#22d3ee" stroke-width="2"/>
+            <text x="520" y="214" text-anchor="middle" fill="#22d3ee" font-family="Geist Mono, ui-monospace, monospace" font-size="30" font-weight="700">A</text>
+            <rect x="322" y="338" width="52" height="44" rx="7" fill="#0a101c" fill-opacity=".92" stroke="#22d3ee" stroke-width="2"/>
+            <text x="348" y="370" text-anchor="middle" fill="#22d3ee" font-family="Geist Mono, ui-monospace, monospace" font-size="30" font-weight="700">L</text>
+            <rect x="586" y="338" width="52" height="44" rx="7" fill="#0a101c" fill-opacity=".92" stroke="#fbbf24" stroke-width="2"/>
+            <text x="612" y="370" text-anchor="middle" fill="#fbbf24" font-family="Geist Mono, ui-monospace, monospace" font-size="30" font-weight="700">X</text>
           </svg>
         </div>
         <figcaption>
-          <span class="label">Macroblock grid</span>
-          <span class="faint">cyan = predictors · amber = current</span>
+          <span class="label">Close-up of the macroblock grid</span>
+          <span class="faint">cyan = already decoded · amber = block being predicted</span>
         </figcaption>
       </figure>
+      <div class="cards" style="display: grid; gap: 12px; align-content: start">
+        <div>
+          <p style="margin: 0 0 10px; font: 500 .72rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent)">
+            What the file stores for X
+          </p>
+          <p style="margin: 0; font: 500 1.05rem/1.5 var(--mono)">
+            <b style="color: var(--amber); font-weight: 600">X</b> = predict(<b style="color: var(--accent); font-weight: 600">L</b>, <b style="color: var(--accent); font-weight: 600">A</b>) + residual
+          </p>
+          <p class="muted" style="margin: 10px 0 0; font-size: .88rem">
+            Only the residual is written down. The prediction is rebuilt from
+            neighbors the decoder already has.
+          </p>
+        </div>
+        <div>
+          <p class="muted" style="margin: 0; font-size: .88rem">
+            So a block is not self-contained. Change <b style="color: var(--accent); font-weight: 600">L</b> or
+            <b style="color: var(--accent); font-weight: 600">A</b> and
+            <b style="color: var(--amber); font-weight: 600">X</b> decodes to different pixels, even though nobody touched it.
+          </p>
+        </div>
+      </div>
+      </div>
     </section>
 
     <!-- 9 -->
@@ -1214,7 +1250,7 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
           <video id="demo-edit" src="demos1-redacted.mp4" playsinline preload="metadata" muted></video>
           <figcaption>
             <span class="label">Published</span>
-            <span class="badge good">redact only ~2.0s–4.5s</span>
+            <span class="badge good">redact only ~2.0s to 4.5s</span>
           </figcaption>
         </figure>
       </div>
@@ -1445,50 +1481,40 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
     </section>
 
     <!-- 14 -->
-    <section class="slide" data-title="Cannot just merge">
+    <section class="slide" data-title="Merging island">
       <p class="eyebrow">Touched-only · island-only encode</p>
-      <h1>You cannot paste a separately encoded island into the camera stream.</h1>
-      <ul class="points">
-        <li>Touched-only wants a mix: island blocks get new predictions and coefficients from a re-encode; everything outside keeps the camera’s predictions and coefficients from the original encode.</li>
-        <li>That mix is hard. The island’s coefficients were chosen against neighbors that must still match the camera stream at the cut, or prediction + residual no longer rebuilds the right pixels.</li>
-      </ul>
-
-      <figure class="shot" style="margin: 8px 0 0">
-        <div class="frame-stage" style="max-height: 44vh">
-          <img
-            src="eva-edit-grid.jpg"
-            alt="Full frame macroblock grid with island and camera skip"
-            style="width: 100%; max-height: 44vh; object-fit: cover; object-position: center; display: block"
-          />
-          <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
-            <!-- outside / skip: faint cyan wash + label -->
-            <rect x="20" y="24" width="860" height="552" fill="rgba(34,211,238,0.06)" stroke="#22d3ee" stroke-width="2" rx="4"/>
-
-            <!-- island region (around the marked MB / redact area) -->
-            <rect x="108" y="330" width="120" height="100" fill="rgba(251,191,36,0.28)" stroke="#fbbf24" stroke-width="3.5" rx="3"/>
-
-            <!-- outside label -->
-            <rect x="520" y="56" width="340" height="64" rx="8" fill="#0a101c" stroke="#22d3ee" stroke-width="1.5"/>
-            <text x="690" y="82" text-anchor="middle" fill="#22d3ee" font-family="Geist Mono, ui-monospace, monospace" font-size="13" font-weight="600">OUTSIDE ISLAND</text>
-            <text x="690" y="104" text-anchor="middle" fill="#8b9cb8" font-family="Geist, system-ui, sans-serif" font-size="13">predictions + coefficients from the</text>
-            <text x="690" y="122" text-anchor="middle" fill="#8b9cb8" font-family="Geist, system-ui, sans-serif" font-size="13">original camera encode (copied)</text>
-
-            <!-- island label -->
-            <rect x="248" y="348" width="300" height="64" rx="8" fill="#0a101c" stroke="#fbbf24" stroke-width="1.5"/>
-            <text x="398" y="374" text-anchor="middle" fill="#fbbf24" font-family="Geist Mono, ui-monospace, monospace" font-size="13" font-weight="600">ISLAND</text>
-            <text x="398" y="396" text-anchor="middle" fill="#8b9cb8" font-family="Geist, system-ui, sans-serif" font-size="13">predictions + coefficients from</text>
-            <text x="398" y="414" text-anchor="middle" fill="#8b9cb8" font-family="Geist, system-ui, sans-serif" font-size="13">re-encoding the edited blocks</text>
-
-            <!-- hard callout -->
-            <rect x="248" y="430" width="300" height="36" rx="8" fill="#2a1518" stroke="#f87171" stroke-width="1.5"/>
-            <text x="398" y="454" text-anchor="middle" fill="#f87171" font-family="Geist, system-ui, sans-serif" font-size="13" font-weight="600">hard: must fit camera neighbors at the cut</text>
-          </svg>
+      <h1>Merging the re-encoded island with the camera stream.</h1>
+      <div class="two" style="grid-template-columns: auto minmax(14rem, 1fr); gap: 20px; align-items: start; margin-top: 10px">
+        <figure class="shot" style="margin: 0; width: fit-content; max-width: 100%">
+          <div class="frame-stage" style="width: fit-content; max-width: 100%; line-height: 0">
+            <img
+              src="eva-island-merge.jpg"
+              alt="Island and the left and above neighbors of its top-left block"
+              width="900"
+              height="600"
+              style="width: auto; height: auto; max-height: 44vh; max-width: 100%; display: block"
+            />
+            <svg class="mb-arrow" viewBox="0 0 900 600" aria-hidden="true">
+              <rect x="112" y="368" width="16" height="16" fill="rgba(34,211,238,0.45)" stroke="#22d3ee" stroke-width="2.5"/>
+              <rect x="128" y="352" width="16" height="16" fill="rgba(34,211,238,0.45)" stroke="#22d3ee" stroke-width="2.5"/>
+              <rect x="128" y="368" width="64" height="32" fill="rgba(251,191,36,0.32)" stroke="#fbbf24" stroke-width="3"/>
+              <text x="160" y="388" text-anchor="middle" dominant-baseline="middle" fill="#fbbf24" font-family="Geist Mono, ui-monospace, monospace" font-size="12" font-weight="600">island</text>
+            </svg>
+          </div>
+          <figcaption>
+            <span class="label">Island cut</span>
+            <span class="faint">amber = island · cyan = left / above</span>
+          </figcaption>
+        </figure>
+        <div style="padding-top: 4px">
+          <p style="margin: 0 0 10px; font: 500 .72rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent)">At the cut</p>
+          <ul class="points" style="font-size: .93rem; line-height: 1.45; margin: 0; padding-left: 1.1em">
+            <li>Island blocks get new predictions and coefficients from a re-encode.</li>
+            <li>Everything outside keeps the camera’s predictions and coefficients from the original encode.</li>
+            <li>The top-left island block is predicted from its left and above neighbors. Those must still match the camera stream, or prediction + residual no longer rebuilds the right pixels.</li>
+          </ul>
         </div>
-        <figcaption>
-          <span class="label">Intended mix</span>
-          <span class="faint">amber = re-encode · cyan = keep camera encode</span>
-        </figcaption>
-      </figure>
+      </div>
     </section>
 
     <!-- 15 -->
@@ -1499,223 +1525,327 @@ U 8×8 · 121 120 119 120 …     V 8×8 · 136 136 136 135 …
         <li>ZK proving elsewhere already fell by orders of magnitude.</li>
         <li>A faster proof only attests what was signed at capture. That capture trust is still the weak link on cameras.</li>
       </ul>
-      <div class="diagram" style="margin: 8px 0 0; padding: 16px 18px 12px">
-        <svg viewBox="0 0 920 290" xmlns="http://www.w3.org/2000/svg" aria-label="Blockchain ZK proving got much faster; capture trust on cameras has not">
-          <style>
-            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
-            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
-            .ts { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
-            .axis { stroke: #1e2a45; fill: none; stroke-width: 1.25; }
-            .grid { stroke: #1e2a45; fill: none; stroke-width: 1; opacity: .55; }
-            .zk { stroke: #22d3ee; fill: none; stroke-width: 2.5; }
-            .cap { stroke: #f87171; fill: none; stroke-width: 2.5; stroke-dasharray: 6 4; }
-            .dot-zk { fill: #22d3ee; }
-            .dot-cap { fill: #f87171; }
-            .bar { fill: #0d1a22; stroke: #22d3ee; stroke-width: 1.25; }
-            .bar-flat { fill: #2a1518; stroke: #f87171; stroke-width: 1.25; }
-          </style>
-
-          <text class="lbl" x="40" y="18">ZK PROVING · BLOCKCHAIN TRACK RECORD</text>
-          <text class="lbl" x="520" y="18">CAPTURE TRUST · UNCHANGED</text>
-
-          <!-- left: historical ZK drop; labels under bars so they do not overflow -->
-          <line class="axis" x1="60" y1="40" x2="60" y2="200"/>
-          <line class="axis" x1="60" y1="200" x2="430" y2="200"/>
-          <text class="ts" x="48" y="52" text-anchor="end">slow</text>
-          <text class="ts" x="48" y="194" text-anchor="end">fast</text>
-
-          <rect class="bar" x="90" y="50" width="52" height="150" rx="4"/>
-          <rect class="bar" x="175" y="95" width="52" height="105" rx="4" opacity=".92"/>
-          <text class="ts" x="201" y="130" text-anchor="middle" fill="#22d3ee">↓</text>
-          <rect class="bar" x="260" y="135" width="52" height="65" rx="4" opacity=".88"/>
-          <text class="ts" x="286" y="158" text-anchor="middle" fill="#22d3ee">↓</text>
-          <rect class="bar" x="345" y="168" width="52" height="32" rx="4" opacity=".85"/>
-          <text class="ts" x="371" y="186" text-anchor="middle" fill="#22d3ee">↓</text>
-
-          <path class="zk" d="M116 55 C190 90, 270 140, 371 178"/>
-          <circle class="dot-zk" cx="116" cy="55" r="3.5"/>
-          <circle class="dot-zk" cx="371" cy="178" r="3.5"/>
-
-          <text class="ts" x="116" y="220" text-anchor="middle">~2016</text>
-          <text class="ts" x="201" y="220" text-anchor="middle">~2019</text>
-          <text class="ts" x="286" y="220" text-anchor="middle">~2022</text>
-          <text class="ts" x="371" y="220" text-anchor="middle">~2024</text>
-
-          <text class="t" x="116" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">early</text>
-          <text class="t" x="201" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">deployed</text>
-          <text class="t" x="286" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">recursion</text>
-          <text class="t" x="371" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">folding</text>
-
-          <text class="ts" x="60" y="268">Orders of magnitude faster in under a decade.</text>
-
-          <!-- right: capture unchanged across sources -->
-          <line class="axis" x1="540" y1="40" x2="540" y2="200"/>
-          <line class="axis" x1="540" y1="200" x2="890" y2="200"/>
-          <text class="ts" x="528" y="52" text-anchor="end">weak</text>
-          <text class="ts" x="528" y="112" text-anchor="end">sealed</text>
-          <text class="ts" x="528" y="194" text-anchor="end">?</text>
-
-          <line class="grid" x1="540" y1="105" x2="890" y2="105"/>
-          <path class="cap" d="M570 160 H870"/>
-          <circle class="dot-cap" cx="570" cy="160" r="3.5"/>
-          <circle class="dot-cap" cx="870" cy="160" r="3.5"/>
-
-          <rect class="bar-flat" x="575" y="48" width="88" height="36" rx="5"/>
-          <text class="t" x="619" y="70" text-anchor="middle" fill="#f87171" font-size="12">phones</text>
-
-          <rect class="bar-flat" x="678" y="48" width="88" height="36" rx="5"/>
-          <text class="t" x="722" y="70" text-anchor="middle" fill="#f87171" font-size="12">cameras</text>
-
-          <rect class="bar-flat" x="781" y="48" width="88" height="36" rx="5"/>
-          <text class="t" x="825" y="70" text-anchor="middle" fill="#f87171" font-size="12">editors</text>
-
-          <rect x="620" y="122" width="200" height="26" rx="5" fill="#0a101c" stroke="#1e2a45" stroke-dasharray="4 3"/>
-          <text class="ts" x="720" y="139" text-anchor="middle">bus-hash + SE · not shipped</text>
-
-          <text class="ts" x="540" y="230">Signing still happens after software can rewrite the bytes.</text>
-          <text class="ts" x="540" y="248">Cheaper proofs do not buy stronger capture trust.</text>
-          <text class="ts" x="540" y="268">The red line means trust has not moved up toward sealed.</text>
-        </svg>
+      <div class="two" style="gap: 14px; align-items: stretch; margin-top: 8px">
+        <div class="diagram" style="margin: 0; padding: 16px 18px 12px">
+          <svg viewBox="0 0 450 280" xmlns="http://www.w3.org/2000/svg" aria-label="Blockchain ZK proving got much faster" style="width: 100%; min-width: 0; height: auto; display: block">
+            <style>
+              .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+              .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
+              .ts { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+              .axis { stroke: #1e2a45; fill: none; stroke-width: 1.25; }
+              .zk { stroke: #22d3ee; fill: none; stroke-width: 2.5; }
+              .dot-zk { fill: #22d3ee; }
+              .bar { fill: #0d1a22; stroke: #22d3ee; stroke-width: 1.25; }
+            </style>
+            <text class="lbl" x="40" y="18">ZK PROVING · BLOCKCHAIN TRACK RECORD</text>
+            <line class="axis" x1="60" y1="40" x2="60" y2="200"/>
+            <line class="axis" x1="60" y1="200" x2="430" y2="200"/>
+            <text class="ts" x="48" y="52" text-anchor="end">slow</text>
+            <text class="ts" x="48" y="194" text-anchor="end">fast</text>
+            <rect class="bar" x="90" y="50" width="52" height="150" rx="4"/>
+            <rect class="bar" x="175" y="95" width="52" height="105" rx="4" opacity=".92"/>
+            <text class="ts" x="201" y="130" text-anchor="middle" fill="#22d3ee">↓</text>
+            <rect class="bar" x="260" y="135" width="52" height="65" rx="4" opacity=".88"/>
+            <text class="ts" x="286" y="158" text-anchor="middle" fill="#22d3ee">↓</text>
+            <rect class="bar" x="345" y="168" width="52" height="32" rx="4" opacity=".85"/>
+            <text class="ts" x="371" y="186" text-anchor="middle" fill="#22d3ee">↓</text>
+            <path class="zk" d="M116 55 C190 90, 270 140, 371 178"/>
+            <circle class="dot-zk" cx="116" cy="55" r="3.5"/>
+            <circle class="dot-zk" cx="371" cy="178" r="3.5"/>
+            <text class="ts" x="116" y="220" text-anchor="middle">~2016</text>
+            <text class="ts" x="201" y="220" text-anchor="middle">~2019</text>
+            <text class="ts" x="286" y="220" text-anchor="middle">~2022</text>
+            <text class="ts" x="371" y="220" text-anchor="middle">~2024</text>
+            <text class="t" x="116" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">early</text>
+            <text class="t" x="201" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">deployed</text>
+            <text class="t" x="286" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">recursion</text>
+            <text class="t" x="371" y="240" text-anchor="middle" fill="#22d3ee" font-size="11">folding</text>
+            <text class="ts" x="60" y="268">Orders of magnitude faster in under a decade.</text>
+          </svg>
+        </div>
+        <div class="cards" style="display: grid; gap: 14px; align-content: start">
+          <div>
+            <h2 style="margin: 0 0 8px">What a proof can do</h2>
+            <p class="muted" style="margin: 0">
+              Show that the published video follows from the signed one, and that
+              nothing beyond the declared edit happened to it.
+            </p>
+          </div>
+          <div>
+            <h2 style="margin: 0 0 8px">What it cannot do</h2>
+            <p class="muted" style="margin: 0">
+              Say anything about whether the signed pixels ever came off a sensor.
+              That is decided inside the camera, before any proof exists.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- 16 -->
-    <section class="slide" data-title="Capture hardware">
-      <p class="eyebrow">Capture · hardware</p>
-      <h1>Phone “camera signing” is not a sealed sensor.</h1>
+    <section class="slide" data-title="HN attack">
+      <p class="eyebrow">Capture · attack</p>
+      <h1>A few weeks ago on Hacker News: C2PA cameras do not survive contact with reality.</h1>
+      <figure class="shot" style="margin: 4px 0 14px">
+        <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener">
+          <img src="c2pa-hn-screenshot.png" alt="Hacker News: C2PA Cameras Do Not Survive Contact with Reality" width="978" height="136" style="width: 100%; height: auto; display: block" />
+        </a>
+      </figure>
       <ul class="points">
-        <li>A hardware key on the phone does not mean the pixels were sealed at the sensor.</li>
-        <li>On Android, signing sits behind a camera <b style="color: var(--foreground); font-weight: 600">app</b> (Key Attestation / Play Integrity). Root can still feed arbitrary bytes to that key.</li>
+        <li>David Buchanan took the phones that already ship C2PA “signed at capture” and asked what the signature actually covers.</li>
+        <li>He got root on the device, handed the camera key a picture the camera never took, and got back a valid capture signature for it.</li>
+        <li>Root is not exotic here. A one click software exploit worked on fully patched Pixels, and hardware fault injection works whatever the patch level, so it cannot be fixed on phones already sold.</li>
+        <li>Nothing was broken cryptographically. The key stayed in the secure hardware; only the <b style="color: var(--foreground); font-weight: 600">input</b> to signing was attacker-chosen.</li>
+        <li>A verifier sees a genuine hardware-backed signature from a genuine attested phone, over fabricated pixels.</li>
       </ul>
-      <div class="diagram" style="margin-bottom: 14px; padding: 14px 16px 10px">
-        <svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg" aria-label="Claimed capture path versus what root can do">
-          <style>
-            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
-            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
-            .ts { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
-            .box { fill: #0a101c; stroke: #1e2a45; }
-            .box-acc { fill: #0d1a22; stroke: #22d3ee; }
-            .box-bad { fill: #2a1518; stroke: #f87171; }
-            .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
-          </style>
-          <text class="lbl" x="0" y="16">CLAIMED PATH</text>
-          <rect class="box-acc" x="0" y="28" width="100" height="40" rx="6"/>
-          <text class="t" x="50" y="53" text-anchor="middle">sensor</text>
-          <path class="arr" d="M106 48 H122 M114 43 L122 48 L114 53"/>
-          <rect class="box" x="128" y="28" width="110" height="40" rx="6"/>
-          <text class="t" x="183" y="53" text-anchor="middle">camera app</text>
-          <path class="arr" d="M244 48 H260 M252 43 L260 48 L252 53"/>
-          <rect class="box-acc" x="266" y="28" width="130" height="40" rx="6"/>
-          <text class="t" x="331" y="46" text-anchor="middle">StrongBox sign</text>
-          <text class="ts" x="331" y="60" text-anchor="middle">attested device</text>
-          <path class="arr" d="M402 48 H418 M410 43 L418 48 L410 53"/>
-          <rect class="box" x="424" y="28" width="170" height="40" rx="6"/>
-          <text class="t" x="509" y="53" text-anchor="middle">“captured” signature</text>
-
-          <text class="lbl" x="0" y="96">WITH ROOT (SOFTWARE OR HARDWARE)</text>
-          <rect class="box-bad" x="0" y="108" width="160" height="40" rx="6"/>
-          <text class="t" x="80" y="133" text-anchor="middle">any bytes you choose</text>
-          <path class="arr" d="M166 128 H182 M174 123 L182 128 L174 133"/>
-          <rect class="box-bad" x="188" y="108" width="200" height="40" rx="6"/>
-          <text class="t" x="288" y="126" text-anchor="middle">ask StrongBox to sign</text>
-          <text class="ts" x="288" y="140" text-anchor="middle">keys never leave the chip</text>
-          <path class="arr" d="M394 128 H410 M402 123 L410 128 L402 133"/>
-          <rect class="box-bad" x="416" y="108" width="220" height="40" rx="6"/>
-          <text class="t" x="526" y="133" text-anchor="middle">same “captured” trust story</text>
-        </svg>
-      </div>
-      <div class="two cards" style="gap: 12px">
-        <div>
-          <h2>Attestation does not see exploit root</h2>
-          <p class="muted">
-            Locked bootloader, vendor AVB keys, “up to date” can still look fine.
-            Google will provision keys to a compromised device. The strongest
-            phone camera ratings still sit on this app path.
-          </p>
-        </div>
-        <div>
-          <h2>Keys stay “hardware-backed”</h2>
-          <p class="muted">
-            Root does not need to extract the private key. It only needs to call
-            the KeyStore as the camera app and sign arbitrary media.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 17 -->
-    <section class="slide" data-title="Sealed capture">
-      <p class="eyebrow">Capture · hardware</p>
-      <h1>That break is about app signing. The capture we want is different.</h1>
-      <ul class="points">
-        <li>Buchanan’s attack fits Android camera apps: root asks StrongBox to sign an arbitrary digest.</li>
-        <li>What we want instead: hash on the pixel bus, lock that hash in registers the OS cannot write, and let the secure element sign <b style="color: var(--foreground); font-weight: 600">only</b> those registers, never a digest from the OS.</li>
-      </ul>
-      <div class="two" style="gap: 14px; align-items: start; margin-top: 6px">
-        <figure class="shot" style="margin: 0">
-          <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener">
-            <img src="c2pa-hn-screenshot.png" alt="Hacker News discussion of camera signing not surviving contact with reality" style="width: 100%; display: block; max-height: 42vh; object-fit: cover; object-position: top" />
-          </a>
-          <figcaption>
-            <span class="label">Buchanan · HN</span>
-            <span class="faint">app signing is not sealed capture</span>
-          </figcaption>
-        </figure>
-        <div>
-          <div class="diagram" style="margin: 0 0 12px; padding: 12px 14px 10px; overflow-x: auto">
-            <svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" aria-label="Target sealed capture path" style="min-width: 0; width: 100%; height: auto; display: block">
-              <style>
-                .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
-                .t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
-                .ts { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
-                .box { fill: #0a101c; stroke: #1e2a45; }
-                .box-acc { fill: #0d1a22; stroke: #22d3ee; }
-                .box-hot { fill: #17161c; stroke: #fbbf24; }
-                .arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
-              </style>
-              <text class="lbl" x="0" y="14">TARGET PATH</text>
-              <rect class="box-acc" x="0" y="28" width="90" height="36" rx="6"/>
-              <text class="t" x="45" y="51" text-anchor="middle">sensor</text>
-              <path class="arr" d="M96 46 H112 M104 41 L112 46 L104 51"/>
-              <rect class="box-hot" x="118" y="28" width="150" height="36" rx="6"/>
-              <text class="t" x="193" y="44" text-anchor="middle">hash on pixel bus</text>
-              <text class="ts" x="193" y="58" text-anchor="middle">before OS RAM</text>
-              <path class="arr" d="M274 46 H290 M282 41 L290 46 L282 51"/>
-              <rect class="box-hot" x="296" y="28" width="100" height="36" rx="6"/>
-              <text class="t" x="346" y="44" text-anchor="middle">locked B</text>
-              <text class="ts" x="346" y="58" text-anchor="middle">OS cannot write</text>
-              <path class="arr" d="M402 46 H418 M410 41 L418 46 L410 51"/>
-              <rect class="box-acc" x="424" y="28" width="96" height="36" rx="6"/>
-              <text class="t" x="472" y="51" text-anchor="middle">SE signs B</text>
-
-              <text class="ts" x="0" y="88">Root on the application processor should not be able to</text>
-              <text class="ts" x="0" y="106">feed a fake digest into the signer.</text>
-
-              <text class="lbl" x="0" y="136">WHAT THIS ANSWERS</text>
-              <text class="ts" x="0" y="156">App + attestation “hardware-backed” signing can still mint a</text>
-              <text class="ts" x="0" y="174">“captured” signature for arbitrary bytes after root.</text>
-              <text class="ts" x="0" y="192">A bus hash with SE-only register signing is aimed at that.</text>
-            </svg>
-          </div>
-          <div class="cards" style="gap: 10px">
-            <div>
-              <h2>What still remains</h2>
-              <p class="muted" style="margin: 0">
-                Fake feed before the hash tap. Attacks on the SE itself.
-                Optical re-capture. Manufacturer key compromise. Hash in OS RAM,
-                or SE accepts OS digests, and Buchanan applies again.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p class="faint" style="margin: 10px 0 0">
-        Buchanan:
-        <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener" style="color: var(--accent)">da.vidbuchanan.co.uk</a>
+      <p class="faint" style="margin: 12px 0 0">
+        <a href="https://www.da.vidbuchanan.co.uk/blog/android-c2pa.html" target="_blank" rel="noopener" style="color: var(--accent)">da.vidbuchanan.co.uk/blog/android-c2pa</a>
       </p>
     </section>
 
+    <!-- 17 -->
+    <section class="slide" data-title="Why it works">
+      <p class="eyebrow">Capture · why the attack works</p>
+      <h1>The secure chip signs whatever hash the app hands it.</h1>
+      <ul class="points">
+        <li>The camera app does the hashing: it reads the picture from ordinary memory and asks <b style="color: var(--foreground); font-weight: 600">StrongBox</b>, the phone’s secure chip, to sign that hash.</li>
+        <li>StrongBox cannot tell whether that hash came from the sensor or from a file the attacker wrote.</li>
+        <li>So an attacker never needs the private key. They make the same request the app makes, with a hash of their own picture.</li>
+      </ul>
+      <div class="diagram" style="margin-bottom: 14px; padding: 14px 16px 10px">
+        <svg viewBox="0 0 790 205" xmlns="http://www.w3.org/2000/svg" aria-label="The honest capture path and the attacker path differ only in the first two boxes">
+          <style>
+            .w-lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .w-t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
+            .w-ts { fill: #8b9cb8; font: 10.5px Geist, system-ui, sans-serif; }
+            .w-box { fill: #0a101c; stroke: #1e2a45; }
+            .w-acc { fill: #0d1a22; stroke: #22d3ee; }
+            .w-bad { fill: #2a1518; stroke: #f87171; }
+            .w-good { fill: #0f1f19; stroke: #34d399; }
+            .w-arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
+            .w-note { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+          </style>
+
+          <text class="w-lbl" x="0" y="14">WHAT THE SIGNATURE IS SUPPOSED TO MEAN</text>
+          <rect class="w-acc" x="0" y="26" width="150" height="44" rx="6"/>
+          <text class="w-t" x="75" y="45" text-anchor="middle">the real sensor</text>
+          <text class="w-ts" x="75" y="60" text-anchor="middle">light through the lens</text>
+          <path class="w-arr" d="M156 48 H172 M164 43 L172 48 L164 53"/>
+          <rect class="w-box" x="178" y="26" width="170" height="44" rx="6"/>
+          <text class="w-t" x="263" y="45" text-anchor="middle">camera app hashes it</text>
+          <text class="w-ts" x="263" y="60" text-anchor="middle">in ordinary memory</text>
+          <path class="w-arr" d="M354 48 H370 M362 43 L370 48 L362 53"/>
+          <rect class="w-acc" x="376" y="26" width="170" height="44" rx="6"/>
+          <text class="w-t" x="461" y="45" text-anchor="middle">StrongBox signs it</text>
+          <text class="w-ts" x="461" y="60" text-anchor="middle">key never leaves the chip</text>
+          <path class="w-arr" d="M552 48 H568 M560 43 L568 48 L560 53"/>
+          <rect class="w-good" x="574" y="26" width="190" height="44" rx="6"/>
+          <text class="w-t" x="669" y="45" text-anchor="middle">signature verifies</text>
+          <text class="w-ts" x="669" y="60" text-anchor="middle">and the pixels are real</text>
+
+          <text class="w-lbl" x="0" y="106">WHAT AN ATTACKER WITH ROOT ACTUALLY DOES</text>
+          <rect class="w-bad" x="0" y="118" width="150" height="44" rx="6"/>
+          <text class="w-t" x="75" y="137" text-anchor="middle">a picture they made</text>
+          <text class="w-ts" x="75" y="152" text-anchor="middle">no sensor involved</text>
+          <path class="w-arr" d="M156 140 H172 M164 135 L172 140 L164 145"/>
+          <rect class="w-bad" x="178" y="118" width="170" height="44" rx="6"/>
+          <text class="w-t" x="263" y="137" text-anchor="middle">root hashes it instead</text>
+          <text class="w-ts" x="263" y="152" text-anchor="middle">same ordinary memory</text>
+          <path class="w-arr" d="M354 140 H370 M362 135 L370 140 L362 145"/>
+          <rect class="w-acc" x="376" y="118" width="170" height="44" rx="6"/>
+          <text class="w-t" x="461" y="137" text-anchor="middle">StrongBox signs it</text>
+          <text class="w-ts" x="461" y="152" text-anchor="middle">unchanged, still honest</text>
+          <path class="w-arr" d="M552 140 H568 M560 135 L568 140 L560 145"/>
+          <rect class="w-bad" x="574" y="118" width="190" height="44" rx="6"/>
+          <text class="w-t" x="669" y="137" text-anchor="middle">signature verifies</text>
+          <text class="w-ts" x="669" y="152" text-anchor="middle">and the pixels are fake</text>
+
+          <text class="w-note" x="0" y="192">Only the first two boxes changed. The chip, the key and the maths are the same, so a verifier cannot tell the two rows apart.</text>
+        </svg>
+      </div>
+    </section>
+
     <!-- 18 -->
+    <section class="slide" data-title="Fix the attack">
+      <p class="eyebrow">Capture · fix</p>
+      <h1>Fix: never let software choose what gets signed.</h1>
+      <ul class="points">
+        <li>Hash the pixels in hardware on the way out of the sensor, before they reach OS memory.</li>
+        <li>Keep that hash in registers the OS cannot write.</li>
+        <li>Let the secure element sign <b style="color: var(--foreground); font-weight: 600">only</b> those registers. It never accepts a hash from an app.</li>
+      </ul>
+      <div style="margin: 10px 0 0; padding: 12px 12px 8px; border: 1px solid var(--border); border-radius: 12px; background: var(--card, #0a101c); overflow: hidden; max-width: 44rem">
+        <p style="margin: 0 0 8px; font: 500 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent)">
+          Target: hardware-rooted capture
+        </p>
+        <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="While filming, the camera fingerprints video pixels and signs that fingerprint inside the device" style="width: 100%; height: auto; display: block">
+          <g transform="translate(52 108)">
+            <circle cx="0" cy="-28" r="7" fill="#e8edf7" opacity="0.9"/>
+            <path d="M-9 -20 Q0 -14 9 -20 L7 8 Q0 14 -7 8 Z" fill="#e8edf7" opacity="0.85"/>
+            <path d="M-9 -12 L-16 2" stroke="#e8edf7" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+            <path d="M9 -12 L16 2" stroke="#e8edf7" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+          </g>
+          <rect x="96" y="20" width="420" height="100" rx="14" fill="#1a2438" stroke="#22d3ee" stroke-width="2"/>
+          <rect x="124" y="10" width="36" height="12" rx="2" fill="#1a2438" stroke="#22d3ee" stroke-width="1.5"/>
+          <g transform="translate(480 28)">
+            <rect x="0" y="6" width="22" height="14" rx="2.5" fill="none" stroke="#22d3ee" stroke-width="1.4"/>
+            <circle cx="11" cy="13" r="4" fill="none" stroke="#22d3ee" stroke-width="1.3"/>
+            <rect x="15" y="3" width="5" height="4" rx="1" fill="none" stroke="#22d3ee" stroke-width="1.2"/>
+          </g>
+          <text x="124" y="38" fill="#22d3ee" font-size="9" font-weight="600" font-family="Geist, system-ui, sans-serif">Camera</text>
+          <rect x="96" y="50" width="18" height="48" rx="3" fill="#0a101c" stroke="#1e2a45" stroke-width="1"/>
+          <circle cx="144" cy="72" r="18" fill="#0a101c" stroke="#1e2a45" stroke-width="1.5"/>
+          <circle cx="144" cy="72" r="10" fill="none" stroke="#22d3ee" stroke-width="1.2" opacity="0.7"/>
+          <text x="144" y="106" text-anchor="middle" fill="#8b9cb8" font-size="8" font-family="Geist, system-ui, sans-serif">Lens</text>
+          <line x1="166" y1="72" x2="192" y2="72" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
+          <polygon points="200,72 192,68 192,76" fill="#22d3ee" opacity="0.8"/>
+          <rect x="196" y="48" width="48" height="48" rx="4" fill="#0a101c" stroke="#1e2a45"/>
+          <rect x="202" y="54" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="207" y="54" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.5"/>
+          <rect x="212" y="54" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="217" y="54" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.65"/>
+          <rect x="222" y="54" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="202" y="59" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.5"/>
+          <rect x="207" y="59" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="212" y="59" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.65"/>
+          <rect x="217" y="59" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="222" y="59" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.5"/>
+          <rect x="202" y="64" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="207" y="64" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.65"/>
+          <rect x="212" y="64" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="217" y="64" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.5"/>
+          <rect x="222" y="64" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="202" y="69" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.65"/>
+          <rect x="207" y="69" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="212" y="69" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.5"/>
+          <rect x="217" y="69" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="222" y="69" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.65"/>
+          <rect x="202" y="74" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="207" y="74" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.5"/>
+          <rect x="212" y="74" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.35"/>
+          <rect x="217" y="74" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.65"/>
+          <rect x="222" y="74" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.5"/>
+          <text x="220" y="106" text-anchor="middle" fill="#e8edf7" font-size="8" font-weight="500" font-family="Geist, system-ui, sans-serif">Video pixels</text>
+          <line x1="248" y1="72" x2="274" y2="72" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
+          <polygon points="282,72 274,68 274,76" fill="#22d3ee" opacity="0.8"/>
+          <rect x="278" y="52" width="56" height="40" rx="4" fill="#0a101c" stroke="#22d3ee" stroke-width="1.5"/>
+          <text x="306" y="78" text-anchor="middle" fill="#22d3ee" font-size="14" font-family="Geist Mono, ui-monospace, monospace">#</text>
+          <text x="306" y="102" text-anchor="middle" fill="#e8edf7" font-size="7" font-weight="500" font-family="Geist, system-ui, sans-serif">Fingerprint</text>
+          <text x="306" y="112" text-anchor="middle" fill="#8b9cb8" font-size="7" font-family="Geist, system-ui, sans-serif">(hash)</text>
+          <line x1="338" y1="72" x2="364" y2="72" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
+          <polygon points="372,72 364,68 364,76" fill="#22d3ee" opacity="0.8"/>
+          <rect x="368" y="48" width="66" height="48" rx="4" fill="#0a101c" stroke="#34d399" stroke-width="1.5"/>
+          <g transform="translate(401 66)">
+            <rect x="-7" y="-2" width="14" height="10" rx="2" fill="none" stroke="#34d399" stroke-width="1.2"/>
+            <path d="M-4 -2 V-6 a4 4 0 018 0 v4" fill="none" stroke="#34d399" stroke-width="1.2"/>
+          </g>
+          <text x="401" y="106" text-anchor="middle" fill="#e8edf7" font-size="7" font-weight="500" font-family="Geist, system-ui, sans-serif">Sign fingerprint</text>
+          <rect x="448" y="56" width="56" height="36" rx="6" fill="#22d3ee" fill-opacity="0.12" stroke="#22d3ee"/>
+          <text x="476" y="72" text-anchor="middle" fill="#22d3ee" font-size="7" font-family="Geist Mono, ui-monospace, monospace">signed</text>
+          <text x="476" y="84" text-anchor="middle" fill="#22d3ee" font-size="7" font-family="Geist Mono, ui-monospace, monospace">fingerprint</text>
+          <text x="306" y="148" text-anchor="middle" fill="#e8edf7" font-size="12" font-weight="600" font-family="Geist, system-ui, sans-serif">Inside the camera</text>
+          <text x="306" y="168" text-anchor="middle" fill="#8b9cb8" font-size="10" font-family="Geist, system-ui, sans-serif">While filming: pixels → fingerprint → signed in hardware</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 19 -->
+    <section class="slide" data-title="What gets hashed">
+      <p class="eyebrow">Capture · what gets hashed</p>
+      <h1>A hash of what, exactly?</h1>
+      <ul class="points">
+        <li>Eva hashes <b style="color: var(--foreground); font-weight: 600">decoded YUV 4:2:0</b>, one macroblock at a time: 256 Y bytes plus 64 U and 64 V.</li>
+        <li>YUV, not RGB: it is the codec’s own representation and decoding is bit exact. RGB would pull the colour conversion into the proof, and players disagree about it.</li>
+        <li>C2PA hashes the finished file. That claims only “these exact bytes”, so a re-encode breaks it and it cannot say “only this region changed”.</li>
+      </ul>
+      <div class="diagram" style="margin-bottom: 14px; padding: 14px 16px 10px">
+        <svg viewBox="0 0 840 118" xmlns="http://www.w3.org/2000/svg" aria-label="Where in the camera pipeline the hash can be taken">
+          <style>
+            .p-lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .p-t { fill: #e8edf7; font: 12.5px Geist, system-ui, sans-serif; }
+            .p-ts { fill: #8b9cb8; font: 10px Geist, system-ui, sans-serif; }
+            .p-box { fill: #0a101c; stroke: #1e2a45; }
+            .p-acc { fill: #0d1a22; stroke: #22d3ee; }
+            .p-arr { stroke: #8b9cb8; fill: none; stroke-width: 1.25; }
+            .p-tick { stroke-width: 1.25; stroke-dasharray: 3 3; fill: none; }
+            .p-cy { fill: #22d3ee; font: 600 11px Geist, system-ui, sans-serif; }
+            .p-am { fill: #fbbf24; font: 600 11px Geist, system-ui, sans-serif; }
+          </style>
+          <text class="p-lbl" x="0" y="12">THE CAMERA PIPELINE, AND WHERE THE HASH COULD BE TAKEN</text>
+
+          <rect class="p-box" x="0" y="24" width="130" height="40" rx="6"/>
+          <text class="p-t" x="65" y="42" text-anchor="middle">sensor</text>
+          <text class="p-ts" x="65" y="56" text-anchor="middle">RAW Bayer</text>
+          <path class="p-arr" d="M136 44 H152 M144 39 L152 44 L144 49"/>
+          <rect class="p-box" x="158" y="24" width="150" height="40" rx="6"/>
+          <text class="p-t" x="233" y="42" text-anchor="middle">image pipeline</text>
+          <text class="p-ts" x="233" y="56" text-anchor="middle">demosaic, denoise, AI</text>
+          <path class="p-arr" d="M314 44 H330 M322 39 L330 44 L322 49"/>
+          <rect class="p-acc" x="336" y="24" width="170" height="40" rx="6"/>
+          <text class="p-t" x="421" y="42" text-anchor="middle">YUV 4:2:0 frames</text>
+          <text class="p-ts" x="421" y="56" text-anchor="middle">what a decoder outputs</text>
+          <path class="p-arr" d="M512 44 H528 M520 39 L528 44 L520 49"/>
+          <rect class="p-box" x="534" y="24" width="140" height="40" rx="6"/>
+          <text class="p-t" x="604" y="42" text-anchor="middle">H.264 encode</text>
+          <text class="p-ts" x="604" y="56" text-anchor="middle">lossy, not reproducible</text>
+          <path class="p-arr" d="M680 44 H696 M688 39 L696 44 L688 49"/>
+          <rect class="p-box" x="702" y="24" width="130" height="40" rx="6"/>
+          <text class="p-t" x="767" y="48" text-anchor="middle">the file</text>
+
+          <path class="p-tick" d="M65 64 V80" stroke="#fbbf24"/>
+          <text class="p-am" x="65" y="94" text-anchor="middle">out of reach</text>
+          <text class="p-ts" x="65" y="108" text-anchor="middle">would have to prove the ISP</text>
+          <path class="p-tick" d="M421 64 V80" stroke="#22d3ee"/>
+          <text class="p-cy" x="421" y="94" text-anchor="middle">Eva hashes here</text>
+          <text class="p-ts" x="421" y="108" text-anchor="middle">384 B per macroblock, bit exact</text>
+          <path class="p-tick" d="M767 64 V80" stroke="#fbbf24"/>
+          <text class="p-am" x="767" y="94" text-anchor="middle">C2PA hashes here</text>
+          <text class="p-ts" x="767" y="108" text-anchor="middle">these bytes, nothing more</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 21 -->
+    <section class="slide" data-title="Commit for the proof">
+      <p class="eyebrow">Capture · commitment</p>
+      <h1>How you hash depends on what you plan to prove.</h1>
+      <ul class="points">
+        <li>The improvement is proving <b style="color: var(--foreground); font-weight: 600">only the edited blocks</b>. A Merkle tree is not the improvement, it is what makes that possible.</li>
+        <li>On its own the tree is worse than the chain: more than twice as many hashes at capture, and an opening to pay for inside every proof.</li>
+        <li>So it only pays if that opening is cheap, and that is decided by the hash the camera picked, years earlier, in silicon.</li>
+        <li>Still open: committing to pixels and syntax separately never proves that one is an encoding of the other.</li>
+      </ul>
+      <div class="diagram" style="margin-top: 4px; padding: 14px 16px 10px">
+        <svg viewBox="0 0 830 128" xmlns="http://www.w3.org/2000/svg" aria-label="Cost of opening one island macroblock inside the proof, compared with encoding it">
+          <style>
+            .c-lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .c-row { fill: #e8edf7; font: 12px Geist, system-ui, sans-serif; }
+            .c-num { fill: #e8edf7; font: 12px "Geist Mono", ui-monospace, monospace; }
+            .c-mul { font: 600 12px "Geist Mono", ui-monospace, monospace; }
+            .c-note { fill: #8b9cb8; font: 10px Geist, system-ui, sans-serif; }
+          </style>
+          <text class="c-lbl" x="0" y="12">ONE ISLAND MACROBLOCK, COST INSIDE THE PROOF</text>
+
+          <text class="c-row" x="0" y="40">encode it</text>
+          <rect x="250" y="28" width="40" height="16" rx="3" fill="#0d1a22" stroke="#22d3ee"/>
+          <text class="c-num" x="660" y="40" text-anchor="end">5,589</text>
+
+          <text class="c-row" x="0" y="70">open it · circuit friendly hash</text>
+          <rect x="250" y="58" width="39" height="16" rx="3" fill="#0d1a22" stroke="#22d3ee"/>
+          <text class="c-num" x="660" y="70" text-anchor="end">5,508</text>
+          <text class="c-mul" x="682" y="70" fill="#22d3ee">1.0×</text>
+
+          <text class="c-row" x="0" y="100">open it · SHA3-256</text>
+          <rect x="250" y="88" width="310" height="16" rx="3" fill="#2a2110" stroke="#fbbf24"/>
+          <text class="c-num" x="660" y="100" text-anchor="end">3,104,000</text>
+          <text class="c-mul" x="682" y="100" fill="#fbbf24">555×</text>
+
+          <text class="c-note" x="0" y="122">Bars not to scale. Touched-only saves about 50×, so a SHA3 tree opened in the circuit costs more than proving the whole clip.</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 22 -->
     <section class="slide hero" data-title="Thank you">
       <p class="eyebrow">Closing</p>
       <h1>Thank you</h1>
