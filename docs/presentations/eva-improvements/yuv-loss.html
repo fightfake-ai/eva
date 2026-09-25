@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prove the edit on the decoded YUV</title>
+  <style>
+    @font-face {
+      font-family: Geist;
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-latin-ext.woff2") format("woff2");
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: Geist;
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-latin.woff2") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: "Geist Fallback";
+      src: local(Arial);
+      ascent-override: 95.94%;
+      descent-override: 28.16%;
+      line-gap-override: 0.0%;
+      size-adjust: 104.76%;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-mono-latin-ext.woff2") format("woff2");
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url("./fonts/geist-mono-latin.woff2") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: "Geist Mono Fallback";
+      src: local(Arial);
+      ascent-override: 74.67%;
+      descent-override: 21.92%;
+      line-gap-override: 0.0%;
+      size-adjust: 134.59%;
+    }
+    :root {
+      --background: #070b14;
+      --foreground: #e8edf7;
+      --muted: #8b9cb8;
+      --card: #0f1629;
+      --card-border: #1e2a45;
+      --accent: #22d3ee;
+      --amber: #fbbf24;
+      --danger: #f87171;
+      --success: #34d399;
+      --font: Geist, "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+      --mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--background);
+      color: var(--foreground);
+      font: 17px/1.5 var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(color-mix(in srgb, var(--card-border) 40%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--card-border) 40%, transparent) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 15%, #000 20%, transparent 75%);
+      z-index: 0;
+    }
+    .deck {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      min-height: 100%;
+      padding: 24px 32px 72px;
+      display: flex;
+      flex-direction: column;
+    }
+    nav { display: flex; align-items: center; justify-content: flex-end; gap: 16px; margin-bottom: 40px; }
+    .navside { display: flex; align-items: center; gap: 8px; }
+    .nav-btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: color-mix(in srgb, var(--card) 80%, transparent);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 11px;
+      font: 500 11.5px/1 var(--font);
+      cursor: pointer;
+    }
+    .nav-btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--foreground); }
+    .nav-btn:disabled { opacity: .3; cursor: default; }
+    .count { font: 12px/1 var(--mono); color: var(--muted); }
+    .slide { display: none; flex: 1; }
+    .slide.active { display: block; animation: in .28s ease-out; }
+    .slide.hero.active { display: flex; flex-direction: column; justify-content: center; padding-bottom: 6vh; }
+    @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .eyebrow {
+      margin: 0 0 18px;
+      font: 500 11px/1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    h1 {
+      font-size: clamp(1.9rem, 3.6vw, 2.7rem);
+      font-weight: 600;
+      margin: 0 0 16px;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      max-width: 22em;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); max-width: 16em; }
+    .lead { color: var(--muted); margin: 0 0 28px; max-width: 38em; font-size: 1.08rem; line-height: 1.55; }
+    .points { margin: 0 0 16px; padding: 0 0 0 1.2em; color: var(--muted); font-size: 1.02rem; line-height: 1.45; }
+    .points li { margin: 0 0 6px; }
+    .points b, .lead b { color: var(--foreground); font-weight: 600; }
+    h2 { font-size: .95rem; font-weight: 600; margin: 0 0 8px; }
+    .muted { color: var(--muted); font-size: .93rem; margin: 0; line-height: 1.55; }
+    .faint { color: color-mix(in srgb, var(--muted) 75%, transparent); font: .78rem/1.5 var(--mono); margin: 0; }
+    .agenda { display: grid; gap: 10px; }
+    .agenda > div {
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      gap: 12px;
+      align-items: baseline;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .agenda .n { font: 500 .78rem/1 var(--mono); color: var(--accent); }
+    .agenda strong { display: block; font-weight: 600; letter-spacing: -0.01em; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .cards > div, .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .cat {
+      margin: 0 0 8px;
+      font: 500 .74rem/1 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .cat.hot { color: var(--amber); }
+    .cat.bad { color: var(--danger); }
+    .cat.good { color: var(--success); }
+    .diagram {
+      width: 100%;
+      overflow-x: auto;
+      margin: 8px 0 14px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px 12px 12px;
+    }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    .callout {
+      border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+      background: color-mix(in srgb, var(--accent) 7%, var(--card));
+      padding: 16px 18px;
+      border-radius: 12px;
+      font-size: .95rem;
+      line-height: 1.5;
+    }
+    .callout strong {
+      display: block;
+      margin-bottom: 6px;
+      font: 500 .7rem/1 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .steps { display: grid; gap: 1px; background: var(--card-border); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
+    .step { display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start; background: var(--card); padding: 14px 18px; }
+    .step .n { font: 500 .78rem/1.4 var(--mono); color: var(--accent); }
+    .step p { margin: 0; color: var(--muted); font-size: .93rem; }
+    .step b { color: var(--foreground); font-weight: 600; }
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; margin: -4px 0 12px; color: var(--muted); font: 500 .75rem/1.3 var(--mono); }
+    .legend .sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; border: 1px solid #1e2a45; background: #101a2e; }
+    .legend .sw.island { background: #1c1910; border-color: #fbbf24; }
+    .legend .sw.bad { background: #2a1518; border-color: #f87171; }
+    .legend .sw.fix { background: #0e1c18; border-color: #34d399; }
+    .stats { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 8px; }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      min-width: 0;
+      flex: 1;
+    }
+    .stat .k { font: 500 .7rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+    .stat .v { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.03em; margin: 0; }
+    .stat .s { color: var(--muted); font-size: .82rem; margin: 4px 0 0; }
+    @media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+    html.print-all nav, html.print-all body::before { display: none; }
+    html.print-all .slide {
+      display: flex !important;
+      flex-direction: column;
+      animation: none;
+      box-sizing: border-box;
+      width: 13.333in;
+      height: 7.5in;
+      overflow: hidden;
+      padding: 0.4in 0.5in 0.35in;
+      page-break-after: always;
+      break-after: page;
+    }
+    html.print-all .slide:last-of-type { page-break-after: auto; break-after: auto; }
+    html.print-all .slide.hero { justify-content: center; }
+    @page { size: 13.333in 7.5in; margin: 0; }
+    @media print {
+      html, body { background: #070b14; width: 13.333in; height: auto; }
+      .deck { max-width: none; padding: 0; min-height: 0; }
+      .slide, .slide.hero.active, .slide.active {
+        display: flex !important;
+        flex-direction: column;
+        animation: none;
+        box-sizing: border-box;
+        width: 13.333in;
+        height: 7.5in;
+        max-height: 7.5in;
+        overflow: hidden;
+        padding: 0.4in 0.5in 0.35in;
+        break-after: page;
+        page-break-after: always;
+      }
+      .slide:last-of-type { break-after: auto; page-break-after: auto; }
+      .slide.hero { justify-content: center; padding-bottom: 0.4in; }
+      nav, body::before { display: none; }
+      .diagram svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <nav>
+      <div class="navside">
+        <button class="nav-btn" id="prev" type="button">←</button>
+        <span class="count" id="count"></span>
+        <button class="nav-btn" id="next" type="button">→</button>
+      </div>
+    </nav>
+
+    <section class="slide hero" data-title="Prove the edit on the decoded YUV">
+      <p class="eyebrow">Talk</p>
+      <h1>Prove the edit on the decoded YUV</h1>
+      <div class="diagram" style="margin-top: 18px">
+        <svg viewBox="0 0 920 292" role="img" aria-label="Eva proves the edit and the H.264 encode. This approach proves the YUV edit and rebuilds H.264 outside the proof.">
+          <style>
+            .role { fill: #8b9cb8; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .14em; }
+            .lane { fill: #22d3ee; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .box { fill: #101a2e; stroke: #1e2a45; }
+            .proof { fill: #101a2e; stroke: #22d3ee; stroke-width: 1.5; }
+            .edit { fill: #241d0e; stroke: #fbbf24; stroke-width: 1.5; }
+            .out { fill: #101a2e; stroke: #8b9cb8; stroke-dasharray: 4 3; }
+            .pub { fill: #0e1c18; stroke: #34d399; stroke-width: 1.5; }
+            .frame { fill: none; stroke: #1e2a45; stroke-width: 1.2; }
+            .t { fill: #e8edf7; font: 600 14px Geist, system-ui, sans-serif; }
+            .s { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+            .a { stroke: #8b9cb8; fill: none; stroke-width: 1.4; }
+          </style>
+
+          <rect class="frame" x="8" y="8" width="292" height="276" rx="14"/>
+          <rect class="frame" x="316" y="8" width="300" height="276" rx="14"/>
+          <rect class="frame" x="632" y="8" width="280" height="276" rx="14"/>
+
+          <text class="role" x="154" y="32" text-anchor="middle">CAMERA</text>
+          <text class="role" x="466" y="32" text-anchor="middle">EDITOR</text>
+          <text class="role" x="772" y="32" text-anchor="middle">VERIFIER</text>
+
+          <text class="lane" x="24" y="62">EVA</text>
+          <text class="lane" x="332" y="62">EVA</text>
+          <text class="lane" x="648" y="62">EVA</text>
+
+          <rect class="proof" x="86" y="78" width="136" height="64" rx="9"/>
+          <text class="t" x="154" y="106" text-anchor="middle">YUV</text>
+          <text class="s" x="154" y="124" text-anchor="middle">pixels signed</text>
+
+          <path class="a" d="M230 110 H332 M324 104 L332 110 L324 116"/>
+
+          <rect class="edit" x="340" y="78" width="112" height="64" rx="9"/>
+          <text class="t" x="396" y="106" text-anchor="middle">YUV edit</text>
+          <text class="s" x="396" y="124" text-anchor="middle">in the proof</text>
+          <path class="a" d="M460 110 H476 M468 104 L476 110 L468 116"/>
+          <rect class="proof" x="484" y="78" width="116" height="64" rx="9"/>
+          <text class="t" x="542" y="106" text-anchor="middle">H.264</text>
+          <text class="s" x="542" y="124" text-anchor="middle">encode in proof</text>
+
+          <path class="a" d="M608 110 H676 M668 104 L676 110 L668 116"/>
+
+          <rect class="pub" x="684" y="78" width="176" height="64" rx="9"/>
+          <text class="t" x="772" y="106" text-anchor="middle">H.264</text>
+          <text class="s" x="772" y="124" text-anchor="middle">encode was proved</text>
+
+          <text class="lane" x="24" y="188">YUV PROOF</text>
+          <text class="lane" x="332" y="188">YUV PROOF</text>
+          <text class="lane" x="648" y="188">YUV PROOF</text>
+
+          <rect class="proof" x="24" y="204" width="112" height="64" rx="9"/>
+          <text class="t" x="80" y="232" text-anchor="middle">YUV</text>
+          <text class="s" x="80" y="250" text-anchor="middle">captured</text>
+          <path class="a" d="M144 236 H160 M152 230 L160 236 L152 242"/>
+          <rect class="proof" x="168" y="204" width="116" height="64" rx="9"/>
+          <text class="t" x="226" y="232" text-anchor="middle">H.264</text>
+          <text class="s" x="226" y="250" text-anchor="middle">signed pair</text>
+
+          <path class="a" d="M292 236 H332 M324 230 L332 236 L324 242"/>
+
+          <rect class="edit" x="340" y="204" width="112" height="64" rx="9"/>
+          <text class="t" x="396" y="232" text-anchor="middle">YUV edit</text>
+          <text class="s" x="396" y="250" text-anchor="middle">the proof</text>
+          <path class="a" d="M460 236 H476 M468 230 L476 236 L468 242"/>
+          <rect class="out" x="484" y="204" width="116" height="64" rx="9"/>
+          <text class="t" x="542" y="232" text-anchor="middle">H.264</text>
+          <text class="s" x="542" y="250" text-anchor="middle">outside</text>
+
+          <path class="a" d="M608 236 H640 M632 230 L640 236 L632 242"/>
+
+          <rect class="out" x="648" y="204" width="96" height="64" rx="9"/>
+          <text class="t" x="696" y="232" text-anchor="middle">H.264</text>
+          <text class="s" x="696" y="250" text-anchor="middle">received</text>
+          <path class="a" d="M752 236 H776 M768 230 L776 236 L768 242"/>
+          <rect class="pub" x="784" y="204" width="112" height="64" rx="9"/>
+          <text class="t" x="840" y="232" text-anchor="middle">YUV</text>
+          <text class="s" x="840" y="250" text-anchor="middle">decoded</text>
+        </svg>
+      </div>
+      <p class="faint" style="margin: 22px 0 0">Miha Stopar · fightfake.ai</p>
+    </section>
+
+    <section class="slide" data-title="What the camera signs">
+      <p class="eyebrow">The setting</p>
+      <h1>The secure element signs the bitstream and its decoded samples, as one pair.</h1>
+      <p class="lead" style="margin-bottom: 12px">
+        Two signatures over two files would not say the files correspond. The secure element
+        signs them together: <b>this bitstream decodes to these samples</b>. The proof then
+        starts from the samples and never has to prove the decode.
+      </p>
+      <div class="diagram">
+        <svg viewBox="0 0 920 262" role="img" aria-label="Secure element signs bitstream and decoded samples as a checked pair; the proof works on the samples">
+          <style>
+            .b { fill: #101a2e; stroke: #1e2a45; }
+            .se { fill: #101a2e; stroke: #22d3ee; stroke-width: 1.5; }
+            .pr { fill: #0e1c18; stroke: #34d399; stroke-width: 1.5; }
+            .t { fill: #e8edf7; font: 600 14px Geist, system-ui, sans-serif; }
+            .s { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+            .cap { fill: #8b9cb8; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .acc { fill: #22d3ee; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .ok { fill: #34d399; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .a { stroke: #8b9cb8; fill: none; stroke-width: 1.4; }
+            .pair { stroke: #22d3ee; fill: none; stroke-width: 1.4; }
+          </style>
+          <text class="cap" x="8" y="16">SENSOR → ENCODER</text>
+          <rect class="b" x="8" y="28" width="150" height="62" rx="9"/>
+          <text class="t" x="83" y="54" text-anchor="middle">H.264</text>
+          <text class="s" x="83" y="74" text-anchor="middle">bitstream</text>
+
+          <path class="a" d="M166 59 H206 M198 53 L206 59 L198 65"/>
+          <text class="s" x="186" y="46" text-anchor="middle">decode</text>
+
+          <rect class="b" x="214" y="28" width="150" height="62" rx="9"/>
+          <text class="t" x="289" y="54" text-anchor="middle">Y/U/V samples</text>
+          <text class="s" x="289" y="74" text-anchor="middle">what a player shows</text>
+
+          <path class="pair" d="M83 98 V126 H289 V98"/>
+          <text class="acc" x="196" y="146" text-anchor="middle">SIGNED TOGETHER AS A PAIR</text>
+
+          <rect class="se" x="8" y="160" width="356" height="56" rx="9"/>
+          <text class="t" x="186" y="184" text-anchor="middle">Secure element</text>
+          <text class="s" x="186" y="204" text-anchor="middle">signature over h1, the hash of those samples</text>
+
+          <path class="a" d="M372 188 H436 M428 182 L436 188 L428 194"/>
+
+          <rect class="pr" x="444" y="28" width="468" height="188" rx="10"/>
+          <text class="ok" x="468" y="54">WHERE THE PROOF LIVES</text>
+          <text class="t" x="468" y="84">The circuit reads samples, not bits.</text>
+          <text class="s" x="468" y="110">h1 = hash of the signed samples.</text>
+          <text class="s" x="468" y="132">h2 = the same samples, island replaced by the edit.</text>
+          <text class="s" x="468" y="162">No decoder, no CABAC, no transform inside the circuit.</text>
+          <text class="s" x="468" y="184">The secure element already vouched for the decode.</text>
+          <text class="s" x="468" y="206">The bitstream is only rebuilt afterwards, outside the proof.</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Hash chain fork">
+      <p class="eyebrow">Hash chain</p>
+      <h1>The edit forks the chain after the shared prefix.</h1>
+      <div class="diagram">
+        <svg viewBox="0 0 920 292" role="img" aria-label="A hash chain over macroblocks forks at the island into h1 and h2">
+          <style>
+            .cell { fill: #101a2e; stroke: #22d3ee; stroke-width: 1.4; }
+            .orig { fill: #101a2e; stroke: #1e2a45; }
+            .island { fill: #241d0e; stroke: #fbbf24; stroke-width: 1.6; }
+            .tail { fill: #101a2e; stroke: #8b9cb8; }
+            .h1 { fill: #101a2e; stroke: #22d3ee; stroke-width: 1.6; }
+            .h2 { fill: #0e1c18; stroke: #34d399; stroke-width: 1.6; }
+            .t { fill: #e8edf7; font: 600 13px Geist, system-ui, sans-serif; }
+            .s { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+            .cap { fill: #8b9cb8; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .acc { fill: #22d3ee; font: 600 14px Geist, system-ui, sans-serif; }
+            .ok { fill: #34d399; font: 600 14px Geist, system-ui, sans-serif; }
+            .a { stroke: #8b9cb8; fill: none; stroke-width: 1.4; }
+            .fork { stroke: #22d3ee; fill: none; stroke-width: 1.5; }
+          </style>
+          <text class="cap" x="16" y="18">STATE′ = H(STATE, MACROBLOCK)</text>
+
+          <text class="cap" x="16" y="108">PREFIX · ONCE</text>
+          <rect class="cell" x="16" y="118" width="52" height="44" rx="8"/>
+          <text class="t" x="42" y="145" text-anchor="middle">0</text>
+          <path class="a" d="M72 140 H84 M76 134 L84 140 L76 146"/>
+          <rect class="cell" x="88" y="118" width="52" height="44" rx="8"/>
+          <text class="t" x="114" y="145" text-anchor="middle">1</text>
+          <path class="a" d="M144 140 H156 M148 134 L156 140 L148 146"/>
+          <rect class="cell" x="160" y="118" width="52" height="44" rx="8"/>
+          <text class="t" x="186" y="145" text-anchor="middle">2</text>
+          <path class="a" d="M216 140 H228 M220 134 L228 140 L220 146"/>
+          <rect class="cell" x="232" y="118" width="52" height="44" rx="8"/>
+          <text class="t" x="258" y="145" text-anchor="middle">16</text>
+
+          <path class="fork" d="M284 140 H318 V58"/>
+          <path class="fork" d="M318 58 H340 M332 52 L340 58 L332 64"/>
+          <path class="fork" d="M318 140 V222"/>
+          <path class="fork" d="M318 222 H340 M332 216 L340 222 L332 228"/>
+
+          <text class="cap" x="348" y="28">ORIGINAL · h1</text>
+          <rect class="orig" x="348" y="36" width="64" height="44" rx="8"/>
+          <text class="t" x="380" y="63" text-anchor="middle">17</text>
+          <path class="a" d="M416 58 H428 M420 52 L428 58 L420 64"/>
+          <rect class="orig" x="432" y="36" width="64" height="44" rx="8"/>
+          <text class="t" x="464" y="63" text-anchor="middle">24</text>
+          <path class="a" d="M500 58 H528 M520 52 L528 58 L520 64"/>
+          <rect class="tail" x="532" y="36" width="52" height="44" rx="8"/>
+          <text class="t" x="558" y="63" text-anchor="middle">25</text>
+          <path class="a" d="M588 58 H600 M592 52 L600 58 L592 64"/>
+          <rect class="tail" x="604" y="36" width="52" height="44" rx="8"/>
+          <text class="t" x="630" y="63" text-anchor="middle">…</text>
+          <path class="a" d="M660 58 H688 M680 52 L688 58 L680 64"/>
+          <rect class="h1" x="692" y="32" width="112" height="52" rx="9"/>
+          <text class="acc" x="748" y="63" text-anchor="middle">h1</text>
+
+          <text class="cap" x="348" y="188" style="fill:#fbbf24">EDITED ISLAND · h2</text>
+          <rect class="island" x="348" y="200" width="64" height="44" rx="8"/>
+          <text class="t" x="380" y="227" text-anchor="middle">17</text>
+          <path class="a" d="M416 222 H428 M420 216 L428 222 L420 228"/>
+          <rect class="island" x="432" y="200" width="64" height="44" rx="8"/>
+          <text class="t" x="464" y="227" text-anchor="middle">24</text>
+          <path class="a" d="M500 222 H528 M520 216 L528 222 L520 228"/>
+          <rect class="tail" x="532" y="200" width="52" height="44" rx="8"/>
+          <text class="t" x="558" y="227" text-anchor="middle">25</text>
+          <path class="a" d="M588 222 H600 M592 216 L600 222 L592 228"/>
+          <rect class="tail" x="604" y="200" width="52" height="44" rx="8"/>
+          <text class="t" x="630" y="227" text-anchor="middle">…</text>
+          <path class="a" d="M660 222 H688 M680 216 L688 222 L680 228"/>
+          <rect class="h2" x="692" y="196" width="112" height="52" rx="9"/>
+          <text class="ok" x="748" y="227" text-anchor="middle">h2</text>
+
+        </svg>
+      </div>
+      <div class="legend"><span><i class="sw" style="border-color:#22d3ee"></i>shared prefix, one witness</span><span><i class="sw island"></i>island, the only new values</span><span><i class="sw" style="border-color:#8b9cb8"></i>suffix, hashed twice</span></div>
+      <p class="muted">Blocks 25 onward are the same YUV on both branches. They are absorbed again, because the running state now depends on the island.</p>
+    </section>
+
+    <section class="slide" data-title="Re-encode smear">
+      <p class="eyebrow">Touched-only · full re-encode</p>
+      <h1>Re-encoding the edited video changes macroblocks outside the island.</h1>
+      <ul class="points">
+        <li>A 720p frame is 3,600 macroblocks (80×45). This clip is 30 frames → 108,000 macroblocks.</li>
+        <li>The island is only about 2% of those macroblocks, so proving could look ~50× cheaper.</li>
+        <li>Outside the island, pixels stay the same, but a full re-encode still rewrites how most blocks are stored (prediction + residual), on the edited frames and almost every block after.</li>
+      </ul>
+      <div class="diagram" style="margin: 0; padding: 10px 12px 8px">
+        <svg viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg" aria-label="After full re-encode, edited frames and later frames rewrite most macroblocks outside the island">
+          <style>
+            .lbl { fill: #8b9cb8; font: 500 10px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
+            .ts { fill: #8b9cb8; font: 11px Geist, system-ui, sans-serif; }
+            .num { fill: #fbbf24; font: 600 15px "Geist Mono", ui-monospace, monospace; }
+            .num-bad { fill: #f87171; font: 600 15px "Geist Mono", ui-monospace, monospace; }
+            .ok { fill: #0a101c; stroke: #1e2a45; }
+            .chg { fill: #2a1518; stroke: #f87171; stroke-width: 1; }
+            .isl { fill: #2a2110; stroke: #fbbf24; stroke-width: 1.5; }
+          </style>
+
+          <text class="lbl" x="460" y="16" text-anchor="middle">FULL RE-ENCODE EXPERIMENT · EACH GRID = ONE FRAME · 3,600 BLOCKS</text>
+
+          <!-- EDITED: island + nearly full rewrite -->
+          <g transform="translate(120,36)">
+            <text class="lbl" x="140" y="0" text-anchor="middle">EDITED FRAME</text>
+            <g transform="translate(30,12)">
+              <rect class="chg" width="24" height="24"/><rect class="chg" x="24" width="24" height="24"/><rect class="chg" x="48" width="24" height="24"/><rect class="chg" x="72" width="24" height="24"/><rect class="chg" x="96" width="24" height="24"/><rect class="chg" x="120" width="24" height="24"/><rect class="chg" x="144" width="24" height="24"/><rect class="chg" x="168" width="24" height="24"/><rect class="chg" x="192" width="24" height="24"/><rect class="ok" x="216" width="24" height="24"/><rect class="chg" x="240" width="24" height="24"/>
+              <rect class="chg" y="24" width="24" height="24"/><rect class="chg" x="24" y="24" width="24" height="24"/><rect class="chg" x="48" y="24" width="24" height="24"/><rect class="chg" x="72" y="24" width="24" height="24"/><rect class="isl" x="96" y="24" width="24" height="24"/><rect class="isl" x="120" y="24" width="24" height="24"/><rect class="isl" x="144" y="24" width="24" height="24"/><rect class="chg" x="168" y="24" width="24" height="24"/><rect class="chg" x="192" y="24" width="24" height="24"/><rect class="chg" x="216" y="24" width="24" height="24"/><rect class="chg" x="240" y="24" width="24" height="24"/>
+              <rect class="chg" y="48" width="24" height="24"/><rect class="chg" x="24" y="48" width="24" height="24"/><rect class="chg" x="48" y="48" width="24" height="24"/><rect class="chg" x="72" y="48" width="24" height="24"/><rect class="isl" x="96" y="48" width="24" height="24"/><rect class="isl" x="120" y="48" width="24" height="24"/><rect class="isl" x="144" y="48" width="24" height="24"/><rect class="chg" x="168" y="48" width="24" height="24"/><rect class="chg" x="192" y="48" width="24" height="24"/><rect class="chg" x="216" y="48" width="24" height="24"/><rect class="chg" x="240" y="48" width="24" height="24"/>
+              <rect class="chg" y="72" width="24" height="24"/><rect class="chg" x="24" y="72" width="24" height="24"/><rect class="chg" x="48" y="72" width="24" height="24"/><rect class="chg" x="72" y="72" width="24" height="24"/><rect class="isl" x="96" y="72" width="24" height="24"/><rect class="isl" x="120" y="72" width="24" height="24"/><rect class="isl" x="144" y="72" width="24" height="24"/><rect class="chg" x="168" y="72" width="24" height="24"/><rect class="chg" x="192" y="72" width="24" height="24"/><rect class="chg" x="216" y="72" width="24" height="24"/><rect class="chg" x="240" y="72" width="24" height="24"/>
+              <rect class="chg" y="96" width="24" height="24"/><rect class="chg" x="24" y="96" width="24" height="24"/><rect class="chg" x="48" y="96" width="24" height="24"/><rect class="chg" x="72" y="96" width="24" height="24"/><rect class="chg" x="96" y="96" width="24" height="24"/><rect class="chg" x="120" y="96" width="24" height="24"/><rect class="chg" x="144" y="96" width="24" height="24"/><rect class="chg" x="168" y="96" width="24" height="24"/><rect class="chg" x="192" y="96" width="24" height="24"/><rect class="chg" x="216" y="96" width="24" height="24"/><rect class="ok" x="240" y="96" width="24" height="24"/>
+              <rect class="chg" y="120" width="24" height="24"/><rect class="chg" x="24" y="120" width="24" height="24"/><rect class="ok" x="48" y="120" width="24" height="24"/><rect class="chg" x="72" y="120" width="24" height="24"/><rect class="chg" x="96" y="120" width="24" height="24"/><rect class="chg" x="120" y="120" width="24" height="24"/><rect class="chg" x="144" y="120" width="24" height="24"/><rect class="chg" x="168" y="120" width="24" height="24"/><rect class="chg" x="192" y="120" width="24" height="24"/><rect class="chg" x="216" y="120" width="24" height="24"/><rect class="chg" x="240" y="120" width="24" height="24"/>
+              <text x="108" y="40" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+              <text x="132" y="40" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+              <text x="156" y="40" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">I</text>
+            </g>
+            <text class="num-bad" x="140" y="178" text-anchor="middle">~6k</text>
+            <text class="ts" x="140" y="196" text-anchor="middle">changed on frames 14, 15</text>
+            <text class="ts" x="140" y="212" text-anchor="middle">island + most of those frames</text>
+          </g>
+
+          <!-- AFTER: nearly all red -->
+          <g transform="translate(520,36)">
+            <text class="lbl" x="140" y="0" text-anchor="middle">A LATER FRAME</text>
+            <g transform="translate(30,12)">
+              <rect class="chg" width="24" height="24"/><rect class="chg" x="24" width="24" height="24"/><rect class="chg" x="48" width="24" height="24"/><rect class="chg" x="72" width="24" height="24"/><rect class="chg" x="96" width="24" height="24"/><rect class="chg" x="120" width="24" height="24"/><rect class="chg" x="144" width="24" height="24"/><rect class="chg" x="168" width="24" height="24"/><rect class="chg" x="192" width="24" height="24"/><rect class="chg" x="216" width="24" height="24"/><rect class="chg" x="240" width="24" height="24"/>
+              <rect class="chg" y="24" width="24" height="24"/><rect class="chg" x="24" y="24" width="24" height="24"/><rect class="chg" x="48" y="24" width="24" height="24"/><rect class="chg" x="72" y="24" width="24" height="24"/><rect class="chg" x="96" y="24" width="24" height="24"/><rect class="chg" x="120" y="24" width="24" height="24"/><rect class="chg" x="144" y="24" width="24" height="24"/><rect class="chg" x="168" y="24" width="24" height="24"/><rect class="chg" x="192" y="24" width="24" height="24"/><rect class="chg" x="216" y="24" width="24" height="24"/><rect class="ok" x="240" y="24" width="24" height="24"/>
+              <rect class="chg" y="48" width="24" height="24"/><rect class="chg" x="24" y="48" width="24" height="24"/><rect class="chg" x="48" y="48" width="24" height="24"/><rect class="chg" x="72" y="48" width="24" height="24"/><rect class="chg" x="96" y="48" width="24" height="24"/><rect class="chg" x="120" y="48" width="24" height="24"/><rect class="chg" x="144" y="48" width="24" height="24"/><rect class="chg" x="168" y="48" width="24" height="24"/><rect class="chg" x="192" y="48" width="24" height="24"/><rect class="chg" x="216" y="48" width="24" height="24"/><rect class="chg" x="240" y="48" width="24" height="24"/>
+              <rect class="chg" y="72" width="24" height="24"/><rect class="ok" x="24" y="72" width="24" height="24"/><rect class="chg" x="48" y="72" width="24" height="24"/><rect class="chg" x="72" y="72" width="24" height="24"/><rect class="chg" x="96" y="72" width="24" height="24"/><rect class="chg" x="120" y="72" width="24" height="24"/><rect class="chg" x="144" y="72" width="24" height="24"/><rect class="chg" x="168" y="72" width="24" height="24"/><rect class="chg" x="192" y="72" width="24" height="24"/><rect class="chg" x="216" y="72" width="24" height="24"/><rect class="chg" x="240" y="72" width="24" height="24"/>
+              <rect class="chg" y="96" width="24" height="24"/><rect class="chg" x="24" y="96" width="24" height="24"/><rect class="chg" x="48" y="96" width="24" height="24"/><rect class="chg" x="72" y="96" width="24" height="24"/><rect class="chg" x="96" y="96" width="24" height="24"/><rect class="chg" x="120" y="96" width="24" height="24"/><rect class="chg" x="144" y="96" width="24" height="24"/><rect class="chg" x="168" y="96" width="24" height="24"/><rect class="chg" x="192" y="96" width="24" height="24"/><rect class="chg" x="216" y="96" width="24" height="24"/><rect class="chg" x="240" y="96" width="24" height="24"/>
+              <rect class="chg" y="120" width="24" height="24"/><rect class="chg" x="24" y="120" width="24" height="24"/><rect class="chg" x="48" y="120" width="24" height="24"/><rect class="chg" x="72" y="120" width="24" height="24"/><rect class="chg" x="96" y="120" width="24" height="24"/><rect class="chg" x="120" y="120" width="24" height="24"/><rect class="chg" x="144" y="120" width="24" height="24"/><rect class="chg" x="168" y="120" width="24" height="24"/><rect class="ok" x="192" y="120" width="24" height="24"/><rect class="chg" x="216" y="120" width="24" height="24"/><rect class="chg" x="240" y="120" width="24" height="24"/>
+            </g>
+            <text class="num-bad" x="140" y="178" text-anchor="middle">~50k</text>
+            <text class="ts" x="140" y="196" text-anchor="middle">changed on frames 16 to 29</text>
+            <text class="ts" x="140" y="212" text-anchor="middle">almost every later block</text>
+          </g>
+
+          <line x1="120" y1="258" x2="800" y2="258" stroke="#1e2a45" stroke-width="1"/>
+          <text class="num" x="280" y="280" text-anchor="middle">0</text>
+          <text class="ts" x="280" y="294" text-anchor="middle">outside I · pixels changed</text>
+          <text class="num-bad" x="640" y="280" text-anchor="middle">~55k / 108k</text>
+          <text class="ts" x="640" y="294" text-anchor="middle">from experiment · new prediction / residual</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Samples can stay">
+      <p class="eyebrow">What the proof claims</p>
+      <h1>Outside the island, the target samples are the signed samples.</h1>
+      <p class="lead" style="margin-bottom: 10px">
+        This is the statement being proved, not something an encoder gives for free. h1 and h2
+        read the same value for every macroblock outside the island, so those macroblocks are one
+        witness wired into both hashes.
+      </p>
+      <div class="diagram">
+        <svg viewBox="0 0 920 244" role="img" aria-label="Luma values before and after the edit; only the island values change">
+          <style>
+            .cell { fill: #101a2e; stroke: #1e2a45; }
+            .island { fill: #241d0e; stroke: #fbbf24; stroke-width: 1.6; }
+            .bad { fill: #2a1518; stroke: #f87171; stroke-width: 1.6; }
+            .fix { fill: #0e1c18; stroke: #34d399; stroke-width: 1.6; }
+            .gn { fill: #e8edf7; font: 600 11px Geist, system-ui, sans-serif; }
+            .gnm { fill: #8b9cb8; font: 600 10px "Geist Mono", ui-monospace, monospace; }
+            .cap { fill: #8b9cb8; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+          </style>
+          <text class="cap" x="16" y="20">SIGNED SAMPLES · h1</text>
+          <rect class="cell" x="16" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="34" y="56" text-anchor="middle">40</text>
+          <rect class="cell" x="57" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="75" y="56" text-anchor="middle">49</text>
+          <rect class="cell" x="98" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="116" y="56" text-anchor="middle">58</text>
+          <rect class="cell" x="139" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="157" y="56" text-anchor="middle">67</text>
+          <rect class="cell" x="180" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="198" y="56" text-anchor="middle">76</text>
+          <rect class="cell" x="221" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="239" y="56" text-anchor="middle">85</text>
+          <rect class="cell" x="262" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="280" y="56" text-anchor="middle">44</text>
+          <rect class="cell" x="303" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="321" y="56" text-anchor="middle">53</text>
+          <rect class="cell" x="16" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="34" y="97" text-anchor="middle">47</text>
+          <rect class="cell" x="57" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="75" y="97" text-anchor="middle">56</text>
+          <rect class="cell" x="98" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="116" y="97" text-anchor="middle">65</text>
+          <rect class="cell" x="139" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="157" y="97" text-anchor="middle">74</text>
+          <rect class="cell" x="180" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="198" y="97" text-anchor="middle">83</text>
+          <rect class="cell" x="221" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="239" y="97" text-anchor="middle">42</text>
+          <rect class="cell" x="262" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="280" y="97" text-anchor="middle">51</text>
+          <rect class="cell" x="303" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="321" y="97" text-anchor="middle">60</text>
+          <rect class="cell" x="16" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="34" y="138" text-anchor="middle">54</text>
+          <rect class="cell" x="57" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="75" y="138" text-anchor="middle">63</text>
+          <rect class="cell" x="98" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="116" y="138" text-anchor="middle">72</text>
+          <rect class="island" x="139" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="157" y="138" text-anchor="middle">81</text>
+          <rect class="island" x="180" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="198" y="138" text-anchor="middle">40</text>
+          <rect class="cell" x="221" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="239" y="138" text-anchor="middle">49</text>
+          <rect class="cell" x="262" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="280" y="138" text-anchor="middle">58</text>
+          <rect class="cell" x="303" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="321" y="138" text-anchor="middle">67</text>
+          <rect class="cell" x="16" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="34" y="179" text-anchor="middle">61</text>
+          <rect class="cell" x="57" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="75" y="179" text-anchor="middle">70</text>
+          <rect class="cell" x="98" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="116" y="179" text-anchor="middle">79</text>
+          <rect class="cell" x="139" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="157" y="179" text-anchor="middle">88</text>
+          <rect class="cell" x="180" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="198" y="179" text-anchor="middle">47</text>
+          <rect class="cell" x="221" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="239" y="179" text-anchor="middle">56</text>
+          <rect class="cell" x="262" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="280" y="179" text-anchor="middle">65</text>
+          <rect class="cell" x="303" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="321" y="179" text-anchor="middle">74</text>
+          <rect class="cell" x="16" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="34" y="220" text-anchor="middle">68</text>
+          <rect class="cell" x="57" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="75" y="220" text-anchor="middle">77</text>
+          <rect class="cell" x="98" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="116" y="220" text-anchor="middle">86</text>
+          <rect class="cell" x="139" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="157" y="220" text-anchor="middle">45</text>
+          <rect class="cell" x="180" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="198" y="220" text-anchor="middle">54</text>
+          <rect class="cell" x="221" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="239" y="220" text-anchor="middle">63</text>
+          <rect class="cell" x="262" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="280" y="220" text-anchor="middle">72</text>
+          <rect class="cell" x="303" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="321" y="220" text-anchor="middle">81</text>
+          <text class="cap" x="480" y="20">TARGET SAMPLES · h2</text>
+          <rect class="cell" x="480" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="498" y="56" text-anchor="middle">40</text>
+          <rect class="cell" x="521" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="539" y="56" text-anchor="middle">49</text>
+          <rect class="cell" x="562" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="580" y="56" text-anchor="middle">58</text>
+          <rect class="cell" x="603" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="621" y="56" text-anchor="middle">67</text>
+          <rect class="cell" x="644" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="662" y="56" text-anchor="middle">76</text>
+          <rect class="cell" x="685" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="703" y="56" text-anchor="middle">85</text>
+          <rect class="cell" x="726" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="744" y="56" text-anchor="middle">44</text>
+          <rect class="cell" x="767" y="34" width="36" height="36" rx="3"/>
+          <text class="gn" x="785" y="56" text-anchor="middle">53</text>
+          <rect class="cell" x="480" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="498" y="97" text-anchor="middle">47</text>
+          <rect class="cell" x="521" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="539" y="97" text-anchor="middle">56</text>
+          <rect class="cell" x="562" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="580" y="97" text-anchor="middle">65</text>
+          <rect class="cell" x="603" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="621" y="97" text-anchor="middle">74</text>
+          <rect class="cell" x="644" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="662" y="97" text-anchor="middle">83</text>
+          <rect class="cell" x="685" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="703" y="97" text-anchor="middle">42</text>
+          <rect class="cell" x="726" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="744" y="97" text-anchor="middle">51</text>
+          <rect class="cell" x="767" y="75" width="36" height="36" rx="3"/>
+          <text class="gn" x="785" y="97" text-anchor="middle">60</text>
+          <rect class="cell" x="480" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="498" y="138" text-anchor="middle">54</text>
+          <rect class="cell" x="521" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="539" y="138" text-anchor="middle">63</text>
+          <rect class="cell" x="562" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="580" y="138" text-anchor="middle">72</text>
+          <rect class="island" x="603" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="621" y="138" text-anchor="middle">0</text>
+          <rect class="island" x="644" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="662" y="138" text-anchor="middle">0</text>
+          <rect class="cell" x="685" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="703" y="138" text-anchor="middle">49</text>
+          <rect class="cell" x="726" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="744" y="138" text-anchor="middle">58</text>
+          <rect class="cell" x="767" y="116" width="36" height="36" rx="3"/>
+          <text class="gn" x="785" y="138" text-anchor="middle">67</text>
+          <rect class="cell" x="480" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="498" y="179" text-anchor="middle">61</text>
+          <rect class="cell" x="521" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="539" y="179" text-anchor="middle">70</text>
+          <rect class="cell" x="562" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="580" y="179" text-anchor="middle">79</text>
+          <rect class="cell" x="603" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="621" y="179" text-anchor="middle">88</text>
+          <rect class="cell" x="644" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="662" y="179" text-anchor="middle">47</text>
+          <rect class="cell" x="685" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="703" y="179" text-anchor="middle">56</text>
+          <rect class="cell" x="726" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="744" y="179" text-anchor="middle">65</text>
+          <rect class="cell" x="767" y="157" width="36" height="36" rx="3"/>
+          <text class="gn" x="785" y="179" text-anchor="middle">74</text>
+          <rect class="cell" x="480" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="498" y="220" text-anchor="middle">68</text>
+          <rect class="cell" x="521" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="539" y="220" text-anchor="middle">77</text>
+          <rect class="cell" x="562" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="580" y="220" text-anchor="middle">86</text>
+          <rect class="cell" x="603" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="621" y="220" text-anchor="middle">45</text>
+          <rect class="cell" x="644" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="662" y="220" text-anchor="middle">54</text>
+          <rect class="cell" x="685" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="703" y="220" text-anchor="middle">63</text>
+          <rect class="cell" x="726" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="744" y="220" text-anchor="middle">72</text>
+          <rect class="cell" x="767" y="198" width="36" height="36" rx="3"/>
+          <text class="gn" x="785" y="220" text-anchor="middle">81</text>
+        </svg>
+      </div>
+      <div class="legend"><span><i class="sw island"></i>island, the only new values</span><span><i class="sw cell"></i>same value, same witness</span></div>
+      <p class="muted">The circuit proves the edit gadget on the island and equality everywhere else. The publishing step then has to produce a bitstream that decodes to exactly this picture.</p>
+    </section>
+
+    <section class="slide" data-title="The re-encode problem">
+      <p class="eyebrow">Why a plain re-encode fails</p>
+      <h1>Encoding the edited picture again does not return those samples.</h1>
+      <p class="lead" style="margin-bottom: 10px">
+        Paint the island, run a normal encoder, decode the result. Quantisation rounds the island
+        itself, and every macroblock predicting from it lands somewhere new. Both break the
+        statement on the previous slide.
+      </p>
+      <div class="diagram">
+        <svg viewBox="0 0 920 230" role="img" aria-label="Macroblocks whose decoded samples differ, from the edit and from a second encode">
+          <style>
+            .cell { fill: #101a2e; stroke: #1e2a45; }
+            .island { fill: #241d0e; stroke: #fbbf24; stroke-width: 1.6; }
+            .bad { fill: #2a1518; stroke: #f87171; stroke-width: 1.6; }
+            .fix { fill: #0e1c18; stroke: #34d399; stroke-width: 1.6; }
+            .gn { fill: #e8edf7; font: 600 11px Geist, system-ui, sans-serif; }
+            .gnm { fill: #8b9cb8; font: 600 10px "Geist Mono", ui-monospace, monospace; }
+            .cap { fill: #8b9cb8; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+          </style>
+          <text class="cap" x="16" y="20">CAUSED BY THE EDIT</text>
+          <rect class="cell" x="16" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="55" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="94" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="133" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="172" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="211" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="250" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="289" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="328" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="367" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="16" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="55" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="94" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="133" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="172" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="211" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="250" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="289" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="328" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="367" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="16" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="55" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="94" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="133" y="112" width="34" height="34" rx="3"/>
+          <rect class="island" x="172" y="112" width="34" height="34" rx="3"/>
+          <rect class="island" x="211" y="112" width="34" height="34" rx="3"/>
+          <rect class="bad" x="250" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="289" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="328" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="367" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="16" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="55" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="94" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="133" y="151" width="34" height="34" rx="3"/>
+          <rect class="bad" x="172" y="151" width="34" height="34" rx="3"/>
+          <rect class="bad" x="211" y="151" width="34" height="34" rx="3"/>
+          <rect class="bad" x="250" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="289" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="328" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="367" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="16" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="55" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="94" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="133" y="190" width="34" height="34" rx="3"/>
+          <rect class="bad" x="172" y="190" width="34" height="34" rx="3"/>
+          <rect class="bad" x="211" y="190" width="34" height="34" rx="3"/>
+          <rect class="bad" x="250" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="289" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="328" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="367" y="190" width="34" height="34" rx="3"/>
+          <text class="cap" x="482" y="20">CAUSED BY RE-ENCODING ALONE</text>
+          <rect class="bad" x="482" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="521" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="560" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="599" y="34" width="34" height="34" rx="3"/>
+          <rect class="bad" x="638" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="677" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="716" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="755" y="34" width="34" height="34" rx="3"/>
+          <rect class="bad" x="794" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="833" y="34" width="34" height="34" rx="3"/>
+          <rect class="cell" x="482" y="73" width="34" height="34" rx="3"/>
+          <rect class="bad" x="521" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="560" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="599" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="638" y="73" width="34" height="34" rx="3"/>
+          <rect class="bad" x="677" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="716" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="755" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="794" y="73" width="34" height="34" rx="3"/>
+          <rect class="bad" x="833" y="73" width="34" height="34" rx="3"/>
+          <rect class="cell" x="482" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="521" y="112" width="34" height="34" rx="3"/>
+          <rect class="bad" x="560" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="599" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="638" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="677" y="112" width="34" height="34" rx="3"/>
+          <rect class="bad" x="716" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="755" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="794" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="833" y="112" width="34" height="34" rx="3"/>
+          <rect class="cell" x="482" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="521" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="560" y="151" width="34" height="34" rx="3"/>
+          <rect class="bad" x="599" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="638" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="677" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="716" y="151" width="34" height="34" rx="3"/>
+          <rect class="bad" x="755" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="794" y="151" width="34" height="34" rx="3"/>
+          <rect class="cell" x="833" y="151" width="34" height="34" rx="3"/>
+          <rect class="bad" x="482" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="521" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="560" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="599" y="190" width="34" height="34" rx="3"/>
+          <rect class="bad" x="638" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="677" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="716" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="755" y="190" width="34" height="34" rx="3"/>
+          <rect class="bad" x="794" y="190" width="34" height="34" rx="3"/>
+          <rect class="cell" x="833" y="190" width="34" height="34" rx="3"/>
+        </svg>
+      </div>
+      <div class="legend"><span><i class="sw island"></i>island</span><span><i class="sw bad"></i>decoded samples differ from signed</span><span><i class="sw cell"></i>unchanged</span></div>
+      <div class="stats" style="margin-top: 12px">
+        <div class="stat">
+          <p class="k">Edit's own reach</p>
+          <p class="v">18–55 MBs</p>
+          <p class="s">per following frame, until the next I-frame · luma up to ~15</p>
+        </div>
+        <div class="stat">
+          <p class="k">Re-encode with nothing painted</p>
+          <p class="v">~27% of MBs</p>
+          <p class="s">mean ~0.1 · worst ~20 · pure requantisation</p>
+        </div>
+        <div class="stat">
+          <p class="k">Lossless re-encode</p>
+          <p class="v">0 outside</p>
+          <p class="s">every untouched sample identical</p>
+        </div>
+      </div>
+      <p class="faint" style="margin-top: 12px">1280×720, 30 frames, libx264 QP 23, I-frame every 8. Measured by decoding both encodes and comparing per macroblock.</p>
+    </section>
+
+    <section class="slide" data-title="Two ways to publish">
+      <p class="eyebrow">Two ways to publish</p>
+      <h1>Either ship no new bitstream, or rebuild one macroblock at a time.</h1>
+      <div class="two" style="align-items: stretch">
+        <div class="card">
+          <p class="cat">A · No re-encode</p>
+          <p class="muted">
+            Publish the signed bitstream untouched, plus the island's samples as a side payload.
+            The viewer decodes the original and overwrites the island. Nothing is quantised twice,
+            so every other macroblock is bit-identical by construction.
+          </p>
+          <p class="muted" style="margin-top: 10px; color: var(--amber)">
+            Cost: not a single playable file. A plain player shows the unedited video.
+          </p>
+        </div>
+        <div class="card">
+          <p class="cat good">B · Rebuild the bitstream</p>
+          <p class="muted">
+            One normal H.264 file. Copy the syntax elements of every macroblock whose prediction
+            does not read the island, recompute the residual of those that do, store the island
+            exactly, then entropy-code the slice once.
+          </p>
+          <p class="muted" style="margin-top: 10px; color: var(--success)">
+            Result: a file any player decodes to the proved picture.
+          </p>
+        </div>
+      </div>
+      <p class="callout" style="margin-top: 18px"><strong>Both avoid the 27%</strong>The requantisation noise came from encoding the whole clip a second time. Neither route does that. Route A encodes nothing; route B re-encodes only the macroblocks that depend on the island.</p>
+    </section>
+
+    <section class="slide" data-title="Recomputing a residual">
+      <p class="eyebrow">Recomputing one residual</p>
+      <h1>New residual = signed samples − new prediction.</h1>
+      <p class="lead" style="margin-bottom: 10px">
+        In the original bitstream the island decoded to 80 and <b>R</b> to 90, so R's stored
+        residual was +10. R's prediction copies the island, which is now 0.
+      </p>
+      <div class="diagram">
+        <svg viewBox="0 0 920 238" role="img" aria-label="Block R beside the island; the old residual decodes to 10, the recomputed residual to 90">
+          <style>
+            .cell { fill: #101a2e; stroke: #1e2a45; }
+            .island { fill: #241d0e; stroke: #fbbf24; stroke-width: 1.6; }
+            .bad { fill: #2a1518; stroke: #f87171; stroke-width: 1.6; }
+            .fix { fill: #0e1c18; stroke: #34d399; stroke-width: 1.6; }
+            .gn { fill: #e8edf7; font: 600 11px Geist, system-ui, sans-serif; }
+            .gnm { fill: #8b9cb8; font: 600 10px "Geist Mono", ui-monospace, monospace; }
+            .cap { fill: #8b9cb8; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .box { fill: #101a2e; stroke: #1e2a45; }
+            .wrong { fill: #2a1518; stroke: #f87171; stroke-width: 1.6; }
+            .right { fill: #0e1c18; stroke: #34d399; stroke-width: 1.6; }
+            .k { fill: #8b9cb8; font: 500 10.5px "Geist Mono", ui-monospace, monospace; letter-spacing: .08em; }
+            .n { fill: #e8edf7; font: 600 22px Geist, system-ui, sans-serif; }
+            .op { fill: #8b9cb8; font: 600 18px Geist, system-ui, sans-serif; }
+            .note { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+          </style>
+          <text class="cap" x="16" y="22">ISLAND AND R</text>
+          <rect class="cell" x="16" y="40" width="44" height="44" rx="3"/>
+          <rect class="cell" x="66" y="40" width="44" height="44" rx="3"/>
+          <rect class="cell" x="116" y="40" width="44" height="44" rx="3"/>
+          <rect class="cell" x="166" y="40" width="44" height="44" rx="3"/>
+          <rect class="cell" x="16" y="90" width="44" height="44" rx="3"/>
+          <rect class="island" x="66" y="90" width="44" height="44" rx="3"/>
+          <text class="gn" x="88" y="116" text-anchor="middle">0</text>
+          <rect class="fix" x="116" y="90" width="44" height="44" rx="3"/>
+          <text class="gn" x="138" y="116" text-anchor="middle">R</text>
+          <rect class="cell" x="166" y="90" width="44" height="44" rx="3"/>
+          <rect class="cell" x="16" y="140" width="44" height="44" rx="3"/>
+          <rect class="cell" x="66" y="140" width="44" height="44" rx="3"/>
+          <rect class="cell" x="116" y="140" width="44" height="44" rx="3"/>
+          <rect class="cell" x="166" y="140" width="44" height="44" rx="3"/>
+          <text class="cap" x="232" y="22">IF R'S OLD RESIDUAL IS COPIED</text>
+
+          <rect class="box" x="232" y="38" width="118" height="68" rx="8"/>
+          <text class="k" x="291" y="62" text-anchor="middle">PREDICTION</text>
+          <text class="n" x="291" y="92" text-anchor="middle">0</text>
+          <text class="op" x="362" y="80">+</text>
+          <rect class="box" x="384" y="38" width="140" height="68" rx="8"/>
+          <text class="k" x="454" y="62" text-anchor="middle">RESIDUAL, COPIED</text>
+          <text class="n" x="454" y="92" text-anchor="middle">+10</text>
+          <text class="op" x="536" y="80">=</text>
+          <rect class="wrong" x="558" y="38" width="124" height="68" rx="8"/>
+          <text class="k" x="620" y="62" text-anchor="middle">SAMPLES</text>
+          <text class="n" x="620" y="92" text-anchor="middle">10</text>
+          <text class="note" x="698" y="78">signed value was 90</text>
+
+          <text class="cap" x="232" y="128">IF IT IS RECOMPUTED</text>
+          <rect class="box" x="232" y="140" width="118" height="68" rx="8"/>
+          <text class="k" x="291" y="164" text-anchor="middle">PREDICTION</text>
+          <text class="n" x="291" y="194" text-anchor="middle">0</text>
+          <text class="op" x="362" y="182">+</text>
+          <rect class="right" x="384" y="140" width="140" height="68" rx="8"/>
+          <text class="k" x="454" y="164" text-anchor="middle">RESIDUAL, NEW</text>
+          <text class="n" x="454" y="194" text-anchor="middle">+90</text>
+          <text class="op" x="536" y="182">=</text>
+          <rect class="right" x="558" y="140" width="124" height="68" rx="8"/>
+          <text class="k" x="620" y="164" text-anchor="middle">SAMPLES</text>
+          <text class="n" x="620" y="194" text-anchor="middle">90</text>
+          <text class="note" x="698" y="180">R matches the signature</text>
+        </svg>
+      </div>
+      <div class="legend"><span><i class="sw island"></i>island, now 0</span><span><i class="sw fix"></i>R, predicts from the island</span></div>
+      <p class="muted">90 − 0 = +90. The residual must survive the round trip exactly, so it is coded without a quantiser step, or the macroblock is stored as I_PCM with its samples written directly.</p>
+    </section>
+
+    <section class="slide" data-title="Rebuilding the file">
+      <p class="eyebrow">Route B, step by step</p>
+      <h1>Copying syntax elements, then coding the slice once.</h1>
+      <div class="diagram">
+        <svg viewBox="0 0 920 266" role="img" aria-label="Parse the original bitstream into per-macroblock syntax, decide copy or recompute, then entropy-code one slice">
+          <style>
+            .b { fill: #101a2e; stroke: #1e2a45; }
+            .ok { fill: #0e1c18; stroke: #34d399; stroke-width: 1.5; }
+            .hot { fill: #241d0e; stroke: #fbbf24; stroke-width: 1.5; }
+            .t { fill: #e8edf7; font: 600 13px Geist, system-ui, sans-serif; }
+            .s { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+            .cap { fill: #8b9cb8; font: 500 10.5px "Geist Mono", ui-monospace, monospace; letter-spacing: .1em; }
+            .a { stroke: #8b9cb8; fill: none; stroke-width: 1.4; }
+          </style>
+          <text class="cap" x="150" y="16">EDITOR HOLDS THE SIGNED FILE</text>
+          <rect class="b" x="150" y="26" width="180" height="58" rx="9"/>
+          <text class="t" x="240" y="50" text-anchor="middle">Original H.264</text>
+          <text class="s" x="240" y="70" text-anchor="middle">parsed, not just decoded</text>
+
+          <path class="a" d="M338 55 H372 M364 49 L372 55 L364 61"/>
+
+          <rect class="b" x="380" y="26" width="220" height="58" rx="9"/>
+          <text class="t" x="490" y="50" text-anchor="middle">Per-MB syntax elements</text>
+          <text class="s" x="490" y="70" text-anchor="middle">mb_type, mv, cbp, coeffs, qp</text>
+
+          <path class="a" d="M490 84 V106 M151 106 H762"/>
+          <path class="a" d="M151 106 V126 M145 118 L151 126 L157 118"/>
+          <path class="a" d="M453 106 V126 M447 118 L453 126 L459 118"/>
+          <path class="a" d="M762 106 V126 M756 118 L762 126 L768 118"/>
+
+          <rect class="b" x="8" y="126" width="286" height="56" rx="9"/>
+          <text class="t" x="28" y="150">Prediction avoids the island</text>
+          <text class="s" x="28" y="170">copy every element unchanged</text>
+
+          <rect class="ok" x="310" y="126" width="286" height="56" rx="9"/>
+          <text class="t" x="330" y="150">Prediction reads the island</text>
+          <text class="s" x="330" y="170">recompute the residual</text>
+
+          <rect class="hot" x="612" y="126" width="300" height="56" rx="9"/>
+          <text class="t" x="632" y="150">The island itself</text>
+          <text class="s" x="632" y="170">store the edited samples exactly</text>
+
+          <path class="a" d="M151 182 V202 H762 M453 182 V202"/>
+          <path class="a" d="M762 182 V202"/>
+          <path class="a" d="M460 202 V222 M454 214 L460 222 L466 214"/>
+
+          <rect class="b" x="210" y="222" width="500" height="40" rx="9"/>
+          <text class="t" x="460" y="240" text-anchor="middle">One CABAC pass over the whole slice</text>
+          <text class="s" x="460" y="256" text-anchor="middle">contexts are sequential, so the slice is coded from scratch</text>
+        </svg>
+      </div>
+      <p class="muted">Bytes cannot be pasted: CABAC codes a whole slice as one arithmetic code, and each element's probability model depends on its neighbours. The elements are merged as structured data, then coded once. A later frame that never reads the island can still be copied whole.</p>
+    </section>
+
+    <section class="slide" data-title="How far it reaches">
+      <p class="eyebrow">How far it reaches</p>
+      <h1>Only macroblocks whose prediction reads the island are recomputed.</h1>
+      <div class="diagram">
+        <svg viewBox="0 0 578 268" role="img" aria-label="Macroblock grid showing copied, edited, and recomputed macroblocks">
+          <style>
+            .cell { fill: #101a2e; stroke: #1e2a45; }
+            .island { fill: #241d0e; stroke: #fbbf24; stroke-width: 1.6; }
+            .bad { fill: #2a1518; stroke: #f87171; stroke-width: 1.6; }
+            .fix { fill: #0e1c18; stroke: #34d399; stroke-width: 1.6; }
+            .gn { fill: #e8edf7; font: 600 11px Geist, system-ui, sans-serif; }
+            .gnm { fill: #8b9cb8; font: 600 10px "Geist Mono", ui-monospace, monospace; }
+            .cap { fill: #8b9cb8; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+          </style>
+          <text class="cap" x="16" y="20">FILE THE EDITOR BUILDS</text>
+          <rect class="cell" x="16" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="62" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="108" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="154" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="200" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="246" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="292" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="338" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="384" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="430" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="476" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="522" y="32" width="40" height="40" rx="3"/>
+          <rect class="cell" x="16" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="62" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="108" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="154" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="200" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="246" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="292" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="338" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="384" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="430" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="476" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="522" y="78" width="40" height="40" rx="3"/>
+          <rect class="cell" x="16" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="62" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="108" y="124" width="40" height="40" rx="3"/>
+          <rect class="fix" x="154" y="124" width="40" height="40" rx="3"/>
+          <rect class="island" x="200" y="124" width="40" height="40" rx="3"/>
+          <rect class="island" x="246" y="124" width="40" height="40" rx="3"/>
+          <rect class="fix" x="292" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="338" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="384" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="430" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="476" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="522" y="124" width="40" height="40" rx="3"/>
+          <rect class="cell" x="16" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="62" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="108" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="154" y="170" width="40" height="40" rx="3"/>
+          <rect class="fix" x="200" y="170" width="40" height="40" rx="3"/>
+          <rect class="fix" x="246" y="170" width="40" height="40" rx="3"/>
+          <rect class="fix" x="292" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="338" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="384" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="430" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="476" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="522" y="170" width="40" height="40" rx="3"/>
+          <rect class="cell" x="16" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="62" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="108" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="154" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="200" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="246" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="292" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="338" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="384" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="430" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="476" y="216" width="40" height="40" rx="3"/>
+          <rect class="cell" x="522" y="216" width="40" height="40" rx="3"/>
+        </svg>
+      </div>
+      <div class="legend"><span><i class="sw cell"></i>syntax copied from the signed file</span><span><i class="sw island"></i>the edit</span><span><i class="sw fix"></i>residual recomputed, samples unchanged</span></div>
+      <div class="two">
+        <div class="card">
+          <p class="cat">Same frame</p>
+          <p class="muted">Intra prediction reaches right and down. Deblocking rewrites samples on both sides of the island's edge, so it is switched off, or those samples are recomputed too. Measured: the ring grew from 2 macroblocks to 9 with deblocking on.</p>
+        </div>
+        <div class="card">
+          <p class="cat">Later frames</p>
+          <p class="muted">A macroblock whose motion vector points into the island is treated the same way. Its dependents follow, which is the motion-vector closure. An I-frame copied from the signed file breaks the chain, so frames after it are copied whole.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Who holds which file">
+      <p class="eyebrow">Who holds which file</p>
+      <h1>The verifier never receives the signed bitstream.</h1>
+      <p class="lead" style="margin-bottom: 12px">
+        The copying happens where the signed file already is. Only the rebuilt file, the proof,
+        and the signature travel.
+      </p>
+      <div class="diagram">
+        <svg viewBox="0 0 920 236" role="img" aria-label="Camera signs, editor holds the signed file, verifier receives only the published file">
+          <style>
+            .b { fill: #101a2e; stroke: #1e2a45; }
+            .bk { fill: #0e1c18; stroke: #34d399; stroke-width: 1.5; }
+            .role { fill: #22d3ee; font: 500 11px "Geist Mono", ui-monospace, monospace; letter-spacing: .12em; }
+            .t { fill: #e8edf7; font: 13px Geist, system-ui, sans-serif; }
+            .s { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+            .a { stroke: #8b9cb8; fill: none; stroke-width: 1.4; }
+            .no { stroke: #f87171; fill: none; stroke-width: 1.4; stroke-dasharray: 4 3; }
+            .nol { fill: #f87171; font: 11.5px Geist, system-ui, sans-serif; }
+          </style>
+          <text class="role" x="8" y="18">CAMERA</text>
+          <rect class="b" x="8" y="30" width="238" height="72" rx="10"/>
+          <text class="t" x="26" y="56">Bitstream + samples</text>
+          <text class="s" x="26" y="78">secure element signs the pair</text>
+          <text class="s" x="26" y="96">signature over h1</text>
+
+          <text class="role" x="332" y="18">EDITOR</text>
+          <rect class="b" x="332" y="30" width="252" height="72" rx="10"/>
+          <text class="t" x="350" y="56">Keeps the signed file</text>
+          <text class="s" x="350" y="78">copies syntax out of it, recomputes</text>
+          <text class="s" x="350" y="96">the dependents, proves, re-codes</text>
+
+          <text class="role" x="670" y="18">VERIFIER</text>
+          <rect class="bk" x="670" y="30" width="242" height="72" rx="10"/>
+          <text class="t" x="688" y="56">Published file + proof</text>
+          <text class="s" x="688" y="78">decodes it, hashes the samples,</text>
+          <text class="s" x="688" y="96">checks signature and proof</text>
+
+          <path class="a" d="M254 66 H324 M316 60 L324 66 L316 72"/>
+          <path class="a" d="M592 66 H662 M654 60 L662 66 L654 72"/>
+
+          <path class="no" d="M458 110 V134 H790 V104"/>
+          <path class="no" d="M617 127 l14 14 M631 127 l-14 14"/>
+          <text class="nol" x="624" y="158" text-anchor="middle">the signed bitstream never travels</text>
+
+          <rect class="b" x="8" y="166" width="904" height="58" rx="10"/>
+          <text class="t" x="28" y="192">A wrong copy shows up as wrong samples.</text>
+          <text class="s" x="28" y="214">The verifier's own decode is the check: the hash misses h2 and the proof fails. No reference copy needed.</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="What the proof sees">
+      <p class="eyebrow">Witness and bitstream</p>
+      <h1>Recomputed residuals are not witnesses.</h1>
+      <div class="two" style="align-items: stretch">
+        <div class="card">
+          <p class="cat good">Inside the circuit</p>
+          <ul class="points" style="margin: 0">
+            <li>Signed samples of every macroblock, hashed into <b>h1</b>.</li>
+            <li>The same values outside the island, reused for <b>h2</b>.</li>
+            <li>The edited island, the only new sample values.</li>
+            <li>The edit gadget and its configuration.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <p class="cat hot">In the published bitstream</p>
+          <ul class="points" style="margin: 0">
+            <li>Copied syntax elements for untouched macroblocks.</li>
+            <li>Recomputed residual coefficients, or I_PCM samples.</li>
+            <li>The island's coded representation.</li>
+          </ul>
+          <p class="muted" style="margin-top: 10px">None of this is witnessed. It only has to make the decoder emit the samples the circuit hashed.</p>
+        </div>
+      </div>
+      <div class="diagram" style="margin-top: 16px">
+        <svg viewBox="0 0 920 108" role="img" aria-label="Verifier decodes the published file, hashes the samples, and checks the proof">
+          <style>
+            .b { fill: #101a2e; stroke: #1e2a45; }
+            .ok { fill: #0e1c18; stroke: #34d399; stroke-width: 1.5; }
+            .t { fill: #e8edf7; font: 600 13px Geist, system-ui, sans-serif; }
+            .s { fill: #8b9cb8; font: 11.5px Geist, system-ui, sans-serif; }
+            .a { stroke: #8b9cb8; fill: none; stroke-width: 1.4; }
+          </style>
+          <rect class="b" x="8" y="14" width="192" height="76" rx="10"/>
+          <text class="t" x="104" y="44" text-anchor="middle">Published file</text>
+          <text class="s" x="104" y="66" text-anchor="middle">carries the new residuals</text>
+          <path class="a" d="M208 52 H244 M236 46 L244 52 L236 58"/>
+          <rect class="b" x="252" y="14" width="168" height="76" rx="10"/>
+          <text class="t" x="336" y="44" text-anchor="middle">Decode</text>
+          <text class="s" x="336" y="66" text-anchor="middle">R comes out as 90</text>
+          <path class="a" d="M428 52 H464 M456 46 L464 52 L456 58"/>
+          <rect class="b" x="472" y="14" width="192" height="76" rx="10"/>
+          <text class="t" x="568" y="44" text-anchor="middle">Hash the samples</text>
+          <text class="s" x="568" y="66" text-anchor="middle">must equal h2</text>
+          <path class="a" d="M672 52 H708 M700 46 L708 52 L700 58"/>
+          <rect class="ok" x="716" y="14" width="196" height="76" rx="10"/>
+          <text class="t" x="814" y="44" text-anchor="middle">Proof verifies</text>
+          <text class="s" x="814" y="66" text-anchor="middle">island is the declared edit</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="What is left to build">
+      <p class="eyebrow">What is left to build</p>
+      <h1>The merge and the entropy pass work. Residuals against the merged reconstruction do not exist yet.</h1>
+      <div class="two" style="align-items: stretch">
+        <div class="card">
+          <p class="cat good">Working today</p>
+          <ul class="points" style="margin: 0">
+            <li>Merging syntax elements from two sources and coding one slice — bitexact through 30 frames.</li>
+            <li>Copying untouched macroblocks with their stored motion-vector differences.</li>
+            <li>Measuring which macroblocks a given edit reaches.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <p class="cat bad">The gap</p>
+          <p class="muted">
+            The one run that published an edited file took island macroblocks from a separate
+            encode, so their residuals were fitted to that encode's reconstruction rather than the
+            merged one. It played, and everything after the edit drifted.
+          </p>
+        </div>
+      </div>
+      <div class="steps" style="margin-top: 16px">
+        <div class="step"><span class="n">01</span><p><b>Reconstruct properly while merging.</b> The glue currently rebuilds injected macroblocks from the prediction only. It needs prediction plus dequantised residual, checked against a reference decoder's output.</p></div>
+        <div class="step"><span class="n">02</span><p><b>Encode dependents against that reconstruction.</b> For each macroblock reading the island, form the prediction from the merged picture and code <b>signed samples − prediction</b> with no quantisation loss, or fall back to I_PCM.</p></div>
+        <div class="step"><span class="n">03</span><p><b>Re-measure.</b> Decode the published file and compare per macroblock against the signed samples. Outside the island the difference has to be zero on every frame, not just the edited ones.</p></div>
+      </div>
+    </section>
+
+    <section class="slide hero" data-title="Close">
+      <p class="eyebrow">Close</p>
+      <h1>Prove the YUV. Rebuild the bitstream so it decodes to it.</h1>
+      <ul class="points" style="font-size: 1.12rem; max-width: 40em">
+        <li>The secure element signs bitstream and samples as a pair, so the proof can start after the decode.</li>
+        <li>Syntax elements move around an edit. Sample values need not, so the proof walks samples and reuses every untouched macroblock as one witness.</li>
+        <li>A plain re-encode breaks that reuse. Copy the untouched syntax and recompute only the residuals whose prediction changed.</li>
+        <li>Remaining work: produce those residuals against the merged reconstruction.</li>
+      </ul>
+      <p class="faint" style="margin-top: 26px">Miha Stopar · fightfake.ai</p>
+    </section>
+  </div>
+  <script>
+    if (new URLSearchParams(location.search).has("print")) {
+      document.documentElement.classList.add("print-all");
+    }
+    const slides = [...document.querySelectorAll(".slide")];
+    const count = document.getElementById("count");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    let i = Math.min(Math.max(parseInt(location.hash.slice(1), 10) || 0, 0), slides.length - 1);
+    function go(n) {
+      i = Math.min(Math.max(n, 0), slides.length - 1);
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      count.textContent = `${i + 1} / ${slides.length}`;
+      prev.disabled = i === 0;
+      next.disabled = i === slides.length - 1;
+      history.replaceState(null, "", `#${i}`);
+    }
+    prev.addEventListener("click", () => go(i - 1));
+    next.addEventListener("click", () => go(i + 1));
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); go(i + 1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(i - 1); }
+      if (e.key === "f" || e.key === "F") {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+    });
+    go(i);
+  </script>
+</body>
+</html>
