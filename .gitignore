@@ -10,4 +10,18 @@ folding-schemes/src/frontend/circom/test_folder/cubic_circuit_js/
 # generated contracts at test time
 solidity-verifiers/generated
 *.yuv
+# Per-macroblock syntax dumps; regenerate with scripts/jm_syntax_dumps.sh or
+# scripts/jm_decoder_dumps.sh (see docs/fixtures/README.md)
+docs/fixtures/jm-dumps-720p/
+docs/fixtures/jm-sweep-720p/
+docs/fixtures/glue-*/
 my_clip_edited.mp4
+
+# JM encoder leaves these in the working directory
+/log.dat
+/stats.dat
+/data.txt
+/leakybucketparam.cfg
+
+__pycache__/
+.DS_Store
