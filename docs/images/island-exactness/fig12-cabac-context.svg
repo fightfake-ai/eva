@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="560" viewBox="0 0 1180 560" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect width="1180" height="560" fill="#070b14"/>
+<text x="40" y="46" font-size="20" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">The bug: one leftover field, and both sides stop agreeing</text>
+<text x="40" y="72" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">H.264 compresses each number using the neighbouring numbers as context. Writer and reader must hold the same context, always.</text>
+<rect x="44" y="100" width="520" height="290" rx="10" fill="#0d1424" stroke="#ef4444" stroke-width="1.4"/>
+<text x="60" y="126" font-size="15" fill="#ef4444" text-anchor="start" font-weight="600" opacity="1.0">Before the fix</text>
+<rect x="60" y="150" width="105.39999999999999" height="80.60000000000001" fill="#a855f7" opacity="0.85" stroke="#1b2540"/>
+<text x="112.69999999999999" y="182" font-size="12" fill="#fff" text-anchor="middle" font-weight="600" opacity="1.0">raw block</text>
+<text x="112.69999999999999" y="202" font-size="11" fill="#f2e8ff" text-anchor="middle" font-weight="400" opacity="1.0">(I_PCM)</text>
+<rect x="165.39999999999998" y="150" width="105.39999999999999" height="80.60000000000001" fill="#1d2a47" stroke="#1b2540"/>
+<text x="218.1" y="186" font-size="12" fill="#e2e8f5" text-anchor="middle" font-weight="400" opacity="1.0">next block</text>
+<text x="60" y="258" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">what each side thinks the raw block’s</text>
+<text x="60" y="276" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">motion-vector difference was:</text>
+<text x="60" y="302" font-size="13" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">encoder: (0, +2)  ← stale, from the block it replaced</text>
+<text x="60" y="322" font-size="13" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">decoder: (0, 0)   ← the standard says a raw block has none</text>
+<text x="60" y="354" font-size="13" fill="#ef4444" text-anchor="start" font-weight="600" opacity="1.0">Different context → different bits → the streams part company.</text>
+<rect x="624" y="100" width="520" height="290" rx="10" fill="#0d1424" stroke="#10b981" stroke-width="1.4"/>
+<text x="640" y="126" font-size="15" fill="#10b981" text-anchor="start" font-weight="600" opacity="1.0">After the fix</text>
+<rect x="640" y="150" width="105.39999999999999" height="80.60000000000001" fill="#a855f7" opacity="0.85" stroke="#1b2540"/>
+<text x="692.7" y="182" font-size="12" fill="#fff" text-anchor="middle" font-weight="600" opacity="1.0">raw block</text>
+<text x="692.7" y="202" font-size="11" fill="#f2e8ff" text-anchor="middle" font-weight="400" opacity="1.0">(I_PCM)</text>
+<rect x="745.4" y="150" width="105.39999999999999" height="80.60000000000001" fill="#1d2a47" stroke="#1b2540"/>
+<text x="798.1" y="186" font-size="12" fill="#e2e8f5" text-anchor="middle" font-weight="400" opacity="1.0">next block</text>
+<text x="640" y="258" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">what each side thinks the raw block’s</text>
+<text x="640" y="276" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">motion-vector difference was:</text>
+<text x="640" y="302" font-size="13" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">encoder: (0, 0)   ← cleared when the block became raw</text>
+<text x="640" y="322" font-size="13" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">decoder: (0, 0)</text>
+<text x="640" y="354" font-size="13" fill="#10b981" text-anchor="start" font-weight="600" opacity="1.0">Same context → the same bits → every decoder agrees.</text>
+<text x="40" y="470" font-size="12.8" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">What it looked like: ffmpeg and the reference decoder matched on frames 0 and 1, split at one block on frame 2, and from the next row</text>
+<text x="40" y="490" font-size="12.8" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">the whole frame was unrelated to the intended picture. The fix is two assignments, applied at the moment a block is switched to raw.</text>
+<text x="40" y="522" font-size="12.5" fill="#22d3ee" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">memset(currMB->mvd, 0, sizeof(currMB->mvd));      currMB->prev_dqp = 0;</text>
+</svg>

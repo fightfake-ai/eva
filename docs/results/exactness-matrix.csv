@@ -1,0 +1,12 @@
+name,frames,refs,gop,bframes,qp,rate_kbps,edit_mbs,raw_blocks,camera_bytes,published_bytes,size_ratio,control_identical,decode_is_target,outside_edit_mbs,outside_edit_differ,frames_with_difference,raw_per_frame,status,note
+base-8f-1ref,8,1,one,0,28,constant QP,25,669,325642,577421,1.77,True,True,28775,0,-,7:669,EXACT outside the edit,baseline from the document
+long-30f-1ref,30,1,one,0,28,constant QP,25,242,896328,987523,1.1,True,True,107975,0,-,15:199;16:43,EXACT outside the edit,"longer clip, single GOP of 30"
+refs5-30f,30,5,one,0,28,constant QP,25,848,876467,1192676,1.36,True,True,107975,0,-,15:118;16:47;18:679;20:4,EXACT outside the edit,five reference frames
+gop8-30f-1ref,30,1,8,0,28,constant QP,25,130,1232091,1280988,1.04,True,True,107975,0,-,15:130,EXACT outside the edit,"four GOPs, IDR every 8 frames"
+bframes2-30f,30,3,one,2,28,constant QP,25,,861693,,,,,,,,,"not run: the dump format records list-0 motion only, so B slices cannot be replayed",two B-frames between anchors
+ratectl-30f-1ref,30,1,one,0,28,6000,25,163,760486,822240,1.08,True,True,107975,0,-,15:30;16:133,EXACT outside the edit,"rate-controlled capture, QP varies per frame"
+qp20-30f-1ref,30,1,one,0,20,constant QP,25,531,2348542,2540896,1.08,True,True,107975,0,-,15:483;16:48,EXACT outside the edit,higher quality
+qp34-30f-1ref,30,1,one,0,34,constant QP,25,326,357539,482136,1.35,True,True,107975,0,-,15:141;16:185,EXACT outside the edit,lower quality
+edit-large-30f,30,1,one,0,28,constant QP,280,1108,896328,1314614,1.47,True,True,107720,0,-,15:728;16:380,EXACT outside the edit,"large edit, 20x14 macroblocks"
+edit-strip-30f,30,1,one,0,28,constant QP,70,1960,896328,1632705,1.82,True,True,107930,0,-,15:1228;16:732,EXACT outside the edit,"thin strip, 70x1 macroblocks"
+edit-two-frames-30f,30,1,one,0,28,constant QP,50,337,896328,1023815,1.14,True,True,107950,0,-,15:199;16:34;17:104,EXACT outside the edit,same box painted on two consecutive frames

@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="620" viewBox="0 0 1180 620" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect width="1180" height="620" fill="#070b14"/>
+<text x="40" y="46" font-size="20" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">Motion vectors, and why they are guessed</text>
+<text x="40" y="72" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">A block on a new frame is usually described as “the same thing, moved”.</text>
+<rect x="52" y="110" width="250" height="172" rx="6" fill="#0d1424" stroke="#1b2540" stroke-width="1"/>
+<text x="60" y="100" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">previous frame (already decoded)</text>
+<rect x="60" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="86" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="112" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="138" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="164" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="190" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="216" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="242" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="268" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="60" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="86" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="112" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="138" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="164" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="190" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="216" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="242" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="268" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="60" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="86" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="112" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="138" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="164" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="190" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="216" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="242" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="268" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="60" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="86" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="112" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="138" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="164" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="190" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="216" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="242" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="268" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="60" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="86" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="112" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="138" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="164" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="190" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="216" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="242" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="268" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="60" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="86" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="112" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="138" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="164" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="190" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="216" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="242" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="268" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="392" y="110" width="250" height="172" rx="6" fill="#0d1424" stroke="#1b2540" stroke-width="1"/>
+<text x="400" y="100" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">frame being decoded</text>
+<rect x="400" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="426" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="452" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="478" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="504" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="530" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="556" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="582" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="608" y="118" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="400" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="426" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="452" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="478" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="504" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="530" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="556" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="582" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="608" y="144" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="400" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="426" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="452" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="478" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="504" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="530" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="556" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="582" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="608" y="170" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="400" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="426" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="452" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="478" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="504" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="530" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="556" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="582" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="608" y="196" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="400" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="426" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="452" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="478" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="504" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="530" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="556" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="582" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="608" y="222" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="400" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="426" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="452" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="478" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="504" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="530" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="556" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="582" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="608" y="248" width="26" height="26" fill="#16233c" stroke="#1b2540" stroke-width="0.6"/>
+<rect x="190" y="196" width="26" height="26" fill="#10b981" opacity="0.85"/>
+<text x="203.0" y="190" font-size="11" fill="#10b981" text-anchor="middle" font-weight="400" opacity="1.0">this patch</text>
+<rect x="452" y="144" width="26" height="26" fill="#22d3ee" opacity="0.85"/>
+<text x="465.0" y="138" font-size="11" fill="#22d3ee" text-anchor="middle" font-weight="400" opacity="1.0">goes here</text>
+<path d="M 203.0 209.0 C 300 278, 330 148, 462.4 162.2" stroke="#22d3ee" stroke-width="2" fill="none" marker-end="url(#mv)"/>
+<defs><marker id="mv" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto"><path d="M0,0 L7,3.2 L0,6.4 z" fill="#22d3ee"/></marker></defs>
+<text x="660" y="158" font-size="13.5" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0">“For this block, copy the patch that sits</text>
+<text x="660" y="178" font-size="13.5" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0">3 blocks right and 2 blocks down in the</text>
+<text x="660" y="198" font-size="13.5" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0">previous frame.”</text>
+<text x="660" y="228" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">That offset is the motion vector: two numbers,</text>
+<text x="660" y="246" font-size="12.5" fill="#22d3ee" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">here (+48, +32) in pixels.</text>
+<text x="660" y="274" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">Any leftover difference is the residual.</text>
+<rect x="46" y="326" width="1088" height="230" rx="10" fill="#0d1424" stroke="#1b2540" stroke-width="1"/>
+<text x="66" y="352" font-size="15.5" fill="#22d3ee" text-anchor="start" font-weight="600" opacity="1.0">The file does not store the vector. It stores the surprise.</text>
+<rect x="110.0" y="382.0" width="41.6" height="41.6" fill="#16233c" stroke="#1b2540" stroke-width="0.8"/>
+<rect x="110.0" y="423.6" width="41.6" height="41.6" fill="#2b3c63" stroke="#1b2540" stroke-width="0.8"/>
+<text x="130.8" y="449.392" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">A</text>
+<rect x="151.6" y="382.0" width="41.6" height="41.6" fill="#2b3c63" stroke="#1b2540" stroke-width="0.8"/>
+<text x="172.4" y="407.79200000000003" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">B</text>
+<rect x="151.6" y="423.6" width="41.6" height="41.6" fill="#22d3ee" stroke="#1b2540" stroke-width="0.8"/>
+<rect x="193.2" y="382.0" width="41.6" height="41.6" fill="#2b3c63" stroke="#1b2540" stroke-width="0.8"/>
+<text x="214.0" y="407.79200000000003" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">C</text>
+<rect x="193.2" y="423.6" width="41.6" height="41.6" fill="#16233c" stroke="#1b2540" stroke-width="0.8"/>
+<rect x="234.8" y="382.0" width="41.6" height="41.6" fill="#16233c" stroke="#1b2540" stroke-width="0.8"/>
+<rect x="234.8" y="423.6" width="41.6" height="41.6" fill="#16233c" stroke="#1b2540" stroke-width="0.8"/>
+<text x="176.56" y="372" font-size="11.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">already-decoded neighbours</text>
+<text x="151.6" y="486.0" font-size="11.5" fill="#22d3ee" text-anchor="start" font-weight="400" opacity="1.0">this block</text>
+<text x="470" y="388" font-size="12.8" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">A is the block to the left, B above, C above-right.</text>
+<text x="470" y="414" font-size="12.8" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">A (+46, +30)    B (+50, +34)    C (+48, +30)</text>
+<text x="470" y="440" font-size="12.8" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">The decoder takes the middle value of each column:</text>
+<text x="470" y="466" font-size="12.8" fill="#22d3ee" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">predicted vector = (+48, +30)</text>
+<text x="470" y="492" font-size="12.8" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">The file stores only the difference from that guess:</text>
+<text x="470" y="518" font-size="12.8" fill="#10b981" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">stored difference = (0, +2)   →   real vector (+48, +32)</text>
+<text x="66" y="536" font-size="12.8" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">This is why a raw block hurts its neighbour. A raw block carries no vector at all, so it drops out of that guess, the guess moves,</text>
+<text x="66" y="556" font-size="12.8" fill="#ef4444" text-anchor="start" font-weight="400" opacity="1.0">and the neighbour’s stored difference of (0, +2) now points somewhere else entirely.</text>
+</svg>

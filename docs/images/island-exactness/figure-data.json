@@ -1,0 +1,16 @@
+{
+ "frame7_filter_on": {
+  "same": 2888,
+  "raw_same": 633,
+  "raw_diff": 0,
+  "ring": 54,
+  "paint": 25
+ },
+ "frame7_filter_off": {
+  "same": 2931,
+  "raw_same": 644,
+  "raw_diff": 0,
+  "ring": 0,
+  "paint": 25
+ }
+}

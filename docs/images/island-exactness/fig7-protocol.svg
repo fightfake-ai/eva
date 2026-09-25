@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="430" viewBox="0 0 1180 430" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect width="1180" height="430" fill="#070b14"/>
+<text x="40" y="46" font-size="20" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">What is signed, what is proved, what is shipped</text>
+<defs><marker id="p" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto"><path d="M0,0 L7,3.2 L0,6.4 z" fill="#94a3b8"/></marker></defs>
+<rect x="40" y="100" width="250" height="120" rx="10" fill="#0d1424" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="58" y="130" font-size="14.5" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">Camera</text>
+<text x="58" y="154" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">signs the H.264 file</text>
+<text x="58" y="173" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">and the picture it decodes to</text>
+<text x="58" y="192" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">→ R_pix</text>
+<path d="M 298 160 L 348 160" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#p)"/>
+<rect x="356" y="100" width="250" height="120" rx="10" fill="#0d1424" stroke="#a855f7" stroke-width="1.5"/>
+<text x="374" y="130" font-size="14.5" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">Editor</text>
+<text x="374" y="154" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">paints 25 macroblocks</text>
+<text x="374" y="173" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">on the decoded picture</text>
+<text x="374" y="192" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">→ R_stmt</text>
+<path d="M 614 160 L 664 160" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#p)"/>
+<rect x="672" y="100" width="250" height="120" rx="10" fill="#0d1424" stroke="#10b981" stroke-width="1.5"/>
+<text x="690" y="130" font-size="14.5" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">Proof</text>
+<text x="690" y="154" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">25 macroblocks only</text>
+<text x="690" y="173" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">opens under both roots</text>
+<text x="690" y="192" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">cascade is not in here</text>
+<rect x="40" y="260" width="566" height="120" rx="10" fill="#0d1424" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="58" y="290" font-size="14.5" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">Publisher: rebuild the H.264</text>
+<text x="58" y="314" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">keeps the camera’s own bits for every untouched block</text>
+<text x="58" y="333" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">stores raw samples where the prediction changed (669 blocks)</text>
+<text x="58" y="352" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">file 564 KB vs 318 KB original</text>
+<path d="M 614 320 L 664 320" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#p)"/>
+<rect x="672" y="260" width="250" height="120" rx="10" fill="#0d1424" stroke="#10b981" stroke-width="1.5"/>
+<text x="690" y="290" font-size="14.5" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">Any player</text>
+<text x="690" y="314" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">decodes to exactly R_stmt</text>
+<text x="690" y="333" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">ffmpeg and the reference</text>
+<text x="690" y="352" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">decoder agree, byte for byte</text>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="520" viewBox="0 0 1180 520" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect width="1180" height="520" fill="#070b14"/>
+<text x="40" y="46" font-size="20" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">Why some blocks have to be stored raw</text>
+<text x="40" y="72" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">A decoder rebuilds every macroblock as prediction + residual. The residual travels in coarse steps.</text>
+<rect x="40" y="116" width="210" height="100" rx="8" fill="#0d1424" stroke="#1b2540" stroke-width="1.4"/>
+<text x="145.0" y="146" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0">prediction</text>
+<text x="145.0" y="168" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="400" opacity="1.0">from neighbours or</text>
+<text x="145.0" y="194" font-size="13" fill="#22d3ee" text-anchor="middle" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">an earlier frame</text>
+<text x="272" y="174" font-size="26" fill="#94a3b8" text-anchor="middle" font-weight="400" opacity="1.0">+</text>
+<rect x="296" y="116" width="210" height="100" rx="8" fill="#0d1424" stroke="#1b2540" stroke-width="1.4"/>
+<text x="401.0" y="146" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0">residual</text>
+<text x="401.0" y="168" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="400" opacity="1.0">quantised, step ≈ 16</text>
+<text x="401.0" y="194" font-size="13" fill="#22d3ee" text-anchor="middle" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">at quality QP 28</text>
+<text x="528" y="174" font-size="26" fill="#94a3b8" text-anchor="middle" font-weight="400" opacity="1.0">=</text>
+<rect x="552" y="116" width="210" height="100" rx="8" fill="#0d1424" stroke="#22d3ee" stroke-width="1.4"/>
+<text x="657.0" y="146" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0">samples</text>
+<text x="657.0" y="168" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="400" opacity="1.0">what you see</text>
+<text x="40" y="268" font-size="13.5" fill="#e2e8f5" text-anchor="start" font-weight="400" opacity="1.0">The editor changed one neighbour. The prediction is now different, so the camera’s stored residual lands somewhere else.</text>
+<text x="40" y="292" font-size="13.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">Correcting it needs a residual of, say, 3 — smaller than one step, so it is stored as 0. The block cannot be made exact this way.</text>
+<rect x="40" y="332" width="466" height="108" rx="8" fill="#131d33" stroke="#a855f7" stroke-width="1.4"/>
+<text x="273.0" y="362" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0">I_PCM: store the 384 samples themselves</text>
+<text x="273.0" y="384" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="400" opacity="1.0">no prediction, no residual, no rounding</text>
+<text x="273.0" y="410" font-size="13" fill="#22d3ee" text-anchor="middle" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">256 luma + 64 U + 64 V bytes</text>
+<path d="M 522 386 L 566 386" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#a)"/>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94a3b8"/></marker></defs>
+<rect x="578" y="332" width="300" height="108" rx="8" fill="#0d1424" stroke="#10b981" stroke-width="1.4"/>
+<text x="728.0" y="362" font-size="15" fill="#e2e8f5" text-anchor="middle" font-weight="600" opacity="1.0">exactly the camera’s pixels</text>
+<text x="728.0" y="384" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="400" opacity="1.0">bit-for-bit, every time</text>
+<text x="900" y="376" font-size="13" fill="#f59e0b" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">cost: 384 bytes</text>
+<text x="900" y="396" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">vs ≈ 30 bytes normally</text>
+</svg>

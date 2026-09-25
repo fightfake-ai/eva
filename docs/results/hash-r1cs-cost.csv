@@ -1,0 +1,11 @@
+primitive,what,constraints,note
+griffin,"permute t=16 d=5 rounds=9 (Eva)",306,"one sponge permutation"
+griffin,"hash absorb_1_rate (=15 Fr)",306,"1 permute(s); ≈ 306 /perm"
+griffin,"hash absorb_2_rate (=30 Fr)",612,"2 permute(s); ≈ 306 /perm"
+griffin,"permute t=24 d=5 rounds=9",450,"cross-check vs unit test"
+keccak_f1600,"permute (bit-oriented Boolean R1CS)",155200,"unoptimized; no lookups"
+sha3_256,"SHA3-256 Merkle node (67 B)",155200,"67 B → 1× Keccak-f (rate 136 B); circuit cost = n_perm × keccak_f"
+sha3_256,"SHA3-256 pixel leaf (395 B)",465600,"395 B → 3× Keccak-f (rate 136 B); circuit cost = n_perm × keccak_f"
+sha3_256,"SHA3-256 syntax leaf (785 B)",931200,"785 B → 6× Keccak-f (rate 136 B); circuit cost = n_perm × keccak_f"
+sha3_256,"Merkle open one island MB (17 nodes + pixel leaf)",3104000,"20 Keccak-f; 555.4× encode/MB (5589)"
+griffin,"Merkle open one island MB lower bound (17 nodes + 1 leaf permute)",5508,"18× Griffin permute; 0.986× encode/MB (5589)"

@@ -1,0 +1,5 @@
+label,width,height,frames,box_x,box_y,box_w,box_h,frame_start,frame_end,halo,gadget_mb,halo_mb,island_mb,total_mb,island_pct,pixel_outside_i,intra_outside_i_d0,intra_outside_i_d2,intra_halo_d0,gop,gop_outside_i_d0,gop_post_d0,gop_outside_i_d2,gop_post_d2
+hd_center_box,1280,720,30,320,180,640,360,14,16,1,1840,260,2100,108000,1.9444,0,81,52,46,8,28,0,24,0
+small_box,1280,720,30,480,270,320,240,14,16,1,640,152,792,108000,0.7333,0,72,48,73,8,2,0,2,0
+wide_box,1280,720,30,160,120,960,400,14,16,1,3120,352,3472,108000,3.2148,0,143,102,164,8,20,0,16,0
+hd_center_gop1,1280,720,30,320,180,640,360,14,16,1,1840,260,2100,108000,1.9444,0,81,52,46,1,,,,

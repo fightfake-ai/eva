@@ -1,0 +1,7 @@
+scenario,frames,i4_only,has_chroma,has_mvd,has_luma_cof,ref_reorder,bitstream_bytes,bitstream_exact,pass
+i4_iframe_roundtrip,1,true,true,true,false,n/a,,true,true
+i4_ippp_2f_roundtrip,2,true,true,true,false,n/a,163296,true,true
+normal_iframe_roundtrip,1,false,true,true,true,0,157990,true,true
+normal_ippp_2f_roundtrip,2,false,true,true,true,0,160248,true,true
+normal_ippp_8f_roundtrip,8,false,true,true,true,0,319740,true,true
+normal_ippp_30f_roundtrip,30,false,true,true,true,0,873856,true,true

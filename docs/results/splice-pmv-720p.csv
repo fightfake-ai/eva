@@ -1,0 +1,13 @@
+merge_mode,halo_mbs,compare_to,skip_post_max,closure_frame_max,closure_frame_mbs,closure_total,added_post
+geometric,0,full_orig,0,0,897,18018,16140
+geometric,0,full_edited,255,255,897,18018,16140
+pmv_closure,0,full_orig,255,255,897,18018,16140
+pmv_closure,0,full_edited,255,0,897,18018,16140
+geometric,1,full_orig,0,0,1026,20197,18057
+geometric,1,full_edited,255,255,1026,20197,18057
+pmv_closure,1,full_orig,255,255,1026,20197,18057
+pmv_closure,1,full_edited,255,0,1026,20197,18057
+geometric,2,full_orig,0,0,1154,22085,19667
+geometric,2,full_edited,255,255,1154,22085,19667
+pmv_closure,2,full_orig,255,255,1154,22085,19667
+pmv_closure,2,full_edited,255,0,1154,22085,19667

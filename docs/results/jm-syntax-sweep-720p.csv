@@ -1,0 +1,13 @@
+preset_id,preset_label,box_id,syntax_no_pixel,syntax_outside_i,syntax_halo,syntax_edited_frames_only,decode_gop1_no_pixel,decode_gop1_outside_i,decode_gop8_no_pixel,decode_gop8_outside_i,gadget_mb,island_mb
+ipp_baseline,"JM IPP baseline (I@0, P rest)",center,77130,76874,256,5122,382,258,32,9,1840,2100
+ipp_baseline,"JM IPP baseline (I@0, P rest)",mb_aligned,63235,62997,238,4860,394,267,34,9,1840,2100
+all_intra,JM all-intra (IntraPeriod=1),center,77791,77544,247,4990,382,258,32,9,1840,2100
+all_intra,JM all-intra (IntraPeriod=1),mb_aligned,80011,79764,247,4991,394,267,34,9,1840,2100
+gop8,JM GOP=8 (IntraPeriod=8),center,61295,61060,235,4680,382,258,32,9,1840,2100
+gop8,JM GOP=8 (IntraPeriod=8),mb_aligned,62200,61958,242,4871,394,267,34,9,1840,2100
+constrained_intra,JM IPP + constrained intra pred,center,69590,69330,260,5337,382,258,32,9,1840,2100
+constrained_intra,JM IPP + constrained intra pred,mb_aligned,67118,66858,260,5319,394,267,34,9,1840,2100
+strict_cqp,JM IPP + strict CQP (no QP search),center,71389,71129,260,5242,382,258,32,9,1840,2100
+strict_cqp,JM IPP + strict CQP (no QP search),mb_aligned,71584,71343,241,4902,394,267,34,9,1840,2100
+independent_frames,JM per-frame independent encode,center,3426,3271,155,3426,382,258,32,9,1840,2100
+independent_frames,JM per-frame independent encode,mb_aligned,3422,3267,155,3422,394,267,34,9,1840,2100

@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="470" viewBox="0 0 1180 470" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect width="1180" height="470" fill="#070b14"/>
+<text x="40" y="46" font-size="20" fill="#e2e8f5" text-anchor="start" font-weight="600" opacity="1.0">How one rewritten block forces others: the cascade</text>
+<text x="40" y="72" font-size="13" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">Three ways a neighbour stops decoding to the camera’s pixels once a block is stored raw.</text>
+<defs><marker id="c" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto"><path d="M0,0 L7,3.2 L0,6.4 z" fill="#22d3ee"/></marker></defs>
+<rect x="26" y="100" width="352" height="330" rx="10" fill="#0d1424" stroke="#1b2540" stroke-width="1"/>
+<text x="40" y="130" font-size="15" fill="#22d3ee" text-anchor="start" font-weight="600" opacity="1.0">1 · spatial prediction</text>
+<rect x="128" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="158" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="188" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="218" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="128" y="182" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="158" y="182" width="30" height="30" fill="#a855f7" stroke="#1b2540" stroke-width="1"/>
+<rect x="188" y="182" width="30" height="30" fill="#f59e0b" stroke="#1b2540" stroke-width="1"/>
+<rect x="218" y="182" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="128" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="158" y="212" width="30" height="30" fill="#f59e0b" stroke="#1b2540" stroke-width="1"/>
+<rect x="188" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="218" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="128" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="158" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="188" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="218" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<path d="M 173.0 197.0 L 203.0 197.0" stroke="#22d3ee" stroke-width="2" marker-end="url(#c)"/>
+<path d="M 173.0 197.0 L 173.0 227.0" stroke="#22d3ee" stroke-width="2" marker-end="url(#c)"/>
+<text x="40" y="306" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">A block copies pixels from the edge of the</text>
+<text x="40" y="326" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">block to its left and above. Those pixels</text>
+<text x="40" y="346" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">changed, so its own pixels change.</text>
+<rect x="406" y="100" width="352" height="330" rx="10" fill="#0d1424" stroke="#1b2540" stroke-width="1"/>
+<text x="420" y="130" font-size="15" fill="#22d3ee" text-anchor="start" font-weight="600" opacity="1.0">2 · motion vector prediction</text>
+<rect x="508" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="538" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="568" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="598" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="508" y="182" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="538" y="182" width="30" height="30" fill="#a855f7" stroke="#1b2540" stroke-width="1"/>
+<rect x="568" y="182" width="30" height="30" fill="#f59e0b" stroke="#1b2540" stroke-width="1"/>
+<rect x="598" y="182" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="508" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="538" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="568" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="598" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="508" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="538" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="568" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="598" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<path d="M 553.0 197.0 L 583.0 197.0" stroke="#22d3ee" stroke-width="2" marker-end="url(#c)"/>
+<text x="420" y="306" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">A raw block has no motion vector. Its</text>
+<text x="420" y="326" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">neighbour’s vector is guessed from it, so</text>
+<text x="420" y="346" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">that guess moves and the stored correction</text>
+<text x="420" y="366" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">misses.</text>
+<rect x="786" y="100" width="352" height="330" rx="10" fill="#0d1424" stroke="#1b2540" stroke-width="1"/>
+<text x="800" y="130" font-size="15" fill="#22d3ee" text-anchor="start" font-weight="600" opacity="1.0">3 · motion compensation</text>
+<rect x="888" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="918" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="948" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="978" y="152" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="888" y="182" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="918" y="182" width="30" height="30" fill="#a855f7" stroke="#1b2540" stroke-width="1"/>
+<rect x="948" y="182" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="978" y="182" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="888" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="918" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="948" y="212" width="30" height="30" fill="#f59e0b" stroke="#1b2540" stroke-width="1"/>
+<rect x="978" y="212" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="888" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="918" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="948" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<rect x="978" y="242" width="30" height="30" fill="#16233c" stroke="#1b2540" stroke-width="1"/>
+<path d="M 933.0 197.0 L 963.0 227.0" stroke="#22d3ee" stroke-width="2" marker-end="url(#c)"/>
+<text x="800" y="306" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">A block on the next frame copies a patch from</text>
+<text x="800" y="326" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">this picture. If that patch moved, the copy</text>
+<text x="800" y="346" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">lands on different pixels.</text>
+<rect x="40" y="447" width="11" height="11" rx="2" fill="#a855f7"/>
+<text x="57" y="456" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">block stored raw</text>
+<rect x="198" y="447" width="11" height="11" rx="2" fill="#f59e0b"/>
+<text x="215" y="456" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="400" opacity="1.0">forced to be rewritten too</text>
+</svg>
