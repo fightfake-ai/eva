@@ -56,15 +56,66 @@ pub mod edit;
 pub mod edit_only;
 pub mod encode;
 pub mod griffin;
+pub mod island;
+pub mod keccak_r1cs;
 pub mod macroblock_yuv;
+pub mod mb_grid;
+pub mod merkle;
+pub mod neighbor_experiment;
+pub mod neighbor_impact;
 pub mod rgb_yuv;
+pub mod pmv_closure;
+pub mod syntax_splice;
 pub mod utils;
 pub mod var;
 
 pub use edit_only::{
     hash_edited_macroblock, hash_orig_macroblock, EditOnlyCircuit, EditOnlyExternalInputs,
 };
-pub use edit::native_macroblocks::native_brightness_edit_macroblocks;
+pub use edit::native_macroblocks::{
+    native_brightness_edit_macroblocks, native_redact_edit_macroblocks,
+};
+pub use island::{
+    island_counts, island_indices, mb_role, IslandCounts, IslandSpec, MbRole, PixelRect,
+};
+pub use merkle::{
+    capture_pixel_tree, hash_leaf, pixel_leaf, syntax_leaf, Digest32, MerkleProof, MerkleTree,
+    DIGEST_LEN,
+};
+pub use neighbor_impact::{
+    classify_syntax_changes, compare_yuv_to_island, syntax_mb_changed, ImpactReport,
+};
+pub use pmv_closure::{
+    edit_window_presets, load_mv_dir, pmv_closure, pmv_closure_for_spec, validate_syntax_lengths,
+    BlockMotion, EditWindowPreset, MvBundle, PmvClosureCounts, BLOCKS_PER_MB, MV_BYTES_PER_MB,
+};
+pub use syntax_splice::{
+    compare_decoded_frame_to_yuv, compare_decoded_mb_set, compare_decoded_planes,
+    decode_frame_luma, expected_splice_yuv, export_glue_dir, export_glue_dir_with_mv,
+    finalize_role_means, load_syntax_dir, merge_syntax,
+    merge_syntax_pmv, merge_syntax_pmv_dirs, merge_syntax_set, pixel_outside_island,
+    RoleLumaStats, SpliceDecodeMode, SpliceDecodeReport, SyntaxBundle,
+};
+
+/// Splice merge for publish: P-MV closure on orig capture, edited syntax on closure slots.
+pub fn merge_for_publish(
+    orig_dir: &std::path::Path,
+    edit_dir: &std::path::Path,
+    spec: &IslandSpec,
+) -> Result<(SyntaxBundle, PmvClosureCounts), String> {
+    merge_syntax_pmv_dirs(orig_dir, edit_dir, spec)
+}
+pub use mb_grid::{
+    build_mb_grid_report, compare_yuv_per_mb, mb_grid_to_json, mb_walkthrough_to_json,
+    pixel_edit_per_mb, role_to_code, MbCoord, MbFrameGrid, MbGridReport, PerMbLumaDiff,
+};
+pub use neighbor_experiment::{
+    compare_reencoded_decoded, csv_header, ffmpeg_available, hd_center_box,
+    hd_center_box_mb_aligned, hd_small_box,
+    hd_wide_box, load_yuv420, load_yuv_or_fixture, redact_window, redact_yuv, row_to_csv,
+    run_experiment, synthetic_gradient_yuv, DEFAULT_FIXTURE_YUV, ExperimentRow, HD_FRAMES,
+    HD_HEIGHT, HD_WIDTH,
+};
 pub use macroblock_yuv::{
     macroblock_count_from_dir, macroblocks_per_frame, macroblocks_to_yuv420, parse_orig_blocks,
     read_macroblock_dir, write_macroblock_dir, yuv420_frame_bytes, yuv420_to_macroblocks,
